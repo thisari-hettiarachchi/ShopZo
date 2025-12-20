@@ -2,7 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
-console.log("MONGO_URI:", process.env.MONGODB_URI);
 
 const feedbackRoutes = require("./routes/feedbackRoutes");
 
@@ -21,5 +20,6 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
 
+// Use PORT from environment (Vercel sets it automatically)
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
