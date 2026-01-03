@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, ShoppingCart, User, Menu, X, Heart, Bell, ChevronDown, Home, Package, Info, Phone, Moon, Sun } from 'lucide-react';
+import logo from '../../assets/logo.png';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -45,12 +46,12 @@ export default function Navbar() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-10 text-sm">
               <div className="flex items-center space-x-4">
-                <span className="font-medium">Welcome to MarketPlace</span>
+                <span className="font-medium">Welcome to ShopZo</span>
                 <span className="hidden md:inline">|</span>
                 <span className="hidden md:inline">Free shipping on orders over $50</span>
               </div>
               <div className="flex items-center space-x-4">
-                <button className="hover:opacity-80 transition font-medium">Sell on MarketPlace</button>
+                <button className="hover:opacity-80 transition font-medium">Sell on ShopZo</button>
                 <span className="hidden sm:inline">|</span>
                 <button className="hover:opacity-80 transition hidden sm:inline">Help</button>
               </div>
@@ -69,9 +70,7 @@ export default function Navbar() {
               >
                 {isMobileMenuOpen ? <X size={24} className="icon-primary" /> : <Menu size={24} className="icon-primary" />}
               </button>
-              <h1 className="text-2xl font-bold logo-text">
-                MarketPlace
-              </h1>
+              <img src={logo} alt="ShopZo Logo" className="h-8 w-auto" />
             </div>
 
             {/* Main Menu - Desktop */}
