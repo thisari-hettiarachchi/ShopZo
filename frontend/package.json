@@ -7,10 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint .",
-    "postcss:build": "npx tailwindcss -i ./src/index.css -o ./dist/output.css --watch"
+    "lint": "eslint ."
   },
   "dependencies": {
+    "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.3",
     "react-icons": "^5.5.0",

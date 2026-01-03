@@ -1,45 +1,261 @@
-import React, { useState, useEffect } from "react";
-import {
-  FiShoppingCart,
-  FiUser,
-  FiMenu,
-  FiX,
-  FiChevronDown,
-  FiSun,
-  FiMoon,
-} from "react-icons/fi";
-import logo from "../../assets/logo.png";
+import { useState, useEffect } from 'react';
+import { Search, ShoppingCart, User, Menu, X, Heart, Bell, ChevronDown, Home, Package, Info, Phone, Moon, Sun } from 'lucide-react';
 
-const Navbar = () => {
-  const [theme, setTheme] = useState("light");
+export default function Navbar() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [activeMenu, setActiveMenu] = useState('home');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [cartCount] = useState(3);
+  const [wishlistCount] = useState(5);
 
+  // Apply theme to document
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "light";
-    setTheme(savedTheme);
-    document.documentElement.setAttribute("data-theme", savedTheme);
-  }, []);
+    if (isDarkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }, [isDarkMode]);
+
+  const mainMenuItems = [
+    { id: 'home', label: 'Home', icon: Home },
+    { id: 'products', label: 'Products', icon: Package },
+    { id: 'about', label: 'About', icon: Info },
+    { id: 'contact', label: 'Contact', icon: Phone }
+  ];
+
+  const categories = [
+    'Electronics',
+    'Fashion',
+    'Home & Living',
+    'Beauty',
+    'Sports',
+    'Books',
+    'Toys',
+    'Groceries'
+  ];
 
   return (
-    <nav className="bg-[var(--bg-main)] shadow-md transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center">
-        <a href="/" className="flex items-center">
-          <img src={logo} alt="Logo" className="h-12 w-12 ml-20" />
-        </a>
+    <>
 
-        <div className="hidden md:flex items-center space-x-6">
-          <a href="/products" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] transition-colors duration-300">
-            Products
-          </a>
-          <a href="/categories" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] transition-colors duration-300">
-            Categories
-          </a>
-          <a href="/about" className="text-[var(--color-primary)] hover:text-[var(--color-secondary)] transition-colors duration-300">
-            About
-          </a>
+      <nav className="navbar-main sticky top-0 z-50">
+        {/* Top Bar */}
+        <div className="top-bar">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-10 text-sm">
+              <div className="flex items-center space-x-4">
+                <span className="font-medium">Welcome to MarketPlace</span>
+                <span className="hidden md:inline">|</span>
+                <span className="hidden md:inline">Free shipping on orders over $50</span>
+              </div>
+              <div className="flex items-center space-x-4">
+                <button className="hover:opacity-80 transition font-medium">Sell on MarketPlace</button>
+                <span className="hidden sm:inline">|</span>
+                <button className="hover:opacity-80 transition hidden sm:inline">Help</button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
-  );
-};
 
-export default Navbar;
+        {/* Main Navbar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <button
+                className="lg:hidden mr-3 p-2 rounded-md btn-icon"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? <X size={24} className="icon-primary" /> : <Menu size={24} className="icon-primary" />}
+              </button>
+              <h1 className="text-2xl font-bold logo-text">
+                MarketPlace
+              </h1>
+            </div>
+
+            {/* Main Menu - Desktop */}
+            <div className="hidden lg:flex items-center space-x-8 ml-12">
+              {mainMenuItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveMenu(item.id)}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-md font-medium btn-icon ${
+                      activeMenu === item.id ? 'active' : ''
+                    }`}
+                  >
+                    <Icon size={18} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Search Bar - Desktop */}
+            <div className="hidden md:flex flex-1 max-w-md mx-8">
+              <div className="w-full relative">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  className="w-full px-4 py-2 pr-20 rounded-full search-input"
+                />
+                <button className="absolute right-1 top-1 px-5 py-1.5 rounded-full search-btn">
+                  <Search size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Search Icon - Mobile */}
+            <button
+              className="md:hidden p-2 rounded-md btn-icon"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+            >
+              <Search size={22} />
+            </button>
+
+            {/* Right Side Icons */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Theme Toggle */}
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-2 rounded-md btn-icon"
+                aria-label="Toggle theme"
+              >
+                {isDarkMode ? <Sun size={22} /> : <Moon size={22} />}
+              </button>
+
+              <button className="hidden sm:flex items-center space-x-1 p-2 rounded-md btn-icon">
+                <User size={22} />
+                <span className="hidden lg:inline text-sm font-medium">Account</span>
+              </button>
+
+              <button className="relative p-2 rounded-md btn-icon">
+                <Heart size={22} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                    {wishlistCount}
+                  </span>
+                )}
+              </button>
+
+              <button className="hidden sm:block relative p-2 rounded-md btn-icon">
+                <Bell size={22} />
+                <span className="absolute top-1 right-1 notification-dot rounded-full h-2 w-2"></span>
+              </button>
+
+              <button className="relative p-2 rounded-md btn-icon">
+                <ShoppingCart size={22} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Search Bar */}
+          {isSearchOpen && (
+            <div className="md:hidden pb-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  className="w-full px-4 py-2 pr-12 rounded-full search-input"
+                />
+                <button className="absolute right-2 top-2 icon-primary">
+                  <Search size={20} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Categories Bar - Desktop */}
+        <div className="hidden lg:block categories-bar">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center space-x-6 h-12 overflow-x-auto">
+              <button className="flex items-center space-x-1 text-sm font-medium category-btn primary whitespace-nowrap">
+                <span>All Categories</span>
+                <ChevronDown size={16} />
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  className="text-sm category-btn whitespace-nowrap font-medium"
+                >
+                  {category}
+                </button>
+              ))}
+              <button className="text-sm font-bold category-btn primary whitespace-nowrap">
+                ⭐ Hot Deals
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden mobile-menu">
+            <div className="px-4 py-3 space-y-1">
+              {/* Main Menu Items */}
+              <div className="pb-2 mb-2 border-b mobile-menu-divider">
+                {mainMenuItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveMenu(item.id);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`flex items-center space-x-3 w-full px-3 py-2.5 text-sm font-medium rounded-md btn-icon ${
+                        activeMenu === item.id ? 'active' : ''
+                      }`}
+                    >
+                      <Icon size={18} />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Categories */}
+              <button className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md category-btn primary">
+                <span>All Categories</span>
+                <ChevronDown size={16} />
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  className="block w-full text-left px-3 py-2 text-sm rounded-md category-btn"
+                >
+                  {category}
+                </button>
+              ))}
+              <button className="block w-full text-left px-3 py-2 text-sm font-bold rounded-md category-btn primary">
+                ⭐ Hot Deals
+              </button>
+
+              {/* Additional Options */}
+              <div className="pt-2 border-t mobile-menu-divider">
+                <button className="flex items-center space-x-2 w-full px-3 py-2 text-sm rounded-md sm:hidden btn-icon">
+                  <User size={18} />
+                  <span>My Account</span>
+                </button>
+                <button className="flex items-center space-x-2 w-full px-3 py-2 text-sm rounded-md sm:hidden btn-icon">
+                  <Bell size={18} />
+                  <span>Notifications</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      
+    </>
+  );
+}
