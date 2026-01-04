@@ -15,6 +15,7 @@ import {
   Moon,
   Sun
 } from 'lucide-react'
+import Assets from '../../assets/assets'
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -78,7 +79,7 @@ export default function Navbar() {
                 <Menu size={24} className="icon-primary" />
               )}
             </button>
-            <div className="text-2xl font-bold logo-text">ShopZo</div>
+            <img src={Assets.logo} alt="ShopZo Logo" className="h-8 w-auto" />
           </div>
 
           {/* DESKTOP MENU */}
