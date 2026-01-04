@@ -1,11 +1,27 @@
 import { useState, useEffect } from 'react'
-import { Search, ShoppingCart, User, Menu, X, Heart, Bell, Home, Package, Info, Phone, Moon, Sun } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
+import {
+  Search,
+  ShoppingCart,
+  User,
+  Menu,
+  X,
+  Heart,
+  Bell,
+  Home,
+  Package,
+  Info,
+  Phone,
+  Moon,
+  Sun
+} from 'lucide-react'
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [activeMenu, setActiveMenu] = useState('home')
   const [isDarkMode, setIsDarkMode] = useState(false)
+
   const [cartCount] = useState(3)
   const [wishlistCount] = useState(5)
 
@@ -18,10 +34,10 @@ export default function Navbar() {
   }, [isDarkMode])
 
   const mainMenuItems = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'products', label: 'Products', icon: Package },
-    { id: 'about', label: 'About', icon: Info },
-    { id: 'contact', label: 'Contact', icon: Phone }
+    { id: 'home', label: 'Home', icon: Home, path: '/' },
+    { id: 'products', label: 'Products', icon: Package, path: '/products' },
+    { id: 'about', label: 'About', icon: Info, path: '/about' },
+    { id: 'contact', label: 'Contact', icon: Phone, path: '/contact' }
   ]
 
   return (
@@ -32,12 +48,18 @@ export default function Navbar() {
             <div className="flex items-center space-x-4">
               <span className="font-medium">Welcome to ShopZo</span>
               <span className="hidden md:inline">|</span>
-              <span className="hidden md:inline">Free shipping on orders over $50</span>
+              <span className="hidden md:inline">
+                Free shipping on orders over $50
+              </span>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="hover:opacity-80 transition font-medium">Sell on ShopZo</button>
+              <button className="hover:opacity-80 transition font-medium">
+                Sell on ShopZo
+              </button>
               <span className="hidden sm:inline">|</span>
-              <button className="hover:opacity-80 transition hidden sm:inline">Help</button>
+              <button className="hover:opacity-80 transition hidden sm:inline">
+                Help
+              </button>
             </div>
           </div>
         </div>
@@ -50,17 +72,23 @@ export default function Navbar() {
               className="lg:hidden mr-3 p-2 rounded-md btn-icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? <X size={24} className="icon-primary" /> : <Menu size={24} className="icon-primary" />}
+              {isMobileMenuOpen ? (
+                <X size={24} className="icon-primary" />
+              ) : (
+                <Menu size={24} className="icon-primary" />
+              )}
             </button>
             <div className="text-2xl font-bold logo-text">ShopZo</div>
           </div>
 
+          {/* DESKTOP MENU */}
           <div className="hidden lg:flex items-center space-x-8 ml-12">
             {mainMenuItems.map((item) => {
               const Icon = item.icon
               return (
-                <button
+                <NavLink
                   key={item.id}
+                  to={item.path}
                   onClick={() => setActiveMenu(item.id)}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-md font-medium btn-icon ${
                     activeMenu === item.id ? 'active' : ''
@@ -68,7 +96,7 @@ export default function Navbar() {
                 >
                   <Icon size={18} />
                   <span>{item.label}</span>
-                </button>
+                </NavLink>
               )
             })}
           </div>
@@ -96,31 +124,33 @@ export default function Navbar() {
           <div className="flex items-center space-x-2 sm:space-x-3">
             <button className="hidden sm:flex items-center space-x-1 p-2 rounded-md btn-icon">
               <User size={22} />
-              <span className="hidden lg:inline text-sm font-medium">Account</span>
+              <span className="hidden lg:inline text-sm font-medium">
+                Account
+              </span>
             </button>
 
-            <button className="relative p-2 rounded-md btn-icon">
+            <NavLink to="/wishlist" className="relative p-2 rounded-md btn-icon">
               <Heart size={22} />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                   {wishlistCount}
                 </span>
               )}
-            </button>
+            </NavLink>
 
             <button className="hidden sm:block relative p-2 rounded-md btn-icon">
               <Bell size={22} />
               <span className="absolute top-1 right-1 notification-dot rounded-full h-2 w-2"></span>
             </button>
 
-            <button className="relative p-2 rounded-md btn-icon">
+            <NavLink to="/cart" className="relative p-2 rounded-md btn-icon">
               <ShoppingCart size={22} />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                   {cartCount}
                 </span>
               )}
-            </button>
+            </NavLink>
 
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
@@ -148,6 +178,7 @@ export default function Navbar() {
         )}
       </div>
 
+      {/* MOBILE MENU */}
       {isMobileMenuOpen && (
         <div className="lg:hidden mobile-menu">
           <div className="px-4 py-3 space-y-1">
@@ -155,8 +186,9 @@ export default function Navbar() {
               {mainMenuItems.map((item) => {
                 const Icon = item.icon
                 return (
-                  <button
+                  <NavLink
                     key={item.id}
+                    to={item.path}
                     onClick={() => {
                       setActiveMenu(item.id)
                       setIsMobileMenuOpen(false)
@@ -167,7 +199,7 @@ export default function Navbar() {
                   >
                     <Icon size={18} />
                     <span>{item.label}</span>
-                  </button>
+                  </NavLink>
                 )
               })}
             </div>
