@@ -1,7 +1,5 @@
-// src/pages/Contact.jsx
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Clock, ChevronDown, ChevronUp } from "lucide-react";
-import Assets from "../assets/assets"; // optional hero image
 
 export default function Contact() {
   const branches = [
@@ -37,7 +35,7 @@ export default function Contact() {
     },
   ];
 
-  const email = "support@shopzo.com"; // Same email for all branches
+  const email = "support@shopzo.com";
   const [selectedBranch, setSelectedBranch] = useState(branches[0]);
   const [formData, setFormData] = useState({
     name: "",
@@ -89,44 +87,40 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">
       {/* Hero Section */}
-      
-        <section
-        className="relative bg-[var(--bg-card)] shadow-md h-[500px] md:h-[600px] flex items-center"
+      <section
+        className="relative h-[500px] md:h-[600px] flex items-center bg-cover bg-center"
         style={{
-            backgroundImage: `url(${Assets.contactHero || Assets.hero})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+          backgroundImage: `url('https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1200')`,
         }}
-        >
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-8 py-16 px-6 md:px-16 bg-black/30 rounded-xl">
-            {/* Text */}
-            <div className="flex-1 space-y-6 text-white">
-            <h1 className="text-5xl font-bold logo-text">
-                Reach Out to ShopZo
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-900/80 via-orange-800/70 to-amber-900/80"></div>
+        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-16 w-full">
+          <div className="max-w-3xl space-y-6 text-white">
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight drop-shadow-lg">
+              Reach Out to <span className="text-amber-300">ShopZo</span>
             </h1>
-            <p className="text-lg">
-                We’re here to help you find the perfect product. Choose a branch
-                or send us a message directly. Your satisfaction is our priority!
+            <p className="text-xl text-amber-50 leading-relaxed drop-shadow-md">
+              We're here to help you find the perfect product. Choose a branch
+              or send us a message directly. Your satisfaction is our priority!
             </p>
-            <p>
-                Explore our branches across Sri Lanka or contact us online.
+            <p className="text-lg text-amber-100 drop-shadow-md">
+              Explore our branches across Sri Lanka or contact us online.
             </p>
-            </div>
+          </div>
         </div>
-        </section>
-
+      </section>
 
       {/* Contact Section */}
       <section className="py-16 px-4 md:px-16">
         <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Branch Info */}
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold">Select a Branch</h2>
+            <h2 className="text-3xl font-bold logo-text mb-8">Select a Branch</h2>
 
             <select
               value={selectedBranch.id}
               onChange={handleBranchChange}
-              className="search-input w-full px-3 py-2 rounded-md border-2 border-[var(--border)] focus:border-[var(--color-primary)]"
+              className="search-input w-full px-4 py-3 rounded-lg border-2 border-[var(--border)] focus:border-[var(--color-primary)] transition-all outline-none font-medium shadow-sm"
             >
               {branches.map((branch) => (
                 <option key={branch.id} value={branch.id}>
@@ -135,26 +129,34 @@ export default function Contact() {
               ))}
             </select>
 
-            <div className="mt-6 space-y-4">
-              <div className="flex items-center gap-4">
-                <MapPin className="icon-primary" />
-                <span>{selectedBranch.address}</span>
+            <div className="mt-8 space-y-5 bg-[var(--bg-card)] p-8 rounded-2xl shadow-lg border-2 border-[var(--border)]">
+              <div className="flex items-center gap-4 group hover:translate-x-1 transition-transform">
+                <div className="p-3 bg-[var(--bg-muted)] rounded-full group-hover:bg-[var(--bg-hover)] transition-colors">
+                  <MapPin className="icon-primary" size={24} />
+                </div>
+                <span className="text-[var(--text-primary)] font-medium">{selectedBranch.address}</span>
               </div>
-              <div className="flex items-center gap-4">
-                <Phone className="icon-primary" />
-                <span>{selectedBranch.phone}</span>
+              <div className="flex items-center gap-4 group hover:translate-x-1 transition-transform">
+                <div className="p-3 bg-[var(--bg-muted)] rounded-full group-hover:bg-[var(--bg-hover)] transition-colors">
+                  <Phone className="icon-primary" size={24} />
+                </div>
+                <span className="text-[var(--text-primary)] font-medium">{selectedBranch.phone}</span>
               </div>
-              <div className="flex items-center gap-4">
-                <Clock className="icon-primary" />
-                <span>{selectedBranch.openingHours}</span>
+              <div className="flex items-center gap-4 group hover:translate-x-1 transition-transform">
+                <div className="p-3 bg-[var(--bg-muted)] rounded-full group-hover:bg-[var(--bg-hover)] transition-colors">
+                  <Clock className="icon-primary" size={24} />
+                </div>
+                <span className="text-[var(--text-primary)] font-medium">{selectedBranch.openingHours}</span>
               </div>
-              <div className="flex items-center gap-4">
-                <Mail className="icon-primary" />
-                <span>{email}</span>
+              <div className="flex items-center gap-4 group hover:translate-x-1 transition-transform">
+                <div className="p-3 bg-[var(--bg-muted)] rounded-full group-hover:bg-[var(--bg-hover)] transition-colors">
+                  <Mail className="icon-primary" size={24} />
+                </div>
+                <span className="text-[var(--text-primary)] font-medium">{email}</span>
               </div>
 
-              {/* Map – Always show Main Branch */}
-              <div className="w-full h-64 mt-4 rounded-md overflow-hidden shadow-md">
+              {/* Map */}
+              <div className="w-full h-64 mt-6 rounded-xl overflow-hidden shadow-md border-2 border-[var(--border)]">
                 <iframe
                   width="100%"
                   height="100%"
@@ -170,99 +172,105 @@ export default function Contact() {
           </div>
 
           {/* Contact Form */}
-          <form
-            className="bg-[var(--bg-card)] p-6 rounded-xl shadow-md flex flex-col gap-4"
-            onSubmit={handleSubmit}
-          >
-            <label className="flex flex-col">
-              Name
+          <div className="bg-[var(--bg-card)] p-8 rounded-2xl shadow-xl border-2 border-[var(--border)] flex flex-col gap-6">
+            <h3 className="text-2xl font-bold logo-text mb-2">Send us a Message</h3>
+            
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-[var(--text-secondary)]">Name</span>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Your Name"
-                className="search-input mt-2 px-3 py-2 rounded-md border-2 border-[var(--border)] focus:border-[var(--color-primary)]"
+                className="search-input px-4 py-3 rounded-lg border-2 border-[var(--border)] focus:border-[var(--color-primary)] transition-all outline-none shadow-sm"
                 required
               />
             </label>
 
-            <label className="flex flex-col">
-              Email
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-[var(--text-secondary)]">Email</span>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Your Email"
-                className="search-input mt-2 px-3 py-2 rounded-md border-2 border-[var(--border)] focus:border-[var(--color-primary)]"
+                className="search-input px-4 py-3 rounded-lg border-2 border-[var(--border)] focus:border-[var(--color-primary)] transition-all outline-none shadow-sm"
                 required
               />
             </label>
 
-            <label className="flex flex-col">
-              Subject
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-[var(--text-secondary)]">Subject</span>
               <input
                 type="text"
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
                 placeholder="Subject"
-                className="search-input mt-2 px-3 py-2 rounded-md border-2 border-[var(--border)] focus:border-[var(--color-primary)]"
+                className="search-input px-4 py-3 rounded-lg border-2 border-[var(--border)] focus:border-[var(--color-primary)] transition-all outline-none shadow-sm"
                 required
               />
             </label>
 
-            <label className="flex flex-col">
-              Message
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-[var(--text-secondary)]">Message</span>
               <textarea
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
                 placeholder="Your Message"
-                className="search-input mt-2 px-3 py-2 rounded-md border-2 border-[var(--border)] focus:border-[var(--color-primary)] h-32 resize-none"
+                className="search-input px-4 py-3 rounded-lg border-2 border-[var(--border)] focus:border-[var(--color-primary)] transition-all outline-none h-32 resize-none shadow-sm"
                 required
               />
             </label>
 
             <button
-              type="submit"
-              className="search-btn mt-4 py-2 rounded-md text-white font-semibold hover:opacity-90"
+              onClick={handleSubmit}
+              className="search-btn mt-2 py-3 px-6 rounded-lg font-semibold shadow-lg hover:shadow-xl hover:opacity-90 transform hover:-translate-y-0.5 transition-all"
             >
               Send Message
             </button>
-          </form>
+          </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-4 md:px-16 bg-[var(--bg-card)] shadow-inner">
+      <section className="py-20 px-4 md:px-16 bg-[var(--bg-muted)] shadow-inner">
         <div className="max-w-6xl mx-auto space-y-8">
-          <h2 className="text-3xl font-bold text-center logo-text">
+          <h2 className="text-4xl font-bold text-center logo-text mb-12">
             Frequently Asked Questions
           </h2>
 
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="border-2 border-[var(--border)] rounded-md overflow-hidden"
-            >
-              <button
-                onClick={() =>
-                  setFaqOpen(faqOpen === index ? null : index)
-                }
-                className="flex justify-between items-center w-full px-4 py-3 bg-[var(--bg-card)] hover:bg-[var(--bg-muted)] transition-colors"
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <div
+                key={index}
+                className="bg-[var(--bg-card)] border-2 border-[var(--border)] rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
               >
-                <span className="font-semibold">{faq.question}</span>
-                {faqOpen === index ? <ChevronUp /> : <ChevronDown />}
-              </button>
-              {faqOpen === index && (
-                <div className="px-4 py-3 text-[var(--text-secondary)] bg-[var(--bg-main)]">
-                  {faq.answer}
-                </div>
-              )}
-            </div>
-          ))}
+                <button
+                  onClick={() =>
+                    setFaqOpen(faqOpen === index ? null : index)
+                  }
+                  className="flex justify-between items-center w-full px-6 py-4 hover:bg-[var(--bg-muted)] transition-colors"
+                >
+                  <span className="font-semibold text-[var(--text-primary)] text-left">{faq.question}</span>
+                  <div className="p-1 rounded-full bg-[var(--bg-muted)]">
+                    {faqOpen === index ? 
+                      <ChevronUp className="icon-primary" size={20} /> : 
+                      <ChevronDown className="icon-primary" size={20} />
+                    }
+                  </div>
+                </button>
+                {faqOpen === index && (
+                  <div className="px-6 py-4 text-[var(--text-secondary)] bg-[var(--bg-main)] border-t-2 border-[var(--border)] leading-relaxed">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>
