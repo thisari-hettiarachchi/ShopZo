@@ -1,3 +1,4 @@
+// src/components/product/ProductCard.jsx
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -6,13 +7,13 @@ export default function ProductCard({ product }) {
 
   return (
     <div
-      onClick={() => navigate(`/products/${product.id}`)}
+      onClick={() => navigate(`/products/${product._id}`)}
       className="bg-[var(--bg-card)] rounded-2xl shadow-md hover:shadow-lg transition group overflow-hidden cursor-pointer"
     >
       {/* Image */}
       <div className="relative bg-[var(--bg-muted)] p-4">
         <img
-          src={product.image}
+          src={product.images?.[0]} // first image only
           alt={product.name}
           className="w-full h-48 object-contain group-hover:scale-105 transition"
         />
@@ -38,14 +39,14 @@ export default function ProductCard({ product }) {
             <Star
               key={i}
               className={`w-4 h-4 ${
-                i < product.rating
+                i < Math.round(product.rating)
                   ? "fill-[var(--color-primary)] text-[var(--color-primary)]"
                   : "text-[var(--text-muted)]"
               }`}
             />
           ))}
           <span className="text-xs text-[var(--text-muted)]">
-            ({product.reviews})
+            ({product.reviews ?? 0})
           </span>
         </div>
 
@@ -61,7 +62,7 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        {/* Add to Cart (prevent navigation) */}
+        {/* Add to Cart */}
         <button
           onClick={(e) => e.stopPropagation()}
           className="w-full mt-3 flex items-center justify-center gap-2 py-2 rounded-xl text-white font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90"

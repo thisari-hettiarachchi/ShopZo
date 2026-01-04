@@ -1,15 +1,20 @@
+// src/pages/Product.jsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { fetchProductById } from "../api/productApi";
 import { ShoppingCart, Heart, Star, Truck } from "lucide-react";
 
-export default function Product() {
+export default function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [mainImage, setMainImage] = useState("");
 
   useEffect(() => {
-    fetchProductById(id).then(setProduct);
+    fetchProductById(id).then((data) => {
+      setProduct(data);
+      setMainImage(data.images?.[0]);
+    });
   }, [id]);
 
   if (!product) return <p className="text-center">Loading...</p>;
@@ -18,25 +23,45 @@ export default function Product() {
     <div className="min-h-screen bg-[var(--bg-main)] py-10 px-4">
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 bg-[var(--bg-card)] p-6 rounded-2xl">
 
-        <img
-          src={product.image}
-          className="h-[350px] object-contain mx-auto"
-        />
+        {/* Left: Images */}
+        <div>
+          <img
+            src={mainImage}
+            alt={product.name}
+            className="w-full h-[350px] object-contain rounded-lg mb-4"
+          />
 
+          <div className="flex gap-2 overflow-x-auto">
+            {product.images.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                alt={`${product.name} ${i + 1}`}
+                className="w-24 h-24 object-contain rounded-lg cursor-pointer border hover:border-[var(--color-primary)]"
+                onClick={() => setMainImage(img)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Product Details */}
         <div className="space-y-5">
           <h1 className="text-3xl font-bold">{product.name}</h1>
 
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
                 className={`w-5 h-5 ${
-                  i < product.rating
+                  i < Math.round(product.rating)
                     ? "fill-[var(--color-primary)] text-[var(--color-primary)]"
                     : "text-gray-300"
                 }`}
               />
             ))}
+            <span className="text-sm text-[var(--text-secondary)]">
+              ({product.reviews ?? 0} reviews)
+            </span>
           </div>
 
           <p className="text-2xl font-bold text-[var(--color-primary)]">
@@ -45,9 +70,44 @@ export default function Product() {
 
           <p>{product.description}</p>
 
-          <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white">
-            Add to Cart
-          </button>
+          {/* Quantity */}
+          <div className="flex items-center gap-4">
+            <span className="font-medium">Quantity</span>
+            <div className="flex items-center border rounded-lg">
+              <button
+                onClick={() => quantity > 1 && setQuantity(quantity - 1)}
+                className="px-3 py-2 hover:bg-[var(--bg-muted)]"
+              >
+                −
+              </button>
+              <span className="px-4">{quantity}</span>
+              <button
+                onClick={() => setQuantity(quantity + 1)}
+                className="px-3 py-2 hover:bg-[var(--bg-muted)]"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4 pt-4">
+            <button className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white">
+              <ShoppingCart className="w-5 h-5" />
+              Add to Cart
+            </button>
+
+            <button className="flex items-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-primary)] hover:bg-[var(--bg-muted)]">
+              <Heart className="w-5 h-5" />
+              Wishlist
+            </button>
+          </div>
+
+          {/* Delivery Info */}
+          <div className="flex items-center gap-3 pt-4 text-sm text-[var(--text-secondary)]">
+            <Truck className="w-5 h-5 text-[var(--color-primary)]" />
+            Free delivery within 3–5 working days
+          </div>
         </div>
       </div>
     </div>
