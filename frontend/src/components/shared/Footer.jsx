@@ -168,20 +168,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
-
-      {/* Trust Badges */}
-      <div className="bg-[var(--bg-muted)] py-6 border-t border-[var(--border)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center items-center gap-8">
-            {['Secure Payment', 'Free Shipping', '24/7 Support', 'Easy Returns', 'Verified Sellers'].map((badge) => (
-              <div key={badge} className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                <div className="w-2 h-2 rounded-full bg-[var(--color-primary)]"></div>
-                <span>{badge}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      
     </footer>
   );
 }
