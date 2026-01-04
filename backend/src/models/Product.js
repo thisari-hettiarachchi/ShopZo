@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 
-const vendorSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  storeName: String,
+const productSchema = new mongoose.Schema({
+  vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Vendor" },
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  images: [String],
   description: String,
-  isApproved: { type: Boolean, default: false },
+  stock: { type: Number, default: 0 },
+  category: String,
 }, { timestamps: true });
 
-export default mongoose.model("Vendor", vendorSchema);
+export default mongoose.model("Product", productSchema);
