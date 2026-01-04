@@ -1,11 +1,13 @@
-import React from "react";
+import AppRoutes from './routes/AppRoutes'
+import Navbar from './components/shared/Navbar'
+import Footer from './components/shared/Footer'
 
-const App = () => {
+export default function App() {
   return (
-    <div>
-      
-    </div>
-  );
+    <>
+      <Navbar />
+      <AppRoutes />
+      <Footer />
+    </>
+  )
 }
-
-export default App;
