@@ -1,0 +1,191 @@
+import React from 'react';
+import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
+
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="bg-[var(--bg-card)] border-t-2 border-[var(--border)] mt-16">
+      {/* Newsletter Section */}
+      <div className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-white text-center md:text-left">
+              <h3 className="text-2xl font-bold mb-2">Subscribe to Our Newsletter</h3>
+              <p className="text-amber-50">Get the latest updates on new products and upcoming sales</p>
+            </div>
+            <div className="flex w-full md:w-auto gap-2">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 md:w-80 px-4 py-3 rounded-lg bg-white text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-white"
+              />
+              <button className="px-6 py-3 bg-white text-[var(--color-primary)] font-semibold rounded-lg hover:bg-amber-50 transition-all">
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          {/* Company Info */}
+          <div>
+            <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] bg-clip-text text-transparent">
+              ShopHub
+            </h2>
+            <p className="text-[var(--text-secondary)] mb-6 leading-relaxed">
+              Your trusted multivendor marketplace for quality products from verified sellers worldwide.
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                <MapPin size={18} className="text-[var(--color-primary)] flex-shrink-0" />
+                <span className="text-sm">123 Market Street, Commerce City, CC 12345</span>
+              </div>
+              <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                <Phone size={18} className="text-[var(--color-primary)] flex-shrink-0" />
+                <span className="text-sm">+1 (555) 123-4567</span>
+              </div>
+              <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                <Mail size={18} className="text-[var(--color-primary)] flex-shrink-0" />
+                <span className="text-sm">support@shophub.com</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Quick Links</h3>
+            <ul className="space-y-2">
+              {['About Us', 'Contact Us', 'Careers', 'Press', 'Blog', 'Affiliate Program'].map((item) => (
+                <li key={item}>
+                  <a href="#" className="text-[var(--text-secondary)] hover:text-[var(--color-primary)] text-sm transition-colors">
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Customer Service */}
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Customer Service</h3>
+            <ul className="space-y-2">
+              {['Help Center', 'Track Order', 'Return Policy', 'Shipping Info', 'Payment Methods', 'Gift Cards', 'Size Guide'].map((item) => (
+                <li key={item}>
+                  <a href="#" className="text-[var(--text-secondary)] hover:text-[var(--color-primary)] text-sm transition-colors">
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* For Sellers */}
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">For Sellers</h3>
+            <ul className="space-y-2">
+              {['Become a Seller', 'Seller Dashboard', 'Seller Guidelines', 'Seller Support', 'Commission Rates', 'Success Stories'].map((item) => (
+                <li key={item}>
+                  <a href="#" className="text-[var(--text-secondary)] hover:text-[var(--color-primary)] text-sm transition-colors">
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Payment Methods & App Download */}
+        <div className="border-t border-[var(--border)] pt-8 mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+              <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">We Accept</h4>
+              <div className="flex gap-3">
+                {['Visa', 'Mastercard', 'PayPal', 'Stripe', 'AmEx'].map((payment) => (
+                  <div
+                    key={payment}
+                    className="px-4 py-2 bg-[var(--bg-muted)] rounded border border-[var(--border)] text-xs font-medium text-[var(--text-secondary)]"
+                  >
+                    {payment}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3 text-center md:text-right">Download Our App</h4>
+              <div className="flex gap-3">
+                <button className="px-4 py-2 bg-[var(--bg-muted)] hover:bg-[var(--color-primary)] hover:text-white rounded border border-[var(--border)] text-xs font-medium text-[var(--text-secondary)] transition-all">
+                  App Store
+                </button>
+                <button className="px-4 py-2 bg-[var(--bg-muted)] hover:bg-[var(--color-primary)] hover:text-white rounded border border-[var(--border)] text-xs font-medium text-[var(--text-secondary)] transition-all">
+                  Play Store
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Social Links & Copyright */}
+        <div className="border-t border-[var(--border)] pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+              <span>Made with</span>
+              <Heart size={16} className="text-[var(--color-primary)] fill-current" />
+              <span>© {currentYear} ShopHub. All rights reserved.</span>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              {[
+                { Icon: Facebook, label: 'Facebook' },
+                { Icon: Twitter, label: 'Twitter' },
+                { Icon: Instagram, label: 'Instagram' },
+                { Icon: Linkedin, label: 'LinkedIn' },
+                { Icon: Youtube, label: 'YouTube' }
+              ].map(({ Icon, label }) => (
+                <a
+                  key={label}
+                  href="#"
+                  aria-label={label}
+                  className="p-2 rounded-full bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:bg-[var(--color-primary)] hover:text-white transition-all"
+                >
+                  <Icon size={18} />
+                </a>
+              ))}
+            </div>
+          </div>
+          
+          <div className="mt-6 text-center">
+            <div className="flex flex-wrap justify-center gap-4 text-xs text-[var(--text-secondary)]">
+              <a href="#" className="hover:text-[var(--color-primary)] transition-colors">Privacy Policy</a>
+              <span>•</span>
+              <a href="#" className="hover:text-[var(--color-primary)] transition-colors">Terms of Service</a>
+              <span>•</span>
+              <a href="#" className="hover:text-[var(--color-primary)] transition-colors">Cookie Policy</a>
+              <span>•</span>
+              <a href="#" className="hover:text-[var(--color-primary)] transition-colors">Accessibility</a>
+              <span>•</span>
+              <a href="#" className="hover:text-[var(--color-primary)] transition-colors">Sitemap</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Trust Badges */}
+      <div className="bg-[var(--bg-muted)] py-6 border-t border-[var(--border)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap justify-center items-center gap-8">
+            {['Secure Payment', 'Free Shipping', '24/7 Support', 'Easy Returns', 'Verified Sellers'].map((badge) => (
+              <div key={badge} className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                <div className="w-2 h-2 rounded-full bg-[var(--color-primary)]"></div>
+                <span>{badge}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
