@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
+import Assets from '../../assets/assets'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -33,9 +34,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Company Info */}
           <div>
-            <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] bg-clip-text text-transparent">
-              ShopHub
-            </h2>
+            <div className="flex items-center space-x-2">
+              <img src={Assets.logo} alt="ShopZo Logo" className="h-8 w-auto" />
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] bg-clip-text text-transparent">
+                ShopZo
+              </h2>
+            </div>
+
             <p className="text-[var(--text-secondary)] mb-6 leading-relaxed">
               Your trusted multivendor marketplace for quality products from verified sellers worldwide.
             </p>
@@ -99,34 +104,25 @@ export default function Footer() {
         </div>
 
         {/* Payment Methods & App Download */}
-        <div className="border-t border-[var(--border)] pt-8 mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
-              <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">We Accept</h4>
-              <div className="flex gap-3">
-                {['Visa', 'Mastercard', 'PayPal', 'Stripe', 'AmEx'].map((payment) => (
-                  <div
-                    key={payment}
-                    className="px-4 py-2 bg-[var(--bg-muted)] rounded border border-[var(--border)] text-xs font-medium text-[var(--text-secondary)]"
-                  >
-                    {payment}
-                  </div>
-                ))}
-              </div>
+        <div className="flex justify-between items-start border-t border-[var(--border)] pt-8 mb-8">
+            {/* We Accept Section */}
+            <div className="flex flex-col items-start">
+                <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                We Accept
+                </h4>
+                <img src={Assets.payment} alt="Payment Methods" className="h-14 w-auto" />
             </div>
-            <div>
-              <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3 text-center md:text-right">Download Our App</h4>
-              <div className="flex gap-3">
-                <button className="px-4 py-2 bg-[var(--bg-muted)] hover:bg-[var(--color-primary)] hover:text-white rounded border border-[var(--border)] text-xs font-medium text-[var(--text-secondary)] transition-all">
-                  App Store
-                </button>
-                <button className="px-4 py-2 bg-[var(--bg-muted)] hover:bg-[var(--color-primary)] hover:text-white rounded border border-[var(--border)] text-xs font-medium text-[var(--text-secondary)] transition-all">
-                  Play Store
-                </button>
-              </div>
+
+            {/* Download Our App Section */}
+            <div className="flex flex-col items-end">
+                <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                Download Our App
+                </h4>
+                <img src={Assets.download} alt="Download App" className="h-10 w-auto" />
             </div>
-          </div>
         </div>
+
+
 
         {/* Social Links & Copyright */}
         <div className="border-t border-[var(--border)] pt-8">
