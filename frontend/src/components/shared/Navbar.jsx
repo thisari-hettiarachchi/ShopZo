@@ -91,7 +91,7 @@ export default function Navbar() {
                   key={item.id}
                   to={item.path}
                   onClick={() => setActiveMenu(item.id)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-md font-medium btn-icon ${
+                  className={`flex items-center space-x-2 px-3 py-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)] ${
                     activeMenu === item.id ? 'active' : ''
                   }`}
                 >
@@ -123,14 +123,16 @@ export default function Navbar() {
           </button>
 
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <button className="hidden sm:flex items-center space-x-1 p-2 rounded-md btn-icon">
+           <button className="hidden sm:flex items-center transition-colors duration-300 text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
               <User size={22} />
-              <span className="hidden lg:inline text-sm font-medium">
+              <span className="hidden lg:inline text-sm font-medium ml-1">
                 Account
               </span>
             </button>
 
-            <NavLink to="/wishlist" className="relative p-2 rounded-md btn-icon">
+
+
+            <NavLink to="/wishlist" className="relative p-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
               <Heart size={22} />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
@@ -139,12 +141,12 @@ export default function Navbar() {
               )}
             </NavLink>
 
-            <button className="hidden sm:block relative p-2 rounded-md btn-icon">
+            <button className="hidden sm:block relative p-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
               <Bell size={22} />
               <span className="absolute top-1 right-1 notification-dot rounded-full h-2 w-2"></span>
             </button>
 
-            <NavLink to="/cart" className="relative p-2 rounded-md btn-icon">
+            <NavLink to="/cart" className="relative p-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
               <ShoppingCart size={22} />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
@@ -155,7 +157,7 @@ export default function Navbar() {
 
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 rounded-md btn-icon"
+              className="p-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)]"
               aria-label="Toggle theme"
             >
               {isDarkMode ? <Sun size={22} /> : <Moon size={22} />}
@@ -194,7 +196,7 @@ export default function Navbar() {
                       setActiveMenu(item.id)
                       setIsMobileMenuOpen(false)
                     }}
-                    className={`flex items-center space-x-3 w-full px-3 py-2.5 text-sm font-medium rounded-md btn-icon ${
+                    className={`flex items-center space-x-3 w-full px-3 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:text-[var(--bg-hover)] ${
                       activeMenu === item.id ? 'active' : ''
                     }`}
                   >
@@ -206,11 +208,11 @@ export default function Navbar() {
             </div>
 
             <div className="pt-2 border-t mobile-menu-divider">
-              <button className="flex items-center space-x-2 w-full px-3 py-2 text-sm rounded-md sm:hidden btn-icon">
+              <button className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
                 <User size={18} />
                 <span>My Account</span>
               </button>
-              <button className="flex items-center space-x-2 w-full px-3 py-2 text-sm rounded-md sm:hidden btn-icon">
+              <button className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
                 <Bell size={18} />
                 <span>Notifications</span>
               </button>
