@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, Store, ShoppingBag, ArrowRight, Check } from 'lucide-react';
+import { registerUser, loginUser } from "../services/authService";
 
 export default function AuthPages() {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,10 +23,41 @@ export default function AuthPages() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    alert(`${isLogin ? 'Login' : 'Registration'} successful!`);
+
+    try {
+      if (isLogin) {
+        const res = await loginUser({
+          email: formData.email,
+          password: formData.password
+        });
+
+        console.log(res.data);
+
+        localStorage.setItem("token", res.data.token);
+        alert("Login successful");
+
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          alert("Passwords do not match");
+          return;
+        }
+
+        const res = await registerUser({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          accountType: formData.accountType
+        });
+
+        console.log(res.data);
+        alert("Account created successfully");
+        setIsLogin(true);
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Something went wrong");
+    }
   };
 
   return (
