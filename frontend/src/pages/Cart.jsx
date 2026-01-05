@@ -1,58 +1,67 @@
+// src/pages/Cart.jsx
+import { useState, useEffect } from "react";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import {
+  fetchCart,
+  updateCartItemApi,
+  removeCartItemApi,
+} from "../api/cartApi";
 
 export default function Cart() {
-  // TEMP demo data (replace with Context / Redux later)
-  const [cartItems, setCartItems] = useState([
-    {
-      _id: "1",
-      name: "Men Running Shoes",
-      price: 8500,
-      image: "https://via.placeholder.com/150",
-      quantity: 1,
-    },
-    {
-      _id: "2",
-      name: "Women Sneakers",
-      price: 9200,
-      image: "https://via.placeholder.com/150",
-      quantity: 2,
-    },
-  ]);
+  const token = localStorage.getItem("token"); // your JWT token
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const increaseQty = (id) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item._id === id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-    );
+  // Fetch cart from backend
+  useEffect(() => {
+    const getCart = async () => {
+      setLoading(true);
+      try {
+        const cart = await fetchCart(token);
+        setCartItems(cart.items || []);
+      } catch (err) {
+        console.error("Failed to fetch cart:", err);
+      }
+      setLoading(false);
+    };
+    getCart();
+  }, [token]);
+
+  // Increase quantity
+  const increaseQty = async (id) => {
+    const item = cartItems.find((i) => i._id === id);
+    if (!item) return;
+    const updatedCart = await updateCartItemApi(item._id, item.quantity + 1, token);
+    setCartItems(updatedCart.items);
   };
 
-  const decreaseQty = (id) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item._id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
+  // Decrease quantity
+  const decreaseQty = async (id) => {
+    const item = cartItems.find((i) => i._id === id);
+    if (!item || item.quantity <= 1) return;
+    const updatedCart = await updateCartItemApi(item._id, item.quantity - 1, token);
+    setCartItems(updatedCart.items);
   };
 
-  const removeItem = (id) => {
-    setCartItems((items) => items.filter((item) => item._id !== id));
+  // Remove item
+  const removeItem = async (id) => {
+    const updatedCart = await removeCartItemApi(id, token);
+    setCartItems(updatedCart.items);
   };
 
+  // Calculate subtotal
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
+  if (loading) {
+    return <p className="text-center py-10">Loading your cart...</p>;
+  }
+
   return (
     <div className="min-h-screen bg-[var(--bg-main)] px-4 py-10">
       <div className="max-w-6xl mx-auto">
-
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <ShoppingBag className="w-7 h-7 text-[var(--color-primary)]" />
@@ -65,7 +74,6 @@ export default function Cart() {
           </p>
         ) : (
           <div className="grid lg:grid-cols-3 gap-8">
-
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => (
@@ -149,7 +157,6 @@ export default function Cart() {
                 <ArrowRight className="w-5 h-5" />
               </button>
             </div>
-
           </div>
         )}
       </div>

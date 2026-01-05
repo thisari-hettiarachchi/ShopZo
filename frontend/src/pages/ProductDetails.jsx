@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { fetchProductById } from "../api/productApi";
 import { ShoppingCart, Heart, Star, Truck } from "lucide-react";
+import { addToCartApi } from "../api/cartApi";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -104,7 +105,28 @@ export default function ProductDetails() {
           </div>
 
           <div className="flex gap-4 pt-4">
-            <button className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white hover:opacity-90">
+            <button
+              onClick={async () => {
+                const token = localStorage.getItem("token");
+                if (!token) return alert("You must be logged in to add to cart");
+
+                try {
+                  const updatedCart = await addToCartApi(product._id, quantity, token);
+
+                  if (updatedCart?.message) {
+                    // backend returned an error
+                    alert(updatedCart.message);
+                  } else {
+                    alert("Added to cart!");
+                    // Optionally, you can redirect to cart page
+                    // navigate("/cart");
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert("Failed to add to cart");
+                }
+              }}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white hover:opacity-90">
               <ShoppingCart className="w-5 h-5" />
               Add to Cart
             </button>
