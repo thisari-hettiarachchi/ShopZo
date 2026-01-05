@@ -55,7 +55,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-3 text-[var(--text-secondary)]">
                 <Mail size={18} className="text-[var(--color-primary)] flex-shrink-0" />
-                <span className="text-sm">support@shophub.com</span>
+                <span className="text-sm">support@shopzo.com</span>
               </div>
             </div>
           </div>
@@ -64,43 +64,77 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              {['About Us', 'Contact Us', 'Careers', 'Press', 'Blog', 'Affiliate Program'].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-[var(--text-secondary)] hover:text-[var(--color-primary)] text-sm transition-colors">
-                    {item}
+              {[
+                { name: 'About Us', path: '/about' },
+                { name: 'Contact Us', path: '/contact' },
+                { name: 'Careers', path: '/careers' },
+                { name: 'Press', path: '/press' },
+                { name: 'Blog', path: '/blog' },
+                { name: 'Affiliate Program', path: '/affiliate' }
+              ].map((item) => (
+                <li key={item.name}>
+                  <a
+                    href={item.path}
+                    className="text-[var(--text-secondary)] hover:text-[var(--color-primary)] text-sm transition-colors"
+                  >
+                    {item.name}
                   </a>
                 </li>
               ))}
             </ul>
           </div>
+
 
           {/* Customer Service */}
           <div>
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Customer Service</h3>
             <ul className="space-y-2">
-              {['Help Center', 'Track Order', 'Return Policy', 'Shipping Info', 'Payment Methods', 'Gift Cards', 'Size Guide'].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-[var(--text-secondary)] hover:text-[var(--color-primary)] text-sm transition-colors">
-                    {item}
+              {[
+                { name: 'Help Center', path: '/help-center' },
+                { name: 'Track Order', path: '/track-order' },
+                { name: 'Return Policy', path: '/return-policy' },
+                { name: 'Shipping Info', path: '/shipping-info' },
+                { name: 'Payment Methods', path: '/payment-methods' },
+                { name: 'Gift Cards', path: '/gift-cards' },
+                { name: 'Size Guide', path: '/size-guide' }
+              ].map((item) => (
+                <li key={item.name}>
+                  <a
+                    href={item.path}
+                    className="text-[var(--text-secondary)] hover:text-[var(--color-primary)] text-sm transition-colors"
+                  >
+                    {item.name}
                   </a>
                 </li>
               ))}
             </ul>
           </div>
 
+
           {/* For Sellers */}
           <div>
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">For Sellers</h3>
             <ul className="space-y-2">
-              {['Become a Seller', 'Seller Dashboard', 'Seller Guidelines', 'Seller Support', 'Commission Rates', 'Success Stories'].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-[var(--text-secondary)] hover:text-[var(--color-primary)] text-sm transition-colors">
-                    {item}
+              {[
+                { name: 'Become a Seller', path: '/auth' },
+                { name: 'Seller Dashboard', path: '/seller/dashboard' },
+                { name: 'Seller Guidelines', path: '/seller/guidelines' },
+                { name: 'Seller Support', path: '/seller/support' },
+                { name: 'Commission Rates', path: '/seller/commission' },
+                { name: 'Success Stories', path: '/seller/success' }
+              ].map((item) => (
+                <li key={item.name}>
+                  <a
+                    href={item.path}
+                    className="text-[var(--text-secondary)] hover:text-[var(--color-primary)] text-sm transition-colors"
+                  >
+                    {item.name}
                   </a>
                 </li>
               ))}
             </ul>
           </div>
+
         </div>
 
         {/* Payment Methods & App Download */}
