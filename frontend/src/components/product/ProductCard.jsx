@@ -2,16 +2,29 @@ import { Heart, ShoppingCart, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { addToCartApi } from "../../api/cartApi";
 
-export default function ProductCard({ product, token, onCartUpdate }) {
+export default function ProductCard({ product, token: propToken, onCartUpdate }) {
   const navigate = useNavigate();
 
+  // fallback to localStorage if parent didn't pass token
+  const token = propToken || localStorage.getItem("token");
+
   const handleAddToCart = async (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
+    if (!token) return alert("You must be logged in to add to cart");
+
     try {
       const updatedCart = await addToCartApi(product._id, 1, token);
-      onCartUpdate(updatedCart); 
-    } catch (error) {
-      console.error("Failed to add to cart:", error);
+
+      // if backend sends message (like "Already in cart")
+      if (updatedCart?.message) {
+        alert(updatedCart.message);
+      } else {
+        alert("Added to cart!");
+        if (onCartUpdate) onCartUpdate(updatedCart);
+      }
+    } catch (err) {
+      console.error("Failed to add to cart:", err);
+      alert(err.message || "Failed to add to cart");
     }
   };
 
@@ -31,7 +44,6 @@ export default function ProductCard({ product, token, onCartUpdate }) {
           alt={product.name}
           className="w-full h-48 object-contain group-hover:scale-105 transition"
         />
-
         <button
           onClick={handleWishlistClick}
           className="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-[var(--bg-muted)]"
@@ -73,23 +85,7 @@ export default function ProductCard({ product, token, onCartUpdate }) {
         </div>
 
         <button
-              onClick={async () => {
-                const token = localStorage.getItem("token");
-                if (!token) return alert("You must be logged in to add to cart");
-
-                try {
-                  const updatedCart = await addToCartApi(product._id, quantity, token);
-
-                  if (updatedCart?.message) {
-                    alert(updatedCart.message);
-                  } else {
-                    alert("Added to cart!");
-                  }
-                } catch (err) {
-                  console.error(err);
-                  alert("Failed to add to cart");
-                }
-              }}
+          onClick={handleAddToCart}
           className="w-full mt-3 flex items-center justify-center gap-2 py-2 rounded-xl text-white font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90"
         >
           <ShoppingCart className="w-4 h-4" />
