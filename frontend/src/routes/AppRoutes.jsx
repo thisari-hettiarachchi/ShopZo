@@ -18,7 +18,7 @@ export default function AppRoutes() {
       <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/auth" element={<AuthPages />} /> 
       <Route path="/products/*" element={<Product />} />
-      <Route path="/productDetails/*" element={<ProductDetails />} />
+      <Route path="/products/:id" element={<ProductDetails />} />
     </Routes>
   );
 }

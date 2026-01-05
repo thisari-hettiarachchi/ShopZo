@@ -5,7 +5,7 @@ import Footer from './components/shared/Footer';
 
 export default function App() {
   const location = useLocation();
-  const noHeaderFooter = location.pathname === '/auth'; // Hide Navbar/Footer for Auth
+  const noHeaderFooter = location.pathname === '/auth'; 
 
   return (
     <>

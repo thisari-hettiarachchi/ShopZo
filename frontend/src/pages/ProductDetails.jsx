@@ -1,4 +1,3 @@
-// src/pages/Product.jsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { fetchProductById } from "../api/productApi";
@@ -17,13 +16,14 @@ export default function ProductDetails() {
     });
   }, [id]);
 
-  if (!product) return <p className="text-center">Loading...</p>;
+  if (!product) {
+    return <p className="text-center py-10">Loading...</p>;
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg-main)] py-10 px-4">
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 bg-[var(--bg-card)] p-6 rounded-2xl">
 
-        {/* Left: Images */}
         <div>
           <img
             src={mainImage}
@@ -32,28 +32,44 @@ export default function ProductDetails() {
           />
 
           <div className="flex gap-2 overflow-x-auto">
-            {product.images.map((img, i) => (
+            {product.images?.map((img, i) => (
               <img
                 key={i}
                 src={img}
                 alt={`${product.name} ${i + 1}`}
-                className="w-24 h-24 object-contain rounded-lg cursor-pointer border hover:border-[var(--color-primary)]"
+                className={`w-24 h-24 object-contain rounded-lg cursor-pointer border ${
+                  mainImage === img
+                    ? "border-[var(--color-primary)]"
+                    : "hover:border-[var(--color-primary)]"
+                }`}
                 onClick={() => setMainImage(img)}
               />
             ))}
           </div>
         </div>
 
-        {/* Right: Product Details */}
         <div className="space-y-5">
-          <h1 className="text-3xl font-bold">{product.name}</h1>
+
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-3xl font-bold leading-tight">
+              {product.name}
+            </h1>
+
+            <button className="p-2 rounded-full border border-[var(--border)] text-[var(--color-primary)] hover:bg-[var(--bg-muted)] transition">
+              <Heart className="w-6 h-6" />
+            </button>
+          </div>
+
+          <p className="text-[var(--text-secondary)] leading-relaxed">
+            {product.description}
+          </p>
 
           <div className="flex items-center gap-1">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
                 className={`w-5 h-5 ${
-                  i < Math.round(product.rating)
+                  i < Math.round(product.rating || 0)
                     ? "fill-[var(--color-primary)] text-[var(--color-primary)]"
                     : "text-gray-300"
                 }`}
@@ -68,9 +84,6 @@ export default function ProductDetails() {
             Rs. {product.price}
           </p>
 
-          <p>{product.description}</p>
-
-          {/* Quantity */}
           <div className="flex items-center gap-4">
             <span className="font-medium">Quantity</span>
             <div className="flex items-center border rounded-lg">
@@ -90,20 +103,18 @@ export default function ProductDetails() {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-4 pt-4">
-            <button className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white">
+            <button className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white hover:opacity-90">
               <ShoppingCart className="w-5 h-5" />
               Add to Cart
             </button>
 
-            <button className="flex items-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-primary)] hover:bg-[var(--bg-muted)]">
+            <button className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-primary)] hover:bg-[var(--bg-muted)]">
               <Heart className="w-5 h-5" />
-              Wishlist
+              Buy Now
             </button>
           </div>
 
-          {/* Delivery Info */}
           <div className="flex items-center gap-3 pt-4 text-sm text-[var(--text-secondary)]">
             <Truck className="w-5 h-5 text-[var(--color-primary)]" />
             Free delivery within 3–5 working days

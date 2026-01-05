@@ -13,7 +13,7 @@ export default function ProductCard({ product }) {
       {/* Image */}
       <div className="relative bg-[var(--bg-muted)] p-4">
         <img
-          src={product.images?.[0]} // first image only
+          src={product.images?.[0]}
           alt={product.name}
           className="w-full h-48 object-contain group-hover:scale-105 transition"
         />
