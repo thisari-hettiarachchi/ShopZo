@@ -10,11 +10,21 @@ export default function Wishlist() {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Dispatch custom event to update navbar
+  const dispatchWishlistUpdate = () => {
+    window.dispatchEvent(new Event('wishlistUpdated'));
+  };
+
   useEffect(() => {
     const loadWishlist = async () => {
       try {
         const data = await fetchWishlistApi(token);
-        setWishlistItems(data.items || []);
+        const items = data.items || [];
+        setWishlistItems(items);
+        
+        // Update localStorage for navbar sync
+        localStorage.setItem('wishlist', JSON.stringify(items));
+        dispatchWishlistUpdate();
       } catch (err) {
         console.error(err);
       } finally {
@@ -28,7 +38,12 @@ export default function Wishlist() {
   const removeItem = async (productId) => {
     try {
       const updated = await removeFromWishlistApi(productId, token);
-      setWishlistItems(updated.items);
+      const items = updated.items || [];
+      setWishlistItems(items);
+      
+      // Update localStorage for navbar sync
+      localStorage.setItem('wishlist', JSON.stringify(items));
+      dispatchWishlistUpdate();
     } catch (err) {
       console.error(err);
     }
