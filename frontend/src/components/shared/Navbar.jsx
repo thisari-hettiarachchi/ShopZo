@@ -26,6 +26,10 @@ export default function Navbar() {
   const [cartCount] = useState(3)
   const [wishlistCount] = useState(5)
 
+  // Added states for account menu
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.setAttribute('data-theme', 'dark')
@@ -33,6 +37,12 @@ export default function Navbar() {
       document.documentElement.removeAttribute('data-theme')
     }
   }, [isDarkMode])
+
+  // Check login status from localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    setIsLoggedIn(!!token)
+  }, [])
 
   const mainMenuItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/' },
@@ -123,14 +133,59 @@ export default function Navbar() {
           </button>
 
           <div className="flex items-center space-x-2 sm:space-x-3">
-           <button className="hidden sm:flex items-center transition-colors duration-300 text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
-              <User size={22} />
-              <span className="hidden lg:inline text-sm font-medium ml-1">
-                Account
-              </span>
-            </button>
+            {/* Account Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+                className="hidden sm:flex items-center transition-colors duration-300 text-[var(--text-primary)] hover:text-[var(--bg-hover)]"
+              >
+                <User size={22} />
+                <span className="hidden lg:inline text-sm font-medium ml-1">Account</span>
+              </button>
 
-
+              {isAccountMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-[var(--bg-card)] border-2 border-[var(--border)] rounded-lg shadow-lg z-50">
+                  {!isLoggedIn ? (
+                    <div className="flex flex-col py-2">
+                      <NavLink
+                        to="/auth"
+                        className="px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                      >
+                        Sign In
+                      </NavLink>
+                      <NavLink
+                        to="/auth"
+                        className="px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                      >
+                        Sign Up
+                      </NavLink>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col py-2">
+                      <NavLink
+                        to="/profile"
+                        className="px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                      >
+                        View Profile
+                      </NavLink>
+                      <button
+                        onClick={() => {
+                          localStorage.removeItem('token')
+                          setIsLoggedIn(false)
+                          setIsAccountMenuOpen(false)
+                        }}
+                        className="text-left px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             <NavLink to="/wishlist" className="relative p-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
               <Heart size={22} />
