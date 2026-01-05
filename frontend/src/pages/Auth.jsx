@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // <-- import useNavigate
 import { Mail, Lock, User, Eye, EyeOff, Store, ShoppingBag, ArrowRight, Check, Shield } from 'lucide-react';
 import { registerUser, loginUser } from "../services/authService";
 
 export default function AuthPages() {
+  const navigate = useNavigate(); // <-- initialize navigate
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -37,6 +39,8 @@ export default function AuthPages() {
 
         localStorage.setItem("token", res.data.token);
         alert("Login successful");
+
+        navigate("/"); // <-- redirect to home page
 
       } else {
         if (formData.password !== formData.confirmPassword) {
