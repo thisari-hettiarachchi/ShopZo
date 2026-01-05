@@ -1,12 +1,31 @@
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { addToCartApi } from "../../api/cartApi";
+import {
+  addToWishlistApi,
+  removeFromWishlistApi,
+  fetchWishlistApi,
+} from "../../api/wishlistApi";
 
 export default function ProductCard({ product, token: propToken, onCartUpdate }) {
   const navigate = useNavigate();
 
   // fallback to localStorage if parent didn't pass token
   const token = propToken || localStorage.getItem("token");
+
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+
+    fetchWishlistApi(token).then((data) => {
+      const exists = data.items?.some(
+        (item) => item.product._id === product._id
+      );
+      setIsWishlisted(exists);
+    });
+  }, [product._id, token]);
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
@@ -15,7 +34,6 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
     try {
       const updatedCart = await addToCartApi(product._id, 1, token);
 
-      // if backend sends message (like "Already in cart")
       if (updatedCart?.message) {
         alert(updatedCart.message);
       } else {
@@ -28,9 +46,21 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
     }
   };
 
-  const handleWishlistClick = (e) => {
+  const handleWishlistClick = async (e) => {
     e.stopPropagation();
-    console.log("Wishlist clicked for", product.name);
+    if (!token) return alert("Login to use wishlist");
+
+    try {
+      if (isWishlisted) {
+        await removeFromWishlistApi(product._id, token);
+        setIsWishlisted(false);
+      } else {
+        await addToWishlistApi(product._id, token);
+        setIsWishlisted(true);
+      }
+    } catch (err) {
+      console.error("Wishlist error:", err);
+    }
   };
 
   return (
@@ -48,7 +78,13 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
           onClick={handleWishlistClick}
           className="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-[var(--bg-muted)]"
         >
-          <Heart className="w-5 h-5 text-[var(--color-primary)]" />
+          <Heart
+            className={`w-5 h-5 ${
+              isWishlisted
+                ? "fill-red-500 text-red-500"
+                : "text-[var(--color-primary)]"
+            }`}
+          />
         </button>
       </div>
 

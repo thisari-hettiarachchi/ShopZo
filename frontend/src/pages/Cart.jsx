@@ -18,7 +18,14 @@ export default function Cart() {
       setLoading(true);
       try {
         const cart = await fetchCart(token);
-        setCartItems(cart.items || []);
+
+        // 🔹 Normalize cart items (use qty from backend)
+        const normalizedItems = (cart.items || []).map((item) => ({
+          ...item,
+          quantity: item.qty && item.qty > 0 ? item.qty : 1,
+        }));
+
+        setCartItems(normalizedItems);
       } catch (err) {
         console.error("Failed to fetch cart:", err);
       }
@@ -31,27 +38,51 @@ export default function Cart() {
   const increaseQty = async (id) => {
     const item = cartItems.find((i) => i._id === id);
     if (!item) return;
+
     const updatedCart = await updateCartItemApi(item._id, item.quantity + 1, token);
-    setCartItems(updatedCart.items);
+
+    setCartItems(
+      (updatedCart.items || []).map((i) => ({
+        ...i,
+        quantity: i.qty && i.qty > 0 ? i.qty : 1,
+      }))
+    );
   };
 
   // Decrease quantity
   const decreaseQty = async (id) => {
     const item = cartItems.find((i) => i._id === id);
     if (!item || item.quantity <= 1) return;
+
     const updatedCart = await updateCartItemApi(item._id, item.quantity - 1, token);
-    setCartItems(updatedCart.items);
+
+    setCartItems(
+      (updatedCart.items || []).map((i) => ({
+        ...i,
+        quantity: i.qty && i.qty > 0 ? i.qty : 1,
+      }))
+    );
   };
 
   // Remove item
-  const removeItem = async (id) => {
-    const updatedCart = await removeCartItemApi(id, token);
-    setCartItems(updatedCart.items);
+  const removeItem = async (itemId) => { // ✅ use cart item _id
+    try {
+      const updatedCart = await removeCartItemApi(itemId, token);
+
+      setCartItems(
+        (updatedCart.items || []).map((i) => ({
+          ...i,
+          quantity: i.qty && i.qty > 0 ? i.qty : 1,
+        }))
+      );
+    } catch (err) {
+      console.error("Failed to remove item:", err);
+    }
   };
 
-  // Calculate subtotal
+  // 🔹 Correct subtotal calculation
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + item.price * (item.quantity || 1),
     0
   );
 
@@ -82,14 +113,14 @@ export default function Cart() {
                   className="flex gap-4 p-4 rounded-2xl bg-[var(--bg-card)] shadow"
                 >
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.product.image}
+                    alt={item.product.name}
                     className="w-24 h-24 object-contain rounded-lg bg-[var(--bg-muted)]"
                   />
 
                   <div className="flex-1 space-y-2">
                     <h3 className="font-semibold text-[var(--text-primary)]">
-                      {item.name}
+                      {item.product.name}
                     </h3>
 
                     <p className="font-bold text-[var(--color-primary)]">
@@ -106,7 +137,7 @@ export default function Cart() {
                       </button>
 
                       <span className="min-w-[24px] text-center">
-                        {item.quantity}
+                        {item.quantity || 1}
                       </span>
 
                       <button
@@ -120,7 +151,7 @@ export default function Cart() {
 
                   {/* Remove */}
                   <button
-                    onClick={() => removeItem(item._id)}
+                    onClick={() => removeItem(item._id)} // ✅ send cart item _id
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                   >
                     <Trash2 className="w-5 h-5" />

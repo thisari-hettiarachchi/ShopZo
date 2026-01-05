@@ -1,21 +1,77 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchProductById } from "../api/productApi";
 import { ShoppingCart, Heart, Star, Truck } from "lucide-react";
+import { fetchProductById } from "../api/productApi";
 import { addToCartApi } from "../api/cartApi";
+import {
+  addToWishlistApi,
+  removeFromWishlistApi,
+  fetchWishlistApi,
+} from "../api/wishlistApi";
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const token = localStorage.getItem("token");
+
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState("");
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
+  /* ---------------- Fetch Product ---------------- */
   useEffect(() => {
     fetchProductById(id).then((data) => {
       setProduct(data);
       setMainImage(data.images?.[0]);
     });
   }, [id]);
+
+  /* ---------------- Check Wishlist Status ---------------- */
+  useEffect(() => {
+    if (!token || !product) return;
+
+    fetchWishlistApi(token).then((data) => {
+      const exists = data.items?.some(
+        (item) => item.product._id === product._id
+      );
+      setIsWishlisted(exists);
+    });
+  }, [product, token]);
+
+  /* ---------------- Wishlist Toggle ---------------- */
+  const handleWishlistClick = async () => {
+    if (!token) return alert("Login to use wishlist");
+
+    try {
+      if (isWishlisted) {
+        await removeFromWishlistApi(product._id, token);
+        setIsWishlisted(false);
+      } else {
+        await addToWishlistApi(product._id, token);
+        setIsWishlisted(true);
+      }
+    } catch (err) {
+      console.error("Wishlist error:", err);
+    }
+  };
+
+  /* ---------------- Add to Cart ---------------- */
+  const handleAddToCart = async () => {
+    if (!token) return alert("You must be logged in to add to cart");
+
+    try {
+      const updatedCart = await addToCartApi(product._id, quantity, token);
+
+      if (updatedCart?.message) {
+        alert(updatedCart.message);
+      } else {
+        alert("Added to cart!");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add to cart");
+    }
+  };
 
   if (!product) {
     return <p className="text-center py-10">Loading...</p>;
@@ -25,6 +81,7 @@ export default function ProductDetails() {
     <div className="min-h-screen bg-[var(--bg-main)] py-10 px-4">
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 bg-[var(--bg-card)] p-6 rounded-2xl">
 
+        {/* -------- Images -------- */}
         <div>
           <img
             src={mainImage}
@@ -49,6 +106,7 @@ export default function ProductDetails() {
           </div>
         </div>
 
+        {/* -------- Product Info -------- */}
         <div className="space-y-5">
 
           <div className="flex items-start justify-between gap-4">
@@ -56,8 +114,17 @@ export default function ProductDetails() {
               {product.name}
             </h1>
 
-            <button className="p-2 rounded-full border border-[var(--border)] text-[var(--color-primary)] hover:bg-[var(--bg-muted)] transition">
-              <Heart className="w-6 h-6" />
+            <button
+              onClick={handleWishlistClick}
+              className="p-2 rounded-full border border-[var(--border)] hover:bg-[var(--bg-muted)] transition"
+            >
+              <Heart
+                className={`w-6 h-6 ${
+                  isWishlisted
+                    ? "fill-red-500 text-red-500"
+                    : "text-[var(--color-primary)]"
+                }`}
+              />
             </button>
           </div>
 
@@ -85,6 +152,7 @@ export default function ProductDetails() {
             Rs. {product.price}
           </p>
 
+          {/* -------- Quantity -------- */}
           <div className="flex items-center gap-4">
             <span className="font-medium">Quantity</span>
             <div className="flex items-center border rounded-lg">
@@ -104,35 +172,20 @@ export default function ProductDetails() {
             </div>
           </div>
 
+          {/* -------- Actions -------- */}
           <div className="flex gap-4 pt-4">
             <button
-              onClick={async () => {
-                const token = localStorage.getItem("token");
-                if (!token) return alert("You must be logged in to add to cart");
-
-                try {
-                  const updatedCart = await addToCartApi(product._id, quantity, token);
-
-                  if (updatedCart?.message) {
-                    // backend returned an error
-                    alert(updatedCart.message);
-                  } else {
-                    alert("Added to cart!");
-                    // Optionally, you can redirect to cart page
-                    // navigate("/cart");
-                  }
-                } catch (err) {
-                  console.error(err);
-                  alert("Failed to add to cart");
-                }
-              }}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white hover:opacity-90">
+              onClick={handleAddToCart}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white hover:opacity-90"
+            >
               <ShoppingCart className="w-5 h-5" />
               Add to Cart
             </button>
 
-            <button className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-primary)] hover:bg-[var(--bg-muted)]">
-              <Heart className="w-5 h-5" />
+            <button
+              onClick={handleWishlistClick}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-primary)] hover:bg-[var(--bg-muted)]"
+            >
               Buy Now
             </button>
           </div>
