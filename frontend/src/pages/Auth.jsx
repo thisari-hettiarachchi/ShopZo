@@ -149,17 +149,6 @@ export default function AuthPages() {
                       <Store size={24} color={formData.accountType === 'vendor' ? 'var(--color-primary)' : 'var(--text-muted)'} />
                       <span className="text-sm font-semibold" style={{ color: formData.accountType === 'vendor' ? 'var(--text-primary)' : 'var(--text-muted)' }}>Sell</span>
                     </div>
-                    <div
-                      className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 ${formData.accountType === 'admin' ? 'shadow-md' : ''}`}
-                      style={{
-                        borderColor: formData.accountType === 'admin' ? 'var(--color-primary)' : 'var(--border)',
-                        backgroundColor: formData.accountType === 'admin' ? 'var(--bg-muted)' : 'var(--bg-card)'
-                      }}
-                      onClick={() => setFormData(prev => ({ ...prev, accountType: 'admin' }))}
-                    >
-                      <Shield size={24} color={formData.accountType === 'admin' ? 'var(--color-primary)' : 'var(--text-muted)'} />
-                      <span className="text-sm font-semibold" style={{ color: formData.accountType === 'admin' ? 'var(--text-primary)' : 'var(--text-muted)' }}>Admin</span>
-                    </div>
                   </div>
                 </div>
               )}
