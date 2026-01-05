@@ -7,6 +7,7 @@ import About from '../pages/About';
 import AuthPages from '../pages/Auth';
 import Product from '../pages/Products';
 import ProductDetails from '../pages/ProductDetails';
+import ProfilePage from '../pages/ProfileDashboard';
 
 export default function AppRoutes() {
   return (
@@ -19,6 +20,7 @@ export default function AppRoutes() {
       <Route path="/auth" element={<AuthPages />} /> 
       <Route path="/products/*" element={<Product />} />
       <Route path="/products/:id" element={<ProductDetails />} />
+      <Route path="/profile" element={<ProfilePage />} />
     </Routes>
   );
 }
