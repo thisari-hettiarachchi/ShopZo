@@ -32,10 +32,9 @@ export const updateCartItemApi = async (itemId, qty, token) => {
 };
 
 export const removeCartItemApi = async (productId, token) => {
-  const res = await fetch(`${BASE_URL}/cart/remove/${productId}`, {
+  const res = await fetch(`${BASE_URL}/remove/${productId}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
   return await res.json();
 };
-
