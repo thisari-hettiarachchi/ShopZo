@@ -140,9 +140,9 @@ export default function Hero() {
             </motion.div>
           </AnimatePresence>
 
-          <button className="bg-[var(--bg-main)] hover:bg-[var(--color-secondary)] text-[var(--color-primary)] font-semibold px-8 py-3 rounded-lg shadow-lg transition">
-            Shop Now
-          </button>
+          <div className="relative inline-block p-0.5 rounded-full overflow-hidden hover:scale-105 transition duration-300 active:scale-100 before:content-[''] before:absolute before:inset-0 before:bg-[conic-gradient(from_0deg,_#FFFFFF,_#FFFFFF,_#FFFFFF)] button-wrapper">
+              <button className="relative z-10 bg-[var(--color-primary)] text-white rounded-full px-8 py-3 font-medium text-sm">Shop Now</button>
+          </div>
         </div>
 
         {/* Right Image */}

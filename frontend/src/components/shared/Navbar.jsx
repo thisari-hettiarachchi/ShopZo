@@ -79,7 +79,7 @@ export default function Navbar() {
   return (
     <nav className="sticky top-4 z-50">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="navbar-main h-16 px-6 rounded-full border backdrop-blur-md flex items-center justify-between">
+        <div className="navbar-main h-16 px-6 rounded-full flex items-center justify-between">
           {/* LEFT */}
           <div className="flex items-center gap-3">
             <button
