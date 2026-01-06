@@ -37,7 +37,7 @@ export default function Hero() {
     },
   ];
 
-  const SLIDE_DURATION = 5000; // 5 seconds
+  const SLIDE_DURATION = 5000; 
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -82,8 +82,7 @@ export default function Hero() {
   };
 
   return (
-    <section
-      className="relative w-full h-[85vh] flex items-center justify-center overflow-hidden"
+    <section className="relative w-full h-screen flex justify-start overflow-hidden mt-[-70px]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -147,7 +146,7 @@ export default function Hero() {
         </div>
 
         {/* Right Image */}
-        <div className="flex-1 flex justify-center lg:justify-end">
+        <div className="flex-1 flex justify-center lg:justify-end  mt-[100px]">
           <AnimatePresence mode="wait">
             <motion.img
               key={currentIndex}

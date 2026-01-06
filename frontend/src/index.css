@@ -43,6 +43,7 @@
 body {
   background-color: var(--bg-main);
   color: var(--text-primary);
+  margin: 0;
 }
 
 .navbar-main {
