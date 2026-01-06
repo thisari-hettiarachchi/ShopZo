@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Store, Users, ShieldCheck, TrendingUp, Heart, Award, Package, Globe, ArrowRight, Sparkles } from 'lucide-react';
+import Assets from "../assets/assets";
 
 function CountUp({ end, duration = 2000, suffix = '' }) {
   const [count, setCount] = useState(0);
@@ -72,10 +73,13 @@ export default function AboutUs() {
   return (
     <div className="min-h-screen bg-yellow-50">
       {/* Hero Section */}
-      <div className="relative py-20 bg-gradient-to-r from-yellow-500 to-orange-400 overflow-hidden text-center">
-        <div className="absolute top-1/5 right-10 opacity-10 animate-bounce-slow">
-          <Sparkles size={100} className="text-white" />
-        </div>
+  
+        <div
+                className="relative w-full md:h-[600px] flex items-center bg-cover bg-center  mt-[-70px]"
+                style={{
+                  backgroundImage: `url(${Assets.about})`
+                }}
+              >
         <div className="absolute bottom-1/5 left-10 opacity-10 animate-bounce-slower">
           <Store size={80} className="text-white" />
         </div>
