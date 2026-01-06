@@ -23,12 +23,43 @@ export default function Navbar() {
   const [activeMenu, setActiveMenu] = useState('home')
   const [isDarkMode, setIsDarkMode] = useState(false)
 
-  const [cartCount] = useState(3)
-  const [wishlistCount] = useState(5)
+  const [cartCount, setCartCount] = useState(0)
+  const [wishlistCount, setWishlistCount] = useState(0)
 
-  // Added states for account menu
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
+
+  const updateCartCount = () => {
+    const cart = JSON.parse(localStorage.getItem('cart')) || []
+    setCartCount(cart.length)
+  }
+
+  const updateWishlistCount = () => {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || []
+    setWishlistCount(wishlist.length)
+  }
+
+  useEffect(() => {
+    updateCartCount()
+    updateWishlistCount()
+    setIsLoggedIn(!!localStorage.getItem('token'))
+  }, [])
+
+  useEffect(() => {
+    const handleStorage = () => {
+      updateCartCount()
+      updateWishlistCount()
+    }
+    window.addEventListener('storage', handleStorage)
+    window.addEventListener('cartUpdated', handleStorage)
+    window.addEventListener('wishlistUpdated', handleStorage)
+
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener('cartUpdated', handleStorage)
+      window.removeEventListener('wishlistUpdated', handleStorage)
+    }
+  }, [])
 
   useEffect(() => {
     if (isDarkMode) {
@@ -38,12 +69,6 @@ export default function Navbar() {
     }
   }, [isDarkMode])
 
-  // Check login status from localStorage
-  useEffect(() => {
-    const token = localStorage.getItem('token')
-    setIsLoggedIn(!!token)
-  }, [])
-
   const mainMenuItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/' },
     { id: 'products', label: 'Products', icon: Package, path: '/products' },
@@ -52,48 +77,29 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="navbar-main sticky top-0 z-50">
-      <div className="top-bar">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-10 text-sm">
-            <div className="flex items-center space-x-4">
-              <span className="font-medium">Welcome to ShopZo</span>
-              <span className="hidden md:inline">|</span>
-              <span className="hidden md:inline">
-                Free shipping on orders over $50
-              </span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="hover:opacity-80 transition font-medium">
-                Sell on ShopZo
-              </button>
-              <span className="hidden sm:inline">|</span>
-              <button className="hover:opacity-80 transition hidden sm:inline">
-                Help
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
+    <nav className="sticky top-4 z-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="navbar-main h-16 px-6 rounded-full flex items-center justify-between">
+          {/* LEFT */}
+          <div className="flex items-center gap-3">
             <button
-              className="lg:hidden mr-3 p-2 rounded-md btn-icon"
+              className="lg:hidden p-2 rounded-full btn-icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? (
-                <X size={24} className="icon-primary" />
-              ) : (
-                <Menu size={24} className="icon-primary" />
-              )}
+              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
-            <img src={Assets.logo} alt="ShopZo Logo" className="h-8 w-auto" />
+
+            <div className="flex items-center gap-2 cursor-pointer">
+              <img src={Assets.logo} alt="ShopZo" className="h-8 w-auto" />
+              <p className="logo-text text-lg font-semibold tracking-wide">
+                ShopZO
+              </p>
+            </div>
+
           </div>
 
-          {/* DESKTOP MENU */}
-          <div className="hidden lg:flex items-center space-x-8 ml-12">
+          {/* CENTER MENU */}
+          <div className="hidden lg:flex items-center gap-2">
             {mainMenuItems.map((item) => {
               const Icon = item.icon
               return (
@@ -101,180 +107,131 @@ export default function Navbar() {
                   key={item.id}
                   to={item.path}
                   onClick={() => setActiveMenu(item.id)}
-                  className={`flex items-center space-x-2 px-3 py-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)] ${
-                    activeMenu === item.id ? 'active' : ''
-                  }`}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition
+                    ${
+                      activeMenu === item.id
+                        ? 'bg-[var(--bg-muted)] text-[var(--color-primary)]'
+                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]'
+                    }`}
                 >
-                  <Icon size={18} />
-                  <span>{item.label}</span>
+                  <Icon size={16} />
+                  {item.label}
                 </NavLink>
               )
             })}
           </div>
 
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="w-full relative">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full px-4 py-2 pr-20 rounded-full search-input"
-              />
-              <button className="absolute right-1 top-1 px-5 py-1.5 rounded-full search-btn">
-                <Search size={18} />
-              </button>
-            </div>
-          </div>
+          {/* RIGHT ICONS */}
+          <div className="flex items-center gap-2">
+            {/* SEARCH */}
+            <button
+              className="p-2 rounded-full btn-icon md:hidden"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+            >
+              <Search size={20} />
+            </button>
 
-          <button
-            className="md:hidden p-2 rounded-md btn-icon"
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-          >
-            <Search size={22} />
-          </button>
-
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* Account Dropdown */}
-            <div className="relative">
+            {/* ACCOUNT */}
+            <div className="relative hidden sm:block">
               <button
                 onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-                className="hidden sm:flex items-center transition-colors duration-300 text-[var(--text-primary)] hover:text-[var(--bg-hover)]"
+                className="p-2 rounded-full btn-icon"
               >
-                <User size={22} />
-                <span className="hidden lg:inline text-sm font-medium ml-1">Account</span>
+                <User size={20} />
               </button>
 
               {isAccountMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-[var(--bg-card)] border-2 border-[var(--border)] rounded-lg shadow-lg z-50">
+                <div className="absolute right-0 mt-2 w-44 bg-[var(--bg-card)] border rounded-xl shadow-lg">
                   {!isLoggedIn ? (
-                    <div className="flex flex-col py-2">
-                      <NavLink
-                        to="/auth"
-                        className="px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
-                        onClick={() => setIsAccountMenuOpen(false)}
-                      >
+                    <>
+                      <NavLink to="/auth" className="block px-4 py-2 hover:bg-[var(--bg-muted)]">
                         Sign In
                       </NavLink>
-                      <NavLink
-                        to="/auth"
-                        className="px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
-                        onClick={() => setIsAccountMenuOpen(false)}
-                      >
+                      <NavLink to="/auth" className="block px-4 py-2 hover:bg-[var(--bg-muted)]">
                         Sign Up
                       </NavLink>
-                    </div>
+                    </>
                   ) : (
-                    <div className="flex flex-col py-2">
-                      <NavLink
-                        to="/profile"
-                        className="px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
-                        onClick={() => setIsAccountMenuOpen(false)}
-                      >
-                        View Profile
+                    <>
+                      <NavLink to="/profile" className="block px-4 py-2 hover:bg-[var(--bg-muted)]">
+                        Profile
                       </NavLink>
                       <button
+                        className="w-full text-left px-4 py-2 hover:bg-[var(--bg-muted)]"
                         onClick={() => {
                           localStorage.removeItem('token')
                           setIsLoggedIn(false)
-                          setIsAccountMenuOpen(false)
                         }}
-                        className="text-left px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
                       >
                         Logout
                       </button>
-                    </div>
+                    </>
                   )}
                 </div>
               )}
             </div>
 
-            <NavLink to="/wishlist" className="relative p-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
-              <Heart size={22} />
+            {/* WISHLIST */}
+            <NavLink to="/wishlist" className="relative p-2 rounded-full btn-icon">
+              <Heart size={20} />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                <span className="badge absolute -top-1 -right-1 h-4 w-4 text-[10px] flex items-center justify-center rounded-full">
                   {wishlistCount}
                 </span>
               )}
             </NavLink>
 
-            <button className="hidden sm:block relative p-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
-              <Bell size={22} />
-              <span className="absolute top-1 right-1 notification-dot rounded-full h-2 w-2"></span>
-            </button>
-
-            <NavLink to="/cart" className="relative p-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
-              <ShoppingCart size={22} />
+            {/* CART */}
+            <NavLink to="/cart" className="relative p-2 rounded-full btn-icon">
+              <ShoppingCart size={20} />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                <span className="badge absolute -top-1 -right-1 h-4 w-4 text-[10px] flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}
             </NavLink>
 
+            {/* THEME */}
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 text-[var(--text-primary)] hover:text-[var(--bg-hover)]"
-              aria-label="Toggle theme"
+              className="p-2 rounded-full btn-icon"
             >
-              {isDarkMode ? <Sun size={22} /> : <Moon size={22} />}
+              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
           </div>
         </div>
 
+        {/* MOBILE SEARCH */}
         {isSearchOpen && (
-          <div className="md:hidden pb-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full px-4 py-2 pr-12 rounded-full search-input"
-              />
-              <button className="absolute right-2 top-2 icon-primary">
-                <Search size={20} />
-              </button>
-            </div>
+          <div className="md:hidden mt-3">
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="w-full px-4 py-2 rounded-full search-input"
+            />
+          </div>
+        )}
+
+        {/* MOBILE MENU */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden mt-3 mobile-menu rounded-2xl">
+            {mainMenuItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <NavLink
+                  key={item.id}
+                  to={item.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3"
+                >
+                  <Icon size={18} />
+                  {item.label}
+                </NavLink>
+              )
+            })}
           </div>
         )}
       </div>
-
-      {/* MOBILE MENU */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden mobile-menu">
-          <div className="px-4 py-3 space-y-1">
-            <div className="pb-2 mb-2 border-b mobile-menu-divider">
-              {mainMenuItems.map((item) => {
-                const Icon = item.icon
-                return (
-                  <NavLink
-                    key={item.id}
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id)
-                      setIsMobileMenuOpen(false)
-                    }}
-                    className={`flex items-center space-x-3 w-full px-3 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:text-[var(--bg-hover)] ${
-                      activeMenu === item.id ? 'active' : ''
-                    }`}
-                  >
-                    <Icon size={18} />
-                    <span>{item.label}</span>
-                  </NavLink>
-                )
-              })}
-            </div>
-
-            <div className="pt-2 border-t mobile-menu-divider">
-              <button className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
-                <User size={18} />
-                <span>My Account</span>
-              </button>
-              <button className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-[var(--text-primary)] hover:text-[var(--bg-hover)]">
-                <Bell size={18} />
-                <span>Notifications</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   )
 }

@@ -1,4 +1,3 @@
-// src/pages/Cart.jsx
 import { useState, useEffect } from "react";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import {
@@ -8,9 +7,14 @@ import {
 } from "../api/cartApi";
 
 export default function Cart() {
-  const token = localStorage.getItem("token"); // your JWT token
+  const token = localStorage.getItem("token");
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Dispatch custom event to update navbar
+  const dispatchCartUpdate = () => {
+    window.dispatchEvent(new Event('cartUpdated'));
+  };
 
   // Fetch cart from backend
   useEffect(() => {
@@ -19,13 +23,17 @@ export default function Cart() {
       try {
         const cart = await fetchCart(token);
 
-        // 🔹 Normalize cart items (use qty from backend)
+        // Normalize cart items (use qty from backend)
         const normalizedItems = (cart.items || []).map((item) => ({
           ...item,
           quantity: item.qty && item.qty > 0 ? item.qty : 1,
         }));
 
         setCartItems(normalizedItems);
+        
+        // Update localStorage for navbar sync
+        localStorage.setItem('cart', JSON.stringify(normalizedItems));
+        dispatchCartUpdate();
       } catch (err) {
         console.error("Failed to fetch cart:", err);
       }
@@ -39,14 +47,19 @@ export default function Cart() {
     const item = cartItems.find((i) => i._id === id);
     if (!item) return;
 
-    const updatedCart = await updateCartItemApi(item._id, item.quantity + 1, token);
-
-    setCartItems(
-      (updatedCart.items || []).map((i) => ({
+    try {
+      const updatedCart = await updateCartItemApi(item._id, item.quantity + 1, token);
+      const normalizedItems = (updatedCart.items || []).map((i) => ({
         ...i,
         quantity: i.qty && i.qty > 0 ? i.qty : 1,
-      }))
-    );
+      }));
+      
+      setCartItems(normalizedItems);
+      localStorage.setItem('cart', JSON.stringify(normalizedItems));
+      dispatchCartUpdate();
+    } catch (err) {
+      console.error("Failed to increase quantity:", err);
+    }
   };
 
   // Decrease quantity
@@ -54,33 +67,39 @@ export default function Cart() {
     const item = cartItems.find((i) => i._id === id);
     if (!item || item.quantity <= 1) return;
 
-    const updatedCart = await updateCartItemApi(item._id, item.quantity - 1, token);
-
-    setCartItems(
-      (updatedCart.items || []).map((i) => ({
+    try {
+      const updatedCart = await updateCartItemApi(item._id, item.quantity - 1, token);
+      const normalizedItems = (updatedCart.items || []).map((i) => ({
         ...i,
         quantity: i.qty && i.qty > 0 ? i.qty : 1,
-      }))
-    );
+      }));
+      
+      setCartItems(normalizedItems);
+      localStorage.setItem('cart', JSON.stringify(normalizedItems));
+      dispatchCartUpdate();
+    } catch (err) {
+      console.error("Failed to decrease quantity:", err);
+    }
   };
 
   // Remove item
-  const removeItem = async (itemId) => { // ✅ use cart item _id
+  const removeItem = async (itemId) => {
     try {
       const updatedCart = await removeCartItemApi(itemId, token);
-
-      setCartItems(
-        (updatedCart.items || []).map((i) => ({
-          ...i,
-          quantity: i.qty && i.qty > 0 ? i.qty : 1,
-        }))
-      );
+      const normalizedItems = (updatedCart.items || []).map((i) => ({
+        ...i,
+        quantity: i.qty && i.qty > 0 ? i.qty : 1,
+      }));
+      
+      setCartItems(normalizedItems);
+      localStorage.setItem('cart', JSON.stringify(normalizedItems));
+      dispatchCartUpdate();
     } catch (err) {
       console.error("Failed to remove item:", err);
     }
   };
 
-  // 🔹 Correct subtotal calculation
+  // Correct subtotal calculation
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * (item.quantity || 1),
     0
@@ -151,7 +170,7 @@ export default function Cart() {
 
                   {/* Remove */}
                   <button
-                    onClick={() => removeItem(item._id)} // ✅ send cart item _id
+                    onClick={() => removeItem(item._id)}
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                   >
                     <Trash2 className="w-5 h-5" />
