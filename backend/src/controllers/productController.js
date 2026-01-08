@@ -16,3 +16,15 @@ export const getProductById = async (req, res) => {
 
   res.json(products);
 };
+
+export const getFlashSaleProducts = async (req, res) => {
+  try {
+    const products = await Product.find({
+      discount: { $gt: 0 }
+    }).limit(10);
+
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch flash sale products" });
+  }
+};

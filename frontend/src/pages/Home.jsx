@@ -53,21 +53,35 @@ export default function Hero() {
     fetchCategories();
   }, []);
 
-  const flashSaleProducts = [
-    { name: "Wireless Earbuds", price: 499, oldPrice: 699, discount: 29, rating: 4.5 },
-    { name: "Smart Watch Pro", price: 899, oldPrice: 1299, discount: 31, rating: 4.8 },
-    { name: "Phone Case Set", price: 299, oldPrice: 499, discount: 40, rating: 4.3 },
-    { name: "USB-C Cable", price: 199, oldPrice: 299, discount: 33, rating: 4.6 },
-    { name: "Power Bank 20K", price: 799, oldPrice: 999, discount: 20, rating: 4.7 },
-  ];
+  const [flashSaleProducts, setFlashSaleProducts] = useState([]);
 
-  const vendors = [
-    { name: "TechZone", rating: 4.9, products: 245 },
-    { name: "Fashion Hub", rating: 4.7, products: 189 },
-    { name: "BeautyMart", rating: 4.8, products: 312 },
-    { name: "GadgetStore", rating: 4.6, products: 456 },
-    { name: "HomeEssentials", rating: 4.9, products: 198 },
-  ];
+  useEffect(() => {
+    const fetchFlashSaleProducts = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/products/flash-sale");
+        setFlashSaleProducts(res.data);
+      } catch (err) {
+        console.error("Failed to fetch flash sale products:", err);
+      }
+    };
+    fetchFlashSaleProducts();
+  }, []);
+
+
+  const [vendors, setVendors] = useState([]);
+
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/vendors");
+        setVendors(res.data);
+      } catch (err) {
+        console.error("Failed to fetch vendors:", err);
+      }
+    };
+    fetchVendors();
+  }, []);
+
 
   const SLIDE_DURATION = 5000;
 
@@ -257,7 +271,11 @@ export default function Hero() {
                 className="group bg-white rounded-2xl shadow-md hover:shadow-2xl p-5 cursor-pointer transform transition-all duration-300 hover:-translate-y-2 border border-gray-100"
               >
                 <div className="relative w-full h-44 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-4 flex items-center justify-center text-6xl overflow-hidden">
-                  <span className="group-hover:scale-110 transition-transform duration-300">🛍️</span>
+                  <img
+                    src={product.images?.[0]}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     -{product.discount}%
                   </div>
