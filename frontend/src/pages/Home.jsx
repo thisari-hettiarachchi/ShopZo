@@ -37,7 +37,23 @@ export default function Hero() {
     },
   ];
 
-  const SLIDE_DURATION = 5000; 
+  // Categories with emojis/icons
+  const categories = [
+    { name: "Electronic Devices", icon: "💻" },
+    { name: "Electronic Accessories", icon: "🔌" },
+    { name: "Babies & Toys", icon: "🧸" },
+    { name: "Groceries & Pets", icon: "🛒" },
+    { name: "TV & Home Appliances", icon: "📺" },
+    { name: "Health & Beauty", icon: "💄" },
+    { name: "Women's Fashion", icon: "👗" },
+    { name: "Men's Fashion", icon: "👔" },
+    { name: "Home & Lifestyle", icon: "🏡" },
+    { name: "Automotive & Motorbike", icon: "🏎️" },
+    { name: "Watches & Accessories", icon: "⌚" },
+    { name: "Sports & Outdoor", icon: "🏀" },
+  ];
+
+  const SLIDE_DURATION = 5000;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -82,85 +98,114 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative w-full h-screen flex justify-start overflow-hidden mt-[-70px]"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
-      {/* Background Carousel */}
-      <AnimatePresence mode="wait">
+    <>
+      {/* HERO SECTION */}
+      <section
+        className="relative w-full h-screen flex justify-start overflow-hidden mt-[-70px]"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {/* Background Carousel */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            className="absolute inset-0 bg-cover bg-center -z-20"
+            style={{ backgroundImage: `url(${bgImages[currentIndex]})` }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+          />
+        </AnimatePresence>
+
+        {/* Arrows */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-6 top-1/2 -translate-y-1/2 z-40 bg-black/40 hover:bg-black/60 p-3 rounded-full text-white"
+        >
+          <ChevronLeft size={28} />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-40 bg-black/40 hover:bg-black/60 p-3 rounded-full text-white"
+        >
+          <ChevronRight size={28} />
+        </button>
+
+        {/* Content */}
         <motion.div
-          key={currentIndex}
-          className="absolute inset-0 bg-cover bg-center -z-20"
-          style={{ backgroundImage: `url(${bgImages[currentIndex]})` }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1 }}
-        />
-      </AnimatePresence>
+          className="container mx-auto px-10 lg:px-20 flex flex-col lg:flex-row items-center justify-between text-white"
+        >
+          {/* Left */}
+          <div className="flex-1 space-y-8 text-center lg:text-left">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.6 }}
+              >
+                <h1 className="text-4xl lg:text-6xl font-bold mb-6">
+                  {heroText[currentIndex].title}
+                </h1>
+                <p className="text-lg lg:text-xl max-w-xl text-white/90">
+                  {heroText[currentIndex].description}
+                </p>
+              </motion.div>
+            </AnimatePresence>
 
-      {/* Arrows */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-6 top-1/2 -translate-y-1/2 z-40 bg-black/40 hover:bg-black/60 p-3 rounded-full text-white"
-      >
-        <ChevronLeft size={28} />
-      </button>
+            <div className="relative inline-block p-0.5 rounded-full overflow-hidden hover:scale-105 transition duration-300 active:scale-100 before:content-[''] before:absolute before:inset-0 before:bg-[conic-gradient(from_0deg,_#FFFFFF,_#FFFFFF,_#FFFFFF)] button-wrapper">
+              <button className="relative z-10 bg-[var(--color-primary)] text-white rounded-full px-8 py-3 font-medium text-sm">
+                Shop Now
+              </button>
+            </div>
+          </div>
 
-      <button
-        onClick={nextSlide}
-        className="absolute right-6 top-1/2 -translate-y-1/2 z-40 bg-black/40 hover:bg-black/60 p-3 rounded-full text-white"
-      >
-        <ChevronRight size={28} />
-      </button>
+          {/* Right Image */}
+          <div className="flex-1 flex justify-center lg:justify-end mt-[100px]">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={currentIndex}
+                src={rightImages[currentIndex]}
+                alt="Featured"
+                className="w-full lg:w-[550px] rounded-lg"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.8 }}
+              />
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      </section>
 
-      {/* Content */}
-      <motion.div
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="container mx-auto px-10 lg:px-20 flex flex-col lg:flex-row items-center justify-between text-white"
-      >
-        {/* Left */}
-        <div className="flex-1 space-y-8 text-center lg:text-left">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentIndex}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-                {heroText[currentIndex].title}
-              </h1>
-              <p className="text-lg lg:text-xl max-w-xl text-white/90">
-                {heroText[currentIndex].description}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+      {/* CATEGORIES SECTION */}
+      <section className="bg-[var(--bg-main)] py-10">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-[var(--text-primary)]">
+            Shop by Categories
+          </h2>
 
-          <div className="relative inline-block p-0.5 rounded-full overflow-hidden hover:scale-105 transition duration-300 active:scale-100 before:content-[''] before:absolute before:inset-0 before:bg-[conic-gradient(from_0deg,_#FFFFFF,_#FFFFFF,_#FFFFFF)] button-wrapper">
-              <button className="relative z-10 bg-[var(--color-primary)] text-white rounded-full px-8 py-3 font-medium text-sm">Shop Now</button>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {categories.map((cat, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center justify-center w-full h-40 bg-[var(--bg-card)] dark:bg-[var(--bg-muted)] rounded-3xl shadow-lg p-4 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:bg-gradient-to-br hover:from-[var(--color-primary)] hover:to-[var(--color-secondary)]"
+              >
+                <div className="text-4xl mb-2">{cat.icon}</div>
+                <span className="text-sm md:text-base font-semibold text-[var(--text-primary)] dark:text-[var(--text-secondary)] text-center">
+                  {cat.name}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* Right Image */}
-        <div className="flex-1 flex justify-center lg:justify-end  mt-[100px]">
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={currentIndex}
-              src={rightImages[currentIndex]}
-              alt="Featured"
-              className="w-full lg:w-[550px] rounded-lg"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.8 }}
-            />
-          </AnimatePresence>
-        </div>
-      </motion.div>
-    </section>
+    </>
   );
 }
