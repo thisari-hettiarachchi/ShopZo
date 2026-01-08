@@ -50,7 +50,6 @@ export default function ProfileDashboard() {
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "var(--bg-main)" }}>
-      {/* Sidebar */}
       <aside className="w-64 p-6 bg-var(--bg-card) shadow-2xl" style={{ boxShadow: "0 10px 40px var(--shadow)" }}>
         {menu.map((section) => (
           <div key={section.title} className="mb-6">
