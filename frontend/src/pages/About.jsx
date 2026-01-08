@@ -82,13 +82,10 @@ export default function AboutUs() {
           style={{ backgroundImage: `url(${Assets.about})` }}
         />
 
-        {/* Light yellow overlay */}
         <div className="absolute inset-0 bg-yellow-200/25" />
 
-        {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/50" />
 
-        {/* Brand gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/20 via-[var(--color-secondary)]/20 to-[var(--color-accent)]/20" />
 
         <div className="relative z-10 max-w-5xl mx-auto text-center">
@@ -251,7 +248,6 @@ export default function AboutUs() {
 
       {/* Vision & Mission Section */}
       <div className="relative overflow-hidden bg-[var(--bg-main)] py-28 px-6">
-        {/* Floating Bubbles */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-10 w-32 h-32 bg-[var(--color-primary)] rounded-full blur-2xl opacity-30 animate-float"></div>
           <div className="absolute top-40 right-20 w-40 h-40 bg-[var(--color-secondary)] rounded-full blur-2xl opacity-30 animate-float-delayed"></div>
@@ -281,7 +277,6 @@ export default function AboutUs() {
               }`}
             >
               <div className="grid md:grid-cols-2 gap-0">
-                {/* Image Side */}
                 <div className="relative h-80 md:h-auto overflow-hidden">
                   <div 
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
@@ -299,7 +294,6 @@ export default function AboutUs() {
                   </div>
                 </div>
 
-                {/* Content Side */}
                 <div className="p-12">
                   <h3 className="text-4xl font-black mb-6 text-[var(--text-primary)]">Our Vision</h3>
                   <p className="text-[var(--text-secondary)] leading-relaxed text-lg mb-6">
@@ -337,7 +331,6 @@ export default function AboutUs() {
               }`}
             >
               <div className="grid md:grid-cols-2 gap-0">
-                {/* Content Side */}
                 <div className="p-12 order-2 md:order-1">
                   <h3 className="text-4xl font-black mb-6 text-[var(--text-primary)]">Our Mission</h3>
                   <p className="text-[var(--text-secondary)] leading-relaxed text-lg mb-6">
@@ -362,7 +355,6 @@ export default function AboutUs() {
                   </div>
                 </div>
 
-                {/* Image Side */}
                 <div className="relative h-80 md:h-auto overflow-hidden order-1 md:order-2">
                   <div 
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
@@ -383,53 +375,6 @@ export default function AboutUs() {
             </div>
           </div>
         </div>
-
-        <style jsx>{`
-          @keyframes float {
-            0%, 100% {
-              transform: translateY(0) translateX(0);
-            }
-            33% {
-              transform: translateY(-20px) translateX(10px);
-            }
-            66% {
-              transform: translateY(10px) translateX(-10px);
-            }
-          }
-          
-          @keyframes float-delayed {
-            0%, 100% {
-              transform: translateY(0) translateX(0);
-            }
-            33% {
-              transform: translateY(15px) translateX(-15px);
-            }
-            66% {
-              transform: translateY(-10px) translateX(15px);
-            }
-          }
-          
-          @keyframes float-slow {
-            0%, 100% {
-              transform: translateY(0) translateX(0) scale(1);
-            }
-            50% {
-              transform: translateY(-30px) translateX(20px) scale(1.1);
-            }
-          }
-          
-          .animate-float {
-            animation: float 8s ease-in-out infinite;
-          }
-          
-          .animate-float-delayed {
-            animation: float-delayed 10s ease-in-out infinite;
-          }
-          
-          .animate-float-slow {
-            animation: float-slow 12s ease-in-out infinite;
-          }
-        `}</style>
       </div>
 
       {/* Why Choose Us Section */}
