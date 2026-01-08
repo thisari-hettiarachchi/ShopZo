@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star, TrendingUp, Award } from "lucide-react";
 import Assets from "../assets/assets";
+import axios from "axios";
 
 export default function Hero() {
   const bgImages = [Assets.hero, Assets.hero1, Assets.hero2];
@@ -37,20 +38,20 @@ export default function Hero() {
     },
   ];
 
-  const categories = [
-    { name: "Electronic Devices", icon: "💻", gradient: "from-blue-400 to-blue-600" },
-    { name: "Electronic Accessories", icon: "🔌", gradient: "from-purple-400 to-purple-600" },
-    { name: "Babies & Toys", icon: "🧸", gradient: "from-pink-400 to-pink-600" },
-    { name: "Groceries & Pets", icon: "🛒", gradient: "from-green-400 to-green-600" },
-    { name: "TV & Home Appliances", icon: "📺", gradient: "from-indigo-400 to-indigo-600" },
-    { name: "Health & Beauty", icon: "💄", gradient: "from-rose-400 to-rose-600" },
-    { name: "Women's Fashion", icon: "👗", gradient: "from-fuchsia-400 to-fuchsia-600" },
-    { name: "Men's Fashion", icon: "👔", gradient: "from-cyan-400 to-cyan-600" },
-    { name: "Home & Lifestyle", icon: "🏡", gradient: "from-amber-400 to-amber-600" },
-    { name: "Automotive & Motorbike", icon: "🏎️", gradient: "from-red-400 to-red-600" },
-    { name: "Watches & Accessories", icon: "⌚", gradient: "from-yellow-400 to-yellow-600" },
-    { name: "Sports & Outdoor", icon: "🏀", gradient: "from-teal-400 to-teal-600" },
-  ];
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/categories");
+        setCategories(res.data);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const flashSaleProducts = [
     { name: "Wireless Earbuds", price: 499, oldPrice: 699, discount: 29, rating: 4.5 },
@@ -211,9 +212,9 @@ export default function Hero() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {categories.map((cat, index) => (
+            {categories.map((cat) => (
               <div
-                key={index}
+                key={cat._id}
                 className="group relative overflow-hidden flex flex-col items-center justify-center h-44 bg-white rounded-2xl shadow-md hover:shadow-2xl p-4 cursor-pointer transform transition-all duration-300 hover:-translate-y-2 border border-gray-100"
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
