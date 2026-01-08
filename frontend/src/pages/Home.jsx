@@ -206,6 +206,43 @@ export default function Hero() {
         </div>
       </section>
 
+
+      {/* FLASH SALE SECTION */}
+      <section className="bg-[var(--bg-main)] py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl md:text-3xl font-semibold text-[var(--text-primary)]">
+              Flash Sale
+            </h2>
+            <button className="text-sm md:text-base font-medium text-[var(--color-primary)] hover:underline">
+              Shop All
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="bg-[var(--bg-card)] dark:bg-[var(--bg-muted)] rounded-2xl shadow-lg p-4 cursor-pointer transform transition-all duration-300 hover:scale-105"
+              >
+                <div className="w-full h-40 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 flex items-center justify-center text-5xl">
+                  🛍️
+                </div>
+                <h3 className="font-semibold text-[var(--text-primary)] dark:text-[var(--text-secondary)] mb-1">
+                  Product Name
+                </h3>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[var(--color-primary)]">Rs. 499</span>
+                  <span className="text-sm text-gray-400 line-through">Rs. 699</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
+
     </>
   );
 }
