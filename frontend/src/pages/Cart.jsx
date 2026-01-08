@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; 
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import {
   fetchCart,
   updateCartItemApi,
   removeCartItemApi,
 } from "../api/cartApi";
+import { useNavigate } from "react-router-dom";
 
 export default function Cart() {
   const token = localStorage.getItem("token");
@@ -16,6 +17,8 @@ export default function Cart() {
     window.dispatchEvent(new Event('cartUpdated'));
   };
 
+  const navigate = useNavigate();
+  
   // Fetch cart from backend
   useEffect(() => {
     const getCart = async () => {
@@ -126,57 +129,59 @@ export default function Cart() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
-              {cartItems.map((item) => (
-                <div
-                  key={item._id}
-                  className="flex gap-4 p-4 rounded-2xl bg-[var(--bg-card)] shadow"
-                >
-                  <img
-                    src={item.product.image}
-                    alt={item.product.name}
-                    className="w-24 h-24 object-contain rounded-lg bg-[var(--bg-muted)]"
-                  />
-
-                  <div className="flex-1 space-y-2">
-                    <h3 className="font-semibold text-[var(--text-primary)]">
-                      {item.product.name}
-                    </h3>
-
-                    <p className="font-bold text-[var(--color-primary)]">
-                      Rs. {item.price}
-                    </p>
-
-                    {/* Quantity */}
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => decreaseQty(item._id)}
-                        className="p-2 rounded-lg border hover:bg-[var(--bg-muted)]"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-
-                      <span className="min-w-[24px] text-center">
-                        {item.quantity || 1}
-                      </span>
-
-                      <button
-                        onClick={() => increaseQty(item._id)}
-                        className="p-2 rounded-lg border hover:bg-[var(--bg-muted)]"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Remove */}
-                  <button
-                    onClick={() => removeItem(item._id)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+              {cartItems.map((item) =>
+                item.product ? (  // <-- check if product exists
+                  <div
+                    key={item._id}
+                    className="flex gap-4 p-4 rounded-2xl bg-[var(--bg-card)] shadow"
                   >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              ))}
+                    <img
+                      src={item.product.image || "/placeholder.png"} // fallback image
+                      alt={item.product.name || "Product"}
+                      className="w-24 h-24 object-contain rounded-lg bg-[var(--bg-muted)]"
+                    />
+
+                    <div className="flex-1 space-y-2">
+                      <h3 className="font-semibold text-[var(--text-primary)]">
+                        {item.product.name}
+                      </h3>
+
+                      <p className="font-bold text-[var(--color-primary)]">
+                        Rs. {item.price}
+                      </p>
+
+                      {/* Quantity */}
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => decreaseQty(item._id)}
+                          className="p-2 rounded-lg border hover:bg-[var(--bg-muted)]"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+
+                        <span className="min-w-[24px] text-center">
+                          {item.quantity || 1}
+                        </span>
+
+                        <button
+                          onClick={() => increaseQty(item._id)}
+                          className="p-2 rounded-lg border hover:bg-[var(--bg-muted)]"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Remove */}
+                    <button
+                      onClick={() => removeItem(item._id)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                ) : null
+              )}
             </div>
 
             {/* Order Summary */}
