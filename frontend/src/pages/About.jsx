@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Store, Users, ShieldCheck, TrendingUp, Heart, Award, Package, Globe, ArrowRight, Sparkles } from 'lucide-react';
+import Assets from "../assets/assets";
 
 function CountUp({ end, duration = 2000, suffix = '' }) {
   const [count, setCount] = useState(0);
@@ -43,78 +44,71 @@ export default function AboutUs() {
   const [hoveredTeam, setHoveredTeam] = useState(null);
 
   const stats = [
-    { label: 'Active Vendors', value: 10000, suffix: '+', icon: Store, color: 'text-yellow-500' },
-    { label: 'Happy Customers', value: 500, suffix: 'K+', icon: Users, color: 'text-orange-400' },
-    { label: 'Products Listed', value: 1, suffix: 'M+', icon: Package, color: 'text-yellow-400' },
-    { label: 'Countries Served', value: 50, suffix: '+', icon: Globe, color: 'text-yellow-500' }
+    { label: 'Active Vendors', value: 10000, suffix: '+', icon: Store },
+    { label: 'Happy Customers', value: 500, suffix: 'K+', icon: Users },
+    { label: 'Products Listed', value: 1, suffix: 'M+', icon: Package },
+    { label: 'Countries Served', value: 50, suffix: '+', icon: Globe }
   ];
 
   const values = [
     { 
       icon: ShieldCheck, 
       title: 'Trust & Security', 
-      description: 'We prioritize secure transactions and protect both buyers and sellers with advanced verification systems.',
-      gradient: 'bg-gradient-to-br from-yellow-500 to-orange-400'
+      description: 'We prioritize secure transactions and protect both buyers and sellers with advanced verification systems.'
     },
     { 
       icon: Heart, 
       title: 'Customer First', 
-      description: 'Every decision we make is centered around creating the best experience for our community.',
-      gradient: 'bg-gradient-to-br from-orange-400 to-yellow-400'
+      description: 'Every decision we make is centered around creating the best experience for our community.'
     },
     { 
       icon: TrendingUp, 
       title: 'Growth & Innovation', 
-      description: 'We constantly evolve our platform with cutting-edge features to help vendors thrive.',
-      gradient: 'bg-gradient-to-br from-yellow-400 to-yellow-500'
+      description: 'We constantly evolve our platform with cutting-edge features to help vendors thrive.'
     },
     { 
       icon: Award, 
       title: 'Quality Assurance', 
-      description: 'We maintain high standards through rigorous vendor vetting and product quality checks.',
-      gradient: 'bg-gradient-to-br from-yellow-500 to-amber-400'
+      description: 'We maintain high standards through rigorous vendor vetting and product quality checks.'
     }
   ];
 
-  const team = [
-    { name: 'Sarah Johnson', role: 'CEO & Founder', initial: 'SJ', color: 'from-yellow-400 to-orange-500' },
-    { name: 'Michael Chen', role: 'CTO', initial: 'MC', color: 'from-orange-400 to-yellow-500' },
-    { name: 'Emily Rodriguez', role: 'Head of Vendor Relations', initial: 'ER', color: 'from-yellow-500 to-amber-400' },
-    { name: 'David Kim', role: 'Head of Operations', initial: 'DK', color: 'from-amber-400 to-yellow-400' }
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-amber-50">
-      {/* Hero Section with Image */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-32 px-6">
-        <div 
-          className="absolute inset-0 opacity-30 bg-cover bg-center"
-          style={{
-            backgroundImage: 'url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920")',
-            backgroundBlendMode: 'overlay'
-          }}
+    <div className="min-h-screen bg-[var(--bg-main)]">
+      {/* HERO SECTION */}
+      <div className="relative overflow-hidden py-32 px-6 mt-[-70px]">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${Assets.about})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-600/20 via-orange-600/20 to-amber-600/20"></div>
-        
-        {/* Animated background elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-orange-500 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
-        </div>
-        
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg text-white px-6 py-3 rounded-full mb-8 shadow-2xl border border-white/20">
-            <Sparkles className="w-5 h-5 text-yellow-300" />
+
+        {/* Light yellow overlay */}
+        <div className="absolute inset-0 bg-yellow-200/25" />
+
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/50" />
+
+        {/* Brand gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/20 via-[var(--color-secondary)]/20 to-[var(--color-accent)]/20" />
+
+        <div className="relative z-10 max-w-5xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg text-white px-6 py-3 rounded-full mb-8 border border-white/20">
+            <Sparkles className="w-5 h-5" />
             <span className="font-semibold">Trusted by thousands worldwide</span>
           </div>
-          <h1 className="text-6xl md:text-7xl font-black mb-8 text-white drop-shadow-2xl tracking-tight">
+
+          <h1 className="text-6xl md:text-7xl font-black mb-8 text-white">
             About Our Marketplace
           </h1>
-          <p className="text-2xl text-white/95 leading-relaxed max-w-3xl mx-auto font-light">
-            Connecting vendors and customers worldwide through a trusted, innovative platform built on transparency and excellence.
+
+          <p className="text-2xl text-white/90 max-w-3xl mx-auto">
+            Connecting vendors and customers worldwide through a trusted,
+            innovative platform built on transparency and excellence.
           </p>
         </div>
       </div>
+
+
 
       {/* Stats Section */}
       <div className="max-w-7xl mx-auto px-6 -mt-20 relative z-20">
@@ -124,23 +118,23 @@ export default function AboutUs() {
               key={idx}
               onMouseEnter={() => setHoveredStat(idx)}
               onMouseLeave={() => setHoveredStat(null)}
-              className={`relative p-8 rounded-2xl text-center transition-all duration-500 ease-out cursor-pointer group overflow-hidden ${
+              className={`relative p-8 rounded-2xl text-center transition-all duration-500 ease-out cursor-pointer group overflow-hidden bg-[var(--bg-card)] ${
                 hoveredStat === idx 
-                  ? 'shadow-2xl -translate-y-3 scale-105 bg-white border-2 border-yellow-400' 
-                  : 'shadow-xl bg-white border-2 border-transparent hover:shadow-2xl'
+                  ? 'shadow-2xl -translate-y-3 scale-105 border-2 border-[var(--color-primary)]' 
+                  : 'shadow-xl border-2 border-transparent hover:shadow-2xl'
               }`}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br from-yellow-400 via-orange-400 to-amber-500 opacity-0 transition-opacity duration-500 ${hoveredStat === idx ? 'opacity-10' : ''}`}></div>
+              <div className={`absolute inset-0 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)] opacity-0 transition-opacity duration-500 ${hoveredStat === idx ? 'opacity-10' : ''}`}></div>
               
               <stat.icon 
-                className={`w-14 h-14 mx-auto mb-5 transition-all duration-500 ${stat.color} ${
+                className={`w-14 h-14 mx-auto mb-5 transition-all duration-500 text-[var(--color-primary)] ${
                   hoveredStat === idx ? 'scale-125 rotate-12 drop-shadow-lg' : 'group-hover:scale-110'
                 }`} 
               />
-              <div className="text-5xl font-black mb-3 bg-gradient-to-r from-yellow-600 via-orange-500 to-amber-600 bg-clip-text text-transparent">
+              <div className="text-5xl font-black mb-3 text-[var(--color-primary)]">
                 <CountUp end={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="text-sm font-bold text-gray-600 uppercase tracking-wider">{stat.label}</div>
+              <div className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-wider">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -151,13 +145,13 @@ export default function AboutUs() {
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <div className="space-y-6">
             <div className="inline-block">
-              <span className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-4 block">Our Journey</span>
-              <h2 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-yellow-600 via-orange-500 to-amber-600 bg-clip-text text-transparent leading-tight">
+              <span className="text-sm font-bold text-[var(--color-secondary)] uppercase tracking-widest mb-4 block">Our Journey</span>
+              <h2 className="text-5xl md:text-6xl font-black text-[var(--color-primary)] leading-tight">
                 Our Story
               </h2>
             </div>
-            <div className="space-y-5 text-lg text-gray-700 leading-relaxed">
-              <p className="text-xl font-semibold text-gray-800">
+            <div className="space-y-5 text-lg text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-xl font-semibold text-[var(--text-primary)]">
                 Founded in 2020, our platform was born from a simple vision: to create a marketplace where vendors of all sizes could thrive and customers could discover unique products from around the world.
               </p>
               <p>
@@ -168,44 +162,44 @@ export default function AboutUs() {
               </p>
             </div>
             <div className="flex gap-4 pt-4">
-              <div className="flex-1 p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200">
-                <div className="text-3xl font-black text-orange-600">2020</div>
-                <div className="text-sm text-gray-600 font-medium">Founded</div>
+              <div className="flex-1 p-4 bg-[var(--bg-muted)] rounded-xl border-2 border-[var(--border)]">
+                <div className="text-3xl font-black text-[var(--color-secondary)]">2020</div>
+                <div className="text-sm text-[var(--text-secondary)] font-medium">Founded</div>
               </div>
-              <div className="flex-1 p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border-2 border-orange-200">
-                <div className="text-3xl font-black text-yellow-600">500K+</div>
-                <div className="text-sm text-gray-600 font-medium">Customers</div>
+              <div className="flex-1 p-4 bg-[var(--bg-muted)] rounded-xl border-2 border-[var(--border)]">
+                <div className="text-3xl font-black text-[var(--color-primary)]">500K+</div>
+                <div className="text-sm text-[var(--text-secondary)] font-medium">Customers</div>
               </div>
-              <div className="flex-1 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl border-2 border-amber-200">
-                <div className="text-3xl font-black text-amber-600">50+</div>
-                <div className="text-sm text-gray-600 font-medium">Countries</div>
+              <div className="flex-1 p-4 bg-[var(--bg-muted)] rounded-xl border-2 border-[var(--border)]">
+                <div className="text-3xl font-black text-[var(--color-accent)]">50+</div>
+                <div className="text-sm text-[var(--text-secondary)] font-medium">Countries</div>
               </div>
             </div>
           </div>
           
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl transform rotate-3 opacity-20"></div>
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-amber-500 rounded-3xl transform -rotate-3 opacity-20"></div>
-            <div className="relative bg-gradient-to-br from-white to-amber-50 p-12 rounded-3xl shadow-2xl border-4 border-white">
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-3xl transform rotate-3 opacity-20"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-secondary)] to-[var(--color-accent)] rounded-3xl transform -rotate-3 opacity-20"></div>
+            <div className="relative bg-[var(--bg-card)] p-12 rounded-3xl shadow-2xl border-4 border-[var(--border)]">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 via-orange-500 to-amber-500 rounded-full mb-6 shadow-2xl">
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)] rounded-full mb-6 shadow-2xl">
                   <Heart className="w-12 h-12 text-white" fill="white" />
                 </div>
-                <h3 className="text-3xl font-black text-gray-800 mb-4">Building Trust Daily</h3>
-                <p className="text-gray-700 text-lg font-medium">Every transaction strengthens our community</p>
-                <div className="mt-8 pt-8 border-t-2 border-gray-200">
+                <h3 className="text-3xl font-black text-[var(--text-primary)] mb-4">Building Trust Daily</h3>
+                <p className="text-[var(--text-secondary)] text-lg font-medium">Every transaction strengthens our community</p>
+                <div className="mt-8 pt-8 border-t-2 border-[var(--border)]">
                   <div className="flex justify-around">
                     <div>
-                      <div className="text-2xl font-black text-orange-600">4.9★</div>
-                      <div className="text-xs text-gray-600">Rating</div>
+                      <div className="text-2xl font-black text-[var(--color-secondary)]">4.9★</div>
+                      <div className="text-xs text-[var(--text-muted)]">Rating</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-black text-yellow-600">99%</div>
-                      <div className="text-xs text-gray-600">Satisfaction</div>
+                      <div className="text-2xl font-black text-[var(--color-primary)]">99%</div>
+                      <div className="text-xs text-[var(--text-muted)]">Satisfaction</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-black text-amber-600">24/7</div>
-                      <div className="text-xs text-gray-600">Support</div>
+                      <div className="text-2xl font-black text-[var(--color-accent)]">24/7</div>
+                      <div className="text-xs text-[var(--text-muted)]">Support</div>
                     </div>
                   </div>
                 </div>
@@ -216,14 +210,14 @@ export default function AboutUs() {
       </div>
 
       {/* Values Section */}
-      <div className="bg-gradient-to-b from-white via-amber-50 to-yellow-50 py-28 px-6">
+      <div className="bg-[var(--bg-muted)] py-28 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <span className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-4 block">What Drives Us</span>
-            <h2 className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-yellow-600 via-orange-500 to-amber-600 bg-clip-text text-transparent">
+            <span className="text-sm font-bold text-[var(--color-secondary)] uppercase tracking-widest mb-4 block">What Drives Us</span>
+            <h2 className="text-5xl md:text-6xl font-black mb-6 text-[var(--color-primary)]">
               Our Core Values
             </h2>
-            <p className="text-gray-600 text-xl max-w-2xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-xl max-w-2xl mx-auto">
               The principles that guide every decision we make
             </p>
           </div>
@@ -234,20 +228,20 @@ export default function AboutUs() {
                 key={idx}
                 onMouseEnter={() => setHoveredValue(idx)}
                 onMouseLeave={() => setHoveredValue(null)}
-                className={`relative p-10 rounded-3xl border-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden bg-white group ${
-                  hoveredValue === idx ? 'shadow-2xl -translate-y-2 border-yellow-400 scale-[1.02]' : 'shadow-lg border-gray-100 hover:shadow-xl'
+                className={`relative p-10 rounded-3xl border-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden bg-[var(--bg-card)] group ${
+                  hoveredValue === idx ? 'shadow-2xl -translate-y-2 border-[var(--color-primary)] scale-[1.02]' : 'shadow-lg border-[var(--border)] hover:shadow-xl'
                 }`}
               >
-                <div className={`absolute inset-0 ${value.gradient} opacity-0 transition-opacity duration-500 ${hoveredValue === idx ? 'opacity-10' : ''}`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] opacity-0 transition-opacity duration-500 ${hoveredValue === idx ? 'opacity-10' : ''}`}></div>
                 
                 <div className="relative z-10">
-                  <div className={`inline-flex items-center justify-center w-16 h-16 ${value.gradient} rounded-2xl mb-6 shadow-lg transition-all duration-500 ${
+                  <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl mb-6 shadow-lg transition-all duration-500 ${
                     hoveredValue === idx ? 'scale-110 rotate-6' : 'group-hover:scale-105'
                   }`}>
                     <value.icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-black mb-4 text-gray-800">{value.title}</h3>
-                  <p className="text-gray-600 leading-relaxed text-lg">{value.description}</p>
+                  <h3 className="text-2xl font-black mb-4 text-[var(--text-primary)]">{value.title}</h3>
+                  <p className="text-[var(--text-secondary)] leading-relaxed text-lg">{value.description}</p>
                 </div>
               </div>
             ))}
@@ -256,23 +250,23 @@ export default function AboutUs() {
       </div>
 
       {/* Vision & Mission Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 py-28 px-6">
+      <div className="relative overflow-hidden bg-[var(--bg-main)] py-28 px-6">
         {/* Floating Bubbles */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-yellow-300 rounded-full blur-2xl opacity-30 animate-float"></div>
-          <div className="absolute top-40 right-20 w-40 h-40 bg-orange-300 rounded-full blur-2xl opacity-30 animate-float-delayed"></div>
-          <div className="absolute bottom-32 left-1/4 w-36 h-36 bg-amber-300 rounded-full blur-2xl opacity-30 animate-float-slow"></div>
-          <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-yellow-400 rounded-full blur-2xl opacity-30 animate-float"></div>
-          <div className="absolute top-1/2 left-1/2 w-44 h-44 bg-orange-200 rounded-full blur-3xl opacity-20 animate-float-delayed"></div>
+          <div className="absolute top-20 left-10 w-32 h-32 bg-[var(--color-primary)] rounded-full blur-2xl opacity-30 animate-float"></div>
+          <div className="absolute top-40 right-20 w-40 h-40 bg-[var(--color-secondary)] rounded-full blur-2xl opacity-30 animate-float-delayed"></div>
+          <div className="absolute bottom-32 left-1/4 w-36 h-36 bg-[var(--color-accent)] rounded-full blur-2xl opacity-30 animate-float-slow"></div>
+          <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-[var(--color-primary)] rounded-full blur-2xl opacity-30 animate-float"></div>
+          <div className="absolute top-1/2 left-1/2 w-44 h-44 bg-[var(--color-secondary)] rounded-full blur-3xl opacity-20 animate-float-delayed"></div>
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-20">
-            <span className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-4 block">Our Direction</span>
-            <h2 className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-yellow-600 via-orange-500 to-amber-600 bg-clip-text text-transparent">
+            <span className="text-sm font-bold text-[var(--color-secondary)] uppercase tracking-widest mb-4 block">Our Direction</span>
+            <h2 className="text-5xl md:text-6xl font-black mb-6 text-[var(--color-primary)]">
               Vision & Mission
             </h2>
-            <p className="text-gray-700 text-xl max-w-2xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-xl max-w-2xl mx-auto">
               Guiding principles that drive our innovation and commitment
             </p>
           </div>
@@ -282,8 +276,8 @@ export default function AboutUs() {
             <div
               onMouseEnter={() => setHoveredTeam(0)}
               onMouseLeave={() => setHoveredTeam(null)}
-              className={`relative rounded-3xl bg-white border-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden group ${
-                hoveredTeam === 0 ? 'shadow-2xl -translate-y-2 border-yellow-400' : 'shadow-lg border-yellow-100 hover:shadow-xl'
+              className={`relative rounded-3xl bg-[var(--bg-card)] border-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden group ${
+                hoveredTeam === 0 ? 'shadow-2xl -translate-y-2 border-[var(--color-primary)]' : 'shadow-lg border-[var(--border)] hover:shadow-xl'
               }`}
             >
               <div className="grid md:grid-cols-2 gap-0">
@@ -295,37 +289,37 @@ export default function AboutUs() {
                       backgroundImage: 'url("https://images.unsplash.com/photo-1552664730-d307ca884978?w=800")',
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/80 to-orange-600/80 mix-blend-multiply"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary)]/80 to-[var(--color-secondary)]/80 mix-blend-multiply"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className={`w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 ${
                       hoveredTeam === 0 ? 'scale-110 rotate-12' : 'group-hover:scale-105'
                     }`}>
-                      <Sparkles className="w-12 h-12 text-orange-500" />
+                      <Sparkles className="w-12 h-12 text-[var(--color-secondary)]" />
                     </div>
                   </div>
                 </div>
 
                 {/* Content Side */}
                 <div className="p-12">
-                  <h3 className="text-4xl font-black mb-6 text-gray-800">Our Vision</h3>
-                  <p className="text-gray-600 leading-relaxed text-lg mb-6">
+                  <h3 className="text-4xl font-black mb-6 text-[var(--text-primary)]">Our Vision</h3>
+                  <p className="text-[var(--text-secondary)] leading-relaxed text-lg mb-6">
                     To become the world's most trusted and innovative marketplace, where entrepreneurs and customers connect seamlessly across borders, cultures, and communities.
                   </p>
-                  <p className="text-gray-600 leading-relaxed text-lg">
+                  <p className="text-[var(--text-secondary)] leading-relaxed text-lg">
                     We envision a future where every vendor has the tools to succeed and every customer finds exactly what they're looking for.
                   </p>
                   <div className="mt-8 flex gap-4">
-                    <div className="flex-1 p-4 bg-yellow-50 rounded-xl border-2 border-yellow-200">
-                      <div className="text-2xl font-black text-yellow-600 mb-1">Global</div>
-                      <div className="text-sm text-gray-600">Marketplace</div>
+                    <div className="flex-1 p-4 bg-[var(--bg-muted)] rounded-xl border-2 border-[var(--border)]">
+                      <div className="text-2xl font-black text-[var(--color-primary)] mb-1">Global</div>
+                      <div className="text-sm text-[var(--text-secondary)]">Marketplace</div>
                     </div>
-                    <div className="flex-1 p-4 bg-orange-50 rounded-xl border-2 border-orange-200">
-                      <div className="text-2xl font-black text-orange-600 mb-1">Innovation</div>
-                      <div className="text-sm text-gray-600">Driven</div>
+                    <div className="flex-1 p-4 bg-[var(--bg-muted)] rounded-xl border-2 border-[var(--border)]">
+                      <div className="text-2xl font-black text-[var(--color-secondary)] mb-1">Innovation</div>
+                      <div className="text-sm text-[var(--text-secondary)]">Driven</div>
                     </div>
-                    <div className="flex-1 p-4 bg-amber-50 rounded-xl border-2 border-amber-200">
-                      <div className="text-2xl font-black text-amber-600 mb-1">Trust</div>
-                      <div className="text-sm text-gray-600">First</div>
+                    <div className="flex-1 p-4 bg-[var(--bg-muted)] rounded-xl border-2 border-[var(--border)]">
+                      <div className="text-2xl font-black text-[var(--color-accent)] mb-1">Trust</div>
+                      <div className="text-sm text-[var(--text-secondary)]">First</div>
                     </div>
                   </div>
                 </div>
@@ -338,32 +332,32 @@ export default function AboutUs() {
             <div
               onMouseEnter={() => setHoveredTeam(1)}
               onMouseLeave={() => setHoveredTeam(null)}
-              className={`relative rounded-3xl bg-white border-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden group ${
-                hoveredTeam === 1 ? 'shadow-2xl -translate-y-2 border-orange-400' : 'shadow-lg border-orange-100 hover:shadow-xl'
+              className={`relative rounded-3xl bg-[var(--bg-card)] border-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden group ${
+                hoveredTeam === 1 ? 'shadow-2xl -translate-y-2 border-[var(--color-secondary)]' : 'shadow-lg border-[var(--border)] hover:shadow-xl'
               }`}
             >
               <div className="grid md:grid-cols-2 gap-0">
                 {/* Content Side */}
                 <div className="p-12 order-2 md:order-1">
-                  <h3 className="text-4xl font-black mb-6 text-gray-800">Our Mission</h3>
-                  <p className="text-gray-600 leading-relaxed text-lg mb-6">
+                  <h3 className="text-4xl font-black mb-6 text-[var(--text-primary)]">Our Mission</h3>
+                  <p className="text-[var(--text-secondary)] leading-relaxed text-lg mb-6">
                     To empower vendors with cutting-edge technology and support while providing customers with a secure, diverse shopping experience.
                   </p>
-                  <p className="text-gray-600 leading-relaxed text-lg">
+                  <p className="text-[var(--text-secondary)] leading-relaxed text-lg">
                     We're committed to building a sustainable ecosystem that benefits all stakeholders through transparency, innovation, and exceptional service.
                   </p>
                   <div className="mt-8 space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500"></div>
-                      <span className="text-gray-700 font-medium">Empower entrepreneurs worldwide</span>
+                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-primary)]"></div>
+                      <span className="text-[var(--text-secondary)] font-medium">Empower entrepreneurs worldwide</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500"></div>
-                      <span className="text-gray-700 font-medium">Deliver exceptional customer experiences</span>
+                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-primary)]"></div>
+                      <span className="text-[var(--text-secondary)] font-medium">Deliver exceptional customer experiences</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500"></div>
-                      <span className="text-gray-700 font-medium">Foster sustainable growth and innovation</span>
+                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-primary)]"></div>
+                      <span className="text-[var(--text-secondary)] font-medium">Foster sustainable growth and innovation</span>
                     </div>
                   </div>
                 </div>
@@ -376,12 +370,12 @@ export default function AboutUs() {
                       backgroundImage: 'url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800")',
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-l from-orange-600/80 to-amber-600/80 mix-blend-multiply"></div>
+                  <div className="absolute inset-0 bg-gradient-to-l from-[var(--color-secondary)]/80 to-[var(--color-accent)]/80 mix-blend-multiply"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className={`w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 ${
                       hoveredTeam === 1 ? 'scale-110 rotate-12' : 'group-hover:scale-105'
                     }`}>
-                      <TrendingUp className="w-12 h-12 text-orange-500" />
+                      <TrendingUp className="w-12 h-12 text-[var(--color-secondary)]" />
                     </div>
                   </div>
                 </div>
@@ -439,219 +433,54 @@ export default function AboutUs() {
       </div>
 
       {/* Why Choose Us Section */}
-      <div className="py-28 px-6">
+      <div className="py-28 px-6 bg-[var(--bg-muted)]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
-            <span className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-4 block">What Sets Us Apart</span>
-            <h2 className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-yellow-600 via-orange-500 to-amber-600 bg-clip-text text-transparent">
+            <span className="text-sm font-bold text-[var(--color-secondary)] uppercase tracking-widest mb-4 block">What Sets Us Apart</span>
+            <h2 className="text-5xl md:text-6xl font-black mb-6 text-[var(--color-primary)]">
               Why Choose Us
             </h2>
-            <p className="text-gray-600 text-xl max-w-3xl mx-auto leading-relaxed">
+            <p className="text-[var(--text-secondary)] text-xl max-w-3xl mx-auto leading-relaxed">
               We go beyond being just a marketplace—we're your partner in success with unmatched features and support
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
-              <div className="relative p-10 rounded-3xl bg-white border-2 border-gray-100 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
-                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                  <ShieldCheck className="w-10 h-10 text-white" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              { icon: ShieldCheck, title: 'Advanced Security', desc: 'Bank-level encryption and fraud protection systems keep every transaction safe and secure.', features: ['SSL encryption for all transactions', 'Real-time fraud detection', 'Secure payment gateway'] },
+              { icon: Users, title: '24/7 Support', desc: 'Our dedicated support team is always available to help you succeed and resolve any issues.', features: ['Live chat support', 'Dedicated account managers', 'Multi-language assistance'] },
+              { icon: Globe, title: 'Global Reach', desc: 'Connect with customers and vendors from over 50 countries worldwide.', features: ['International shipping options', 'Multi-currency support', 'Localized marketplace'] },
+              { icon: Package, title: 'Easy Management', desc: 'Intuitive dashboard and tools make selling and buying effortless for everyone.', features: ['Simple product listing', 'Inventory management', 'Analytics & insights'] },
+              { icon: TrendingUp, title: 'Growth Tools', desc: 'Powerful marketing and analytics tools to help vendors scale their business.', features: ['SEO optimization tools', 'Promotional campaigns', 'Performance reports'] },
+              { icon: Award, title: 'Quality Control', desc: 'Rigorous quality checks ensure only the best products and vendors on our platform.', features: ['Vendor verification process', 'Product quality reviews', 'Customer feedback system'] }
+            ].map((item, idx) => (
+              <div key={idx} className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
+                <div className="relative p-10 rounded-3xl bg-[var(--bg-card)] border-2 border-[var(--border)] shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                  <div className="w-20 h-20 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                    <item.icon className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-black mb-4 text-[var(--text-primary)]">{item.title}</h3>
+                  <p className="text-[var(--text-secondary)] leading-relaxed text-lg mb-6">
+                    {item.desc}
+                  </p>
+                  <ul className="space-y-3 text-[var(--text-secondary)]">
+                    {item.features.map((feature, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-secondary)] mt-2 flex-shrink-0"></div>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <h3 className="text-2xl font-black mb-4 text-gray-800">Advanced Security</h3>
-                <p className="text-gray-600 leading-relaxed text-lg mb-6">
-                  Bank-level encryption and fraud protection systems keep every transaction safe and secure.
-                </p>
-                <ul className="space-y-3 text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>SSL encryption for all transactions</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Real-time fraud detection</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Secure payment gateway</span>
-                  </li>
-                </ul>
               </div>
-            </div>
-
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-amber-500 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
-              <div className="relative p-10 rounded-3xl bg-white border-2 border-gray-100 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
-                <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-amber-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                  <Users className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="text-2xl font-black mb-4 text-gray-800">24/7 Support</h3>
-                <p className="text-gray-600 leading-relaxed text-lg mb-6">
-                  Our dedicated support team is always available to help you succeed and resolve any issues.
-                </p>
-                <ul className="space-y-3 text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Live chat support</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Dedicated account managers</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Multi-language assistance</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
-              <div className="relative p-10 rounded-3xl bg-white border-2 border-gray-100 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
-                <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                  <Globe className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="text-2xl font-black mb-4 text-gray-800">Global Reach</h3>
-                <p className="text-gray-600 leading-relaxed text-lg mb-6">
-                  Connect with customers and vendors from over 50 countries worldwide.
-                </p>
-                <ul className="space-y-3 text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>International shipping options</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Multi-currency support</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Localized marketplace</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-orange-400 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
-              <div className="relative p-10 rounded-3xl bg-white border-2 border-gray-100 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
-                <div className="w-20 h-20 bg-gradient-to-br from-yellow-500 to-orange-400 rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                  <Package className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="text-2xl font-black mb-4 text-gray-800">Easy Management</h3>
-                <p className="text-gray-600 leading-relaxed text-lg mb-6">
-                  Intuitive dashboard and tools make selling and buying effortless for everyone.
-                </p>
-                <ul className="space-y-3 text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Simple product listing</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Inventory management</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Analytics & insights</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-yellow-400 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
-              <div className="relative p-10 rounded-3xl bg-white border-2 border-gray-100 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
-                <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-yellow-400 rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                  <TrendingUp className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="text-2xl font-black mb-4 text-gray-800">Growth Tools</h3>
-                <p className="text-gray-600 leading-relaxed text-lg mb-6">
-                  Powerful marketing and analytics tools to help vendors scale their business.
-                </p>
-                <ul className="space-y-3 text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>SEO optimization tools</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Promotional campaigns</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Performance reports</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-500 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
-              <div className="relative p-10 rounded-3xl bg-white border-2 border-gray-100 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
-                <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                  <Award className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="text-2xl font-black mb-4 text-gray-800">Quality Control</h3>
-                <p className="text-gray-600 leading-relaxed text-lg mb-6">
-                  Rigorous quality checks ensure only the best products and vendors on our platform.
-                </p>
-                <ul className="space-y-3 text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Vendor verification process</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Product quality reviews</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
-                    <span>Customer feedback system</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Our Commitment Section */}
-      <div className="max-w-7xl mx-auto px-6 py-28">
-        <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-3xl p-12 md:p-16 border-2 border-yellow-200 shadow-xl">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 via-orange-500 to-amber-500 rounded-full mb-8 shadow-2xl">
-              <Award className="w-12 h-12 text-white" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-6 text-gray-800">Our Commitment to Excellence</h2>
-            <p className="text-xl text-gray-700 leading-relaxed mb-8">
-              We're dedicated to maintaining the highest standards in everything we do. From vendor verification to customer service, quality assurance to platform security—excellence isn't just a goal, it's our standard.
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
-              <div className="p-6 bg-white rounded-2xl shadow-md">
-                <div className="text-3xl font-black text-yellow-600 mb-2">100%</div>
-                <div className="text-sm text-gray-600 font-semibold">Verified Vendors</div>
-              </div>
-              <div className="p-6 bg-white rounded-2xl shadow-md">
-                <div className="text-3xl font-black text-orange-600 mb-2">A+</div>
-                <div className="text-sm text-gray-600 font-semibold">Security Rating</div>
-              </div>
-              <div className="p-6 bg-white rounded-2xl shadow-md">
-                <div className="text-3xl font-black text-amber-600 mb-2">4.9★</div>
-                <div className="text-sm text-gray-600 font-semibold">User Rating</div>
-              </div>
-              <div className="p-6 bg-white rounded-2xl shadow-md">
-                <div className="text-3xl font-black text-yellow-600 mb-2">24/7</div>
-                <div className="text-sm text-gray-600 font-semibold">Support Available</div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* CTA Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-yellow-400 via-orange-500 to-amber-600 py-24 px-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)] py-24 px-6">
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl opacity-10 animate-pulse"></div>
           <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-orange-300 rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }}></div>
