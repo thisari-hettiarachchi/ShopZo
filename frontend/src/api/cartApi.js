@@ -31,10 +31,18 @@ export const updateCartItemApi = async (itemId, qty, token) => {
   return res.json();
 };
 
-export const removeCartItemApi = async (productId, token) => {
-  const res = await fetch(`${BASE_URL}/remove/${productId}`, {
+export const removeCartItemApi = async (itemId, token) => {
+  const res = await fetch(`http://localhost:5000/api/cart/${itemId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
-  return await res.json();
+
+  if (!res.ok) {
+    throw new Error("Failed to remove cart item");
+  }
+
+  return res.json();
 };
+
