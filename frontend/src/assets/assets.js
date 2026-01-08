@@ -10,5 +10,7 @@ import hero2 from "./hero2.jpg";
 import heroSide3 from "./makeup.png";
 import lap from "./lap.jpg";
 import lap1 from "./lap1.jpg";
+import Contact from "./contact.jpg";
+import about from "./about.jpg";
 
-export default { logo, favicon, payment, download, hero, heroSide, hero1, heroSide1, hero2, heroSide3, lap, lap1 };
+export default { logo, favicon, payment, download, hero, heroSide, hero1, heroSide1, hero2, heroSide3, lap, lap1, Contact, about };

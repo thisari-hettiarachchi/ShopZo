@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import Assets from "../assets/assets";
 
 export default function Contact() {
   const branches = [
@@ -88,9 +89,9 @@ export default function Contact() {
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">
       {/* Hero Section */}
       <section
-        className="relative h-[500px] md:h-[600px] flex items-center bg-cover bg-center"
+        className="relative w-full md:h-[600px] flex items-center bg-cover bg-center  mt-[-70px]"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1200')`,
+          backgroundImage: `url(${Assets.Contact})`
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-amber-900/80 via-orange-800/70 to-amber-900/80"></div>
