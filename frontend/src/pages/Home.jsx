@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, TrendingUp, Award } from "lucide-react";
 import Assets from "../assets/assets";
 
 export default function Hero() {
@@ -37,20 +37,35 @@ export default function Hero() {
     },
   ];
 
-  // Categories with emojis/icons
   const categories = [
-    { name: "Electronic Devices", icon: "💻" },
-    { name: "Electronic Accessories", icon: "🔌" },
-    { name: "Babies & Toys", icon: "🧸" },
-    { name: "Groceries & Pets", icon: "🛒" },
-    { name: "TV & Home Appliances", icon: "📺" },
-    { name: "Health & Beauty", icon: "💄" },
-    { name: "Women's Fashion", icon: "👗" },
-    { name: "Men's Fashion", icon: "👔" },
-    { name: "Home & Lifestyle", icon: "🏡" },
-    { name: "Automotive & Motorbike", icon: "🏎️" },
-    { name: "Watches & Accessories", icon: "⌚" },
-    { name: "Sports & Outdoor", icon: "🏀" },
+    { name: "Electronic Devices", icon: "💻", gradient: "from-blue-400 to-blue-600" },
+    { name: "Electronic Accessories", icon: "🔌", gradient: "from-purple-400 to-purple-600" },
+    { name: "Babies & Toys", icon: "🧸", gradient: "from-pink-400 to-pink-600" },
+    { name: "Groceries & Pets", icon: "🛒", gradient: "from-green-400 to-green-600" },
+    { name: "TV & Home Appliances", icon: "📺", gradient: "from-indigo-400 to-indigo-600" },
+    { name: "Health & Beauty", icon: "💄", gradient: "from-rose-400 to-rose-600" },
+    { name: "Women's Fashion", icon: "👗", gradient: "from-fuchsia-400 to-fuchsia-600" },
+    { name: "Men's Fashion", icon: "👔", gradient: "from-cyan-400 to-cyan-600" },
+    { name: "Home & Lifestyle", icon: "🏡", gradient: "from-amber-400 to-amber-600" },
+    { name: "Automotive & Motorbike", icon: "🏎️", gradient: "from-red-400 to-red-600" },
+    { name: "Watches & Accessories", icon: "⌚", gradient: "from-yellow-400 to-yellow-600" },
+    { name: "Sports & Outdoor", icon: "🏀", gradient: "from-teal-400 to-teal-600" },
+  ];
+
+  const flashSaleProducts = [
+    { name: "Wireless Earbuds", price: 499, oldPrice: 699, discount: 29, rating: 4.5 },
+    { name: "Smart Watch Pro", price: 899, oldPrice: 1299, discount: 31, rating: 4.8 },
+    { name: "Phone Case Set", price: 299, oldPrice: 499, discount: 40, rating: 4.3 },
+    { name: "USB-C Cable", price: 199, oldPrice: 299, discount: 33, rating: 4.6 },
+    { name: "Power Bank 20K", price: 799, oldPrice: 999, discount: 20, rating: 4.7 },
+  ];
+
+  const vendors = [
+    { name: "TechZone", rating: 4.9, products: 245 },
+    { name: "Fashion Hub", rating: 4.7, products: 189 },
+    { name: "BeautyMart", rating: 4.8, products: 312 },
+    { name: "GadgetStore", rating: 4.6, products: 456 },
+    { name: "HomeEssentials", rating: 4.9, products: 198 },
   ];
 
   const SLIDE_DURATION = 5000;
@@ -183,21 +198,29 @@ export default function Hero() {
         </motion.div>
       </section>
 
-      {/* CATEGORIES SECTION */}
-      <section className="bg-[var(--bg-main)] py-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-[var(--text-primary)]">
-            Shop by Categories
-          </h2>
+      
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-10">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                Shop by Categories
+              </h2>
+              <p className="text-gray-600">Explore our wide range of products</p>
+            </div>
+          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {categories.map((cat, index) => (
               <div
                 key={index}
-                className="flex flex-col items-center justify-center w-full h-40 bg-[var(--bg-card)] dark:bg-[var(--bg-muted)] rounded-3xl shadow-lg p-4 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:bg-gradient-to-br hover:from-[var(--color-primary)] hover:to-[var(--color-secondary)]"
+                className="group relative overflow-hidden flex flex-col items-center justify-center h-44 bg-white rounded-2xl shadow-md hover:shadow-2xl p-4 cursor-pointer transform transition-all duration-300 hover:-translate-y-2 border border-gray-100"
               >
-                <div className="text-4xl mb-2">{cat.icon}</div>
-                <span className="text-sm md:text-base font-semibold text-[var(--text-primary)] dark:text-[var(--text-secondary)] text-center">
+                <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                <div className="text-5xl mb-3 transform group-hover:scale-110 transition-transform duration-300">
+                  {cat.icon}
+                </div>
+                <span className="text-sm md:text-base font-semibold text-gray-800 text-center group-hover:text-amber-600 transition-colors">
                   {cat.name}
                 </span>
               </div>
@@ -206,34 +229,48 @@ export default function Hero() {
         </div>
       </section>
 
-
       {/* FLASH SALE SECTION */}
-      <section className="bg-[var(--bg-main)] py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-semibold text-[var(--text-primary)]">
-              Flash Sale
-            </h2>
-            <button className="text-sm md:text-base font-medium text-[var(--color-primary)] hover:underline">
-              Shop All
+      <section className="py-16 px-4 bg-gradient-to-br from-amber-50 to-orange-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-3 rounded-xl">
+                <TrendingUp className="text-white" size={28} />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                  Flash Sale
+                </h2>
+                <p className="text-gray-600">Limited time offers</p>
+              </div>
+            </div>
+            <button className="text-base font-semibold text-amber-600 hover:text-amber-700 px-6 py-2 rounded-full border-2 border-amber-600 hover:bg-amber-50 transition-all">
+              View All
             </button>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {Array.from({ length: 5 }).map((_, idx) => (
+            {flashSaleProducts.map((product, idx) => (
               <div
                 key={idx}
-                className="bg-[var(--bg-card)] dark:bg-[var(--bg-muted)] rounded-2xl shadow-lg p-4 cursor-pointer transform transition-all duration-300 hover:scale-105"
+                className="group bg-white rounded-2xl shadow-md hover:shadow-2xl p-5 cursor-pointer transform transition-all duration-300 hover:-translate-y-2 border border-gray-100"
               >
-                <div className="w-full h-40 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 flex items-center justify-center text-5xl">
-                  🛍️
+                <div className="relative w-full h-44 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-4 flex items-center justify-center text-6xl overflow-hidden">
+                  <span className="group-hover:scale-110 transition-transform duration-300">🛍️</span>
+                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    -{product.discount}%
+                  </div>
                 </div>
-                <h3 className="font-semibold text-[var(--text-primary)] dark:text-[var(--text-secondary)] mb-1">
-                  Product Name
+                <h3 className="font-bold text-gray-800 mb-2 group-hover:text-amber-600 transition-colors">
+                  {product.name}
                 </h3>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-[var(--color-primary)]">Rs. 499</span>
-                  <span className="text-sm text-gray-400 line-through">Rs. 699</span>
+                <div className="flex items-center gap-1 mb-2">
+                  <Star size={14} className="fill-amber-400 text-amber-400" />
+                  <span className="text-sm text-gray-600">{product.rating}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-xl text-amber-600">Rs. {product.price}</span>
+                  <span className="text-sm text-gray-400 line-through">Rs. {product.oldPrice}</span>
                 </div>
               </div>
             ))}
@@ -242,42 +279,66 @@ export default function Hero() {
       </section>
 
       {/* FEATURED VENDORS */}
-      <section className="bg-[var(--bg-main)] py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-[var(--text-primary)]">
-            Featured Vendors
-          </h2>
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 mb-10">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-xl">
+              <Award className="text-white" size={28} />
+            </div>
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                Featured Vendors
+              </h2>
+              <p className="text-gray-600">Top-rated sellers you can trust</p>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {Array.from({ length: 5 }).map((_, idx) => (
+            {vendors.map((vendor, idx) => (
               <div
                 key={idx}
-                className="flex flex-col items-center bg-[var(--bg-card)] dark:bg-[var(--bg-muted)] rounded-2xl shadow-lg p-4 cursor-pointer hover:scale-105 transition-transform"
+                className="group flex flex-col items-center bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-md hover:shadow-2xl p-6 cursor-pointer hover:-translate-y-2 transition-all duration-300 border border-gray-100"
               >
-                <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-4xl mb-2">
+                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-5xl mb-4 group-hover:scale-110 transition-transform shadow-lg">
                   🏪
+                  <div className="absolute -bottom-1 -right-1 bg-green-500 w-6 h-6 rounded-full border-4 border-white" />
                 </div>
-                <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-semibold text-center">
-                  Vendor {idx + 1}
+                <span className="text-gray-900 font-bold text-lg mb-2 text-center group-hover:text-amber-600 transition-colors">
+                  {vendor.name}
                 </span>
+                <div className="flex items-center gap-1 mb-1">
+                  <Star size={14} className="fill-amber-400 text-amber-400" />
+                  <span className="text-sm font-semibold text-gray-700">{vendor.rating}</span>
+                </div>
+                <span className="text-xs text-gray-500">{vendor.products} Products</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-
       {/* PROMO BANNERS */}
-      <section className="bg-[var(--bg-main)] py-12">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-6">
-          <div className="flex-1 h-48 md:h-64 bg-gradient-to-r from-[#F59E0B] to-[#FB923C] rounded-2xl shadow-lg flex items-center justify-center text-white font-bold text-2xl">
-            Mega Sale
+      <section className="py-16 px-4 bg-gradient-to-br from-amber-50 to-orange-50">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
+          <div className="group flex-1 h-64 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-3xl shadow-xl hover:shadow-2xl flex flex-col items-center justify-center text-white font-bold overflow-hidden relative cursor-pointer transform hover:scale-105 transition-all duration-300">
+            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-all" />
+            <div className="relative z-10 text-center">
+              <div className="text-6xl mb-4">🎉</div>
+              <div className="text-4xl mb-2">Mega Sale</div>
+              <div className="text-lg font-normal opacity-90">Up to 70% OFF</div>
+            </div>
           </div>
-          <div className="flex-1 h-48 md:h-64 bg-gradient-to-r from-[#FB923C] to-[#FDE68A] rounded-2xl shadow-lg flex items-center justify-center text-white font-bold text-2xl">
-            New Arrivals
+          
+          <div className="group flex-1 h-64 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-3xl shadow-xl hover:shadow-2xl flex flex-col items-center justify-center text-white font-bold overflow-hidden relative cursor-pointer transform hover:scale-105 transition-all duration-300">
+            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-all" />
+            <div className="relative z-10 text-center">
+              <div className="text-6xl mb-4">✨</div>
+              <div className="text-4xl mb-2">New Arrivals</div>
+              <div className="text-lg font-normal opacity-90">Fresh Collections</div>
+            </div>
           </div>
         </div>
       </section>
-
     </>
   );
 }
