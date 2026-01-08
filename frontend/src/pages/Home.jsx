@@ -336,28 +336,58 @@ export default function Hero() {
         </div>
       </section>
 
-      {/* PROMO BANNERS */}
-      <section className="py-16 px-4 bg-gradient-to-br from-amber-50 to-orange-50">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
-          <div className="group flex-1 h-64 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-3xl shadow-xl hover:shadow-2xl flex flex-col items-center justify-center text-white font-bold overflow-hidden relative cursor-pointer transform hover:scale-105 transition-all duration-300">
-            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-all" />
-            <div className="relative z-10 text-center">
-              <div className="text-6xl mb-4">🎉</div>
-              <div className="text-4xl mb-2">Mega Sale</div>
-              <div className="text-lg font-normal opacity-90">Up to 70% OFF</div>
-            </div>
-          </div>
-          
-          <div className="group flex-1 h-64 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-3xl shadow-xl hover:shadow-2xl flex flex-col items-center justify-center text-white font-bold overflow-hidden relative cursor-pointer transform hover:scale-105 transition-all duration-300">
-            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-all" />
-            <div className="relative z-10 text-center">
-              <div className="text-6xl mb-4">✨</div>
-              <div className="text-4xl mb-2">New Arrivals</div>
-              <div className="text-lg font-normal opacity-90">Fresh Collections</div>
+     {/* PROMO BANNERS */}
+    <section className="py-16 px-4 bg-gradient-to-br from-amber-50 to-orange-50">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="group relative aspect-square rounded-3xl shadow-xl hover:shadow-2xl overflow-hidden cursor-pointer transition-all duration-300">
+          <img
+            src={Assets.flashSale}
+            alt="Mega Sale"
+            className="absolute inset-0 w-full h-full object-contain bg-white z-0"
+          />
+          <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 flex items-center justify-center">
+            <div
+              className="rainbow bg-white/20 p-0.5 rounded-full backdrop-blur-md
+                        opacity-0 group-hover:opacity-100
+                        scale-90 group-hover:scale-100
+                        transition-all duration-300"
+            >
+              <div className="relative group/button overflow-hidden bg-white/20 p-0.5 h-12 w-28 rounded-md active:scale-100 hover:scale-105 transition-all duration-300">
+                <button className="text-white text-sm bg-gradient-to-t from-black/50 to-black h-full w-full rounded">
+                  Shop Now
+                </button>
+                <div className="absolute -bottom-12 group-hover/button:-bottom-10 transition-all duration-200 left-1/2 -z-10 -translate-x-1/2 blur size-14 rounded-full bg-white"></div>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+
+        <div className="group relative aspect-square rounded-3xl shadow-xl hover:shadow-2xl overflow-hidden cursor-pointer transition-all duration-300">          
+          <img
+            src={Assets.newArrival}
+            alt="New Arrivals"
+            className="absolute inset-0 w-full h-full object-contain bg-white z-0"
+          />
+          <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 flex items-center justify-center">
+            <div
+              className="rainbow bg-white/20 p-0.5 rounded-full backdrop-blur-md
+                        opacity-0 group-hover:opacity-100
+                        scale-90 group-hover:scale-100
+                        transition-all duration-300"
+            >
+              <div className="relative group/button overflow-hidden bg-white/20 p-0.5 h-12 w-28 rounded-md active:scale-100 hover:scale-105 transition-all duration-300">
+                <button className="text-white text-sm bg-gradient-to-t from-black/50 to-black h-full w-full rounded">
+                  Shop Now
+                </button>
+                <div className="absolute -bottom-12 group-hover/button:-bottom-10 transition-all duration-200 left-1/2 -z-10 -translate-x-1/2 blur size-14 rounded-full bg-white"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     </>
   );
 }
