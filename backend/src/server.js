@@ -10,6 +10,7 @@ import wishlistRoutes from "./routes/wishlistRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import addressRoutes from "./routes/addressRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -31,6 +32,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/vendors", vendorRoutes);
 app.use("/api/user", userRoutes); 
+app.use("/api/user/addresses", addressRoutes);
 
 app.get("/", (req, res) => res.send("ShopZo API running 🚀"));
 
