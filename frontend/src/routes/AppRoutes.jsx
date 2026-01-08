@@ -8,6 +8,8 @@ import AuthPages from '../pages/Auth';
 import Product from '../pages/Products';
 import ProductDetails from '../pages/ProductDetails';
 import ProfilePage from '../pages/ProfileDashboard';
+import CheckoutPage from '../pages/Checkout';
+import ProceedToPay from '../pages/ProceedToPay';
 
 export default function AppRoutes() {
   return (
@@ -21,6 +23,8 @@ export default function AppRoutes() {
       <Route path="/products/*" element={<Product />} />
       <Route path="/products/:id" element={<ProductDetails />} />
       <Route path="/profile" element={<ProfilePage />} />
+      <Route path='/checkout' element={<CheckoutPage />} />
+      <Route path='/proceedtopay' element={<ProceedToPay />} />
     </Routes>
   );
 }

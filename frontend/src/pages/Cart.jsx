@@ -202,7 +202,9 @@ export default function Cart() {
                 </span>
               </div>
 
-              <button className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90">
+              <button 
+                onClick={() => navigate(`/checkout`)}
+                className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90">
                 Proceed to Checkout
                 <ArrowRight className="w-5 h-5" />
               </button>
