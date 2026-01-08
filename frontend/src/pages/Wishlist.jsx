@@ -10,7 +10,6 @@ export default function Wishlist() {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Dispatch custom event to update navbar
   const dispatchWishlistUpdate = () => {
     window.dispatchEvent(new Event('wishlistUpdated'));
   };
@@ -22,7 +21,6 @@ export default function Wishlist() {
         const items = data.items || [];
         setWishlistItems(items);
         
-        // Update localStorage for navbar sync
         localStorage.setItem('wishlist', JSON.stringify(items));
         dispatchWishlistUpdate();
       } catch (err) {
@@ -41,7 +39,6 @@ export default function Wishlist() {
       const items = updated.items || [];
       setWishlistItems(items);
       
-      // Update localStorage for navbar sync
       localStorage.setItem('wishlist', JSON.stringify(items));
       dispatchWishlistUpdate();
     } catch (err) {
