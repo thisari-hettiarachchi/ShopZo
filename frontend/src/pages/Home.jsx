@@ -170,7 +170,7 @@ export default function Hero() {
           className="container mx-auto px-10 lg:px-20 flex flex-col lg:flex-row items-center justify-between text-white"
         >
           {/* Left */}
-          <div className="flex-1 space-y-8 text-center lg:text-left">
+          <div className="flex-1 space-y-8 text-center lg:text-left ml-10">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -188,8 +188,8 @@ export default function Hero() {
               </motion.div>
             </AnimatePresence>
 
-            <div className="relative inline-block p-0.5 rounded-full overflow-hidden hover:scale-105 transition duration-300 active:scale-100 before:content-[''] before:absolute before:inset-0 before:bg-[conic-gradient(from_0deg,_#FFFFFF,_#FFFFFF,_#FFFFFF)] button-wrapper">
-              <button className="relative z-10 bg-[var(--color-primary)] text-white rounded-full px-8 py-3 font-medium text-sm">
+            <div className="relative inline-block p-0.5 rounded-full overflow-hidden hover:scale-105 transition duration-300 active:scale-100 before:content-[''] before:absolute before:inset-0 before:bg-[conic-gradient(from_0deg,_#FFFFFF,_#FFFFFF,_#FFFFFF)] button-wrapper ml-20">
+              <button className="relative z-10 bg-[var(--color-primary)] text-white rounded-full px-8 py-3 font-medium text-sm ">
                 Shop Now
               </button>
             </div>
