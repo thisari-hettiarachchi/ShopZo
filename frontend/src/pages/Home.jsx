@@ -266,6 +266,18 @@ export default function Hero() {
       </section>
 
 
+      {/* PROMO BANNERS */}
+      <section className="bg-[var(--bg-main)] py-12">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-6">
+          <div className="flex-1 h-48 md:h-64 bg-gradient-to-r from-[#F59E0B] to-[#FB923C] rounded-2xl shadow-lg flex items-center justify-center text-white font-bold text-2xl">
+            Mega Sale
+          </div>
+          <div className="flex-1 h-48 md:h-64 bg-gradient-to-r from-[#FB923C] to-[#FDE68A] rounded-2xl shadow-lg flex items-center justify-center text-white font-bold text-2xl">
+            New Arrivals
+          </div>
+        </div>
+      </section>
+
     </>
   );
 }
