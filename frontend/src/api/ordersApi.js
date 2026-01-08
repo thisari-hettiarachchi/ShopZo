@@ -25,3 +25,16 @@ export const fetchCancellations = async () => {
     },
   });
 };
+
+export const createOrder = async (orderData, token) => {
+  const res = await axios.post(
+    "http://localhost:5000/api/user/orders",
+    orderData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.data;
+};
