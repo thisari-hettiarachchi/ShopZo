@@ -241,6 +241,29 @@ export default function Hero() {
         </div>
       </section>
 
+      {/* FEATURED VENDORS */}
+      <section className="bg-[var(--bg-main)] py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-[var(--text-primary)]">
+            Featured Vendors
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="flex flex-col items-center bg-[var(--bg-card)] dark:bg-[var(--bg-muted)] rounded-2xl shadow-lg p-4 cursor-pointer hover:scale-105 transition-transform"
+              >
+                <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-4xl mb-2">
+                  🏪
+                </div>
+                <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-semibold text-center">
+                  Vendor {idx + 1}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
 
     </>
