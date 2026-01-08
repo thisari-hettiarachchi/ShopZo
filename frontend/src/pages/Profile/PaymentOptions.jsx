@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { CreditCard, Edit2, Plus, X } from "lucide-react";
-import { getCards, addCard, setDefaultCardApi } from "../../services/paymentService";
+import { getCards, addCard, setDefaultCardApi, updateCardApi } from "../../services/paymentService";
 
 export default function PaymentOptions() {
   const [cards, setCards] = useState([]);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newCard, setNewCard] = useState({
+  const [showForm, setShowForm] = useState(false);
+  const [editingCardId, setEditingCardId] = useState(null);
+  const [formCard, setFormCard] = useState({
     cardHolder: "",
     cardNumber: "",
     expiry: "",
@@ -26,34 +27,57 @@ export default function PaymentOptions() {
     fetchCards();
   }, []);
 
-  // Handle input changes for add/edit form
+  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
 
     if (name === "expiry") {
       let val = value.replace(/\D/g, "");
       if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2, 4);
-      setNewCard((prev) => ({ ...prev, [name]: val }));
+      setFormCard((prev) => ({ ...prev, [name]: val }));
     } else {
-      setNewCard((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+      setFormCard((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
     }
   };
 
-  // Add new card
-  const handleSaveNewCard = async () => {
-    const [month, year] = newCard.expiry.split("/");
+  // Open form to add new card
+  const handleAddNew = () => {
+    setFormCard({ cardHolder: "", cardNumber: "", expiry: "", isDefault: false });
+    setEditingCardId(null);
+    setShowForm(true);
+  };
+
+  // Open form to edit existing card
+  const handleEditCard = (card) => {
+    setFormCard({ ...card });
+    setEditingCardId(card._id);
+    setShowForm(true);
+  };
+
+  // Save card (add or edit)
+  const handleSaveCard = async () => {
+    const [month, year] = formCard.expiry.split("/");
     if (!month || !year || Number(month) < 1 || Number(month) > 12 || year.length !== 2) {
       return alert("Invalid expiry date");
     }
 
     try {
-      const res = await addCard(newCard);
-      setCards((prev) => [...prev, res.data]);
-      setNewCard({ cardHolder: "", cardNumber: "", expiry: "", isDefault: false });
-      setShowAddForm(false);
+      let res;
+      if (editingCardId) {
+        // Update existing card
+        res = await updateCardApi(editingCardId, formCard);
+        setCards((prev) => prev.map((c) => (c._id === editingCardId ? res.data : c)));
+      } else {
+        // Add new card
+        res = await addCard(formCard);
+        setCards((prev) => [...prev, res.data]);
+      }
+      setFormCard({ cardHolder: "", cardNumber: "", expiry: "", isDefault: false });
+      setEditingCardId(null);
+      setShowForm(false);
     } catch (err) {
       console.error(err);
-      alert("Failed to add card");
+      alert(editingCardId ? "Failed to update card" : "Failed to add card");
     }
   };
 
@@ -61,16 +85,12 @@ export default function PaymentOptions() {
   const handleSetDefault = async (id) => {
     try {
       await setDefaultCardApi(id);
-      setCards((prev) =>
-        prev.map((card) => ({ ...card, isDefault: card._id === id }))
-      );
+      setCards((prev) => prev.map((card) => ({ ...card, isDefault: card._id === id })));
     } catch (err) {
       console.error(err);
       alert("Failed to set default card");
     }
   };
-
-  const editCard = (id) => alert(`Edit Card ID: ${id}`);
 
   return (
     <div
@@ -117,7 +137,7 @@ export default function PaymentOptions() {
               </button>
 
               <button
-                onClick={() => editCard(card._id)}
+                onClick={() => handleEditCard(card)}
                 className="flex items-center gap-1 px-3 py-1 rounded-lg border-2 text-sm font-medium border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-300"
               >
                 <Edit2 size={16} /> EDIT
@@ -126,17 +146,17 @@ export default function PaymentOptions() {
           </div>
         ))}
 
-        {/* Add New Card Form */}
-        {showAddForm && (
+        {/* Add/Edit Card Form */}
+        {showForm && (
           <div
             className="p-5 rounded-2xl border-2 border-[var(--border)] flex flex-col gap-3"
             style={{ backgroundColor: "var(--bg-muted)" }}
           >
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
-                Add New Card
+                {editingCardId ? "Edit Card" : "Add New Card"}
               </h3>
-              <button onClick={() => setShowAddForm(false)}>
+              <button onClick={() => setShowForm(false)}>
                 <X size={20} />
               </button>
             </div>
@@ -145,7 +165,7 @@ export default function PaymentOptions() {
               type="text"
               name="cardHolder"
               placeholder="Card Holder Name"
-              value={newCard.cardHolder}
+              value={formCard.cardHolder}
               onChange={handleInputChange}
               className="w-full p-3 rounded-lg border-2 border-[var(--border)]"
             />
@@ -153,7 +173,7 @@ export default function PaymentOptions() {
               type="text"
               name="cardNumber"
               placeholder="Card Number"
-              value={newCard.cardNumber}
+              value={formCard.cardNumber}
               onChange={handleInputChange}
               className="w-full p-3 rounded-lg border-2 border-[var(--border)]"
             />
@@ -161,7 +181,7 @@ export default function PaymentOptions() {
               type="text"
               name="expiry"
               placeholder="MM/YY"
-              value={newCard.expiry}
+              value={formCard.expiry}
               onChange={handleInputChange}
               maxLength={5}
               className="w-full p-3 rounded-lg border-2 border-[var(--border)]"
@@ -171,25 +191,25 @@ export default function PaymentOptions() {
               <input
                 type="checkbox"
                 name="isDefault"
-                checked={newCard.isDefault}
+                checked={formCard.isDefault}
                 onChange={handleInputChange}
               />
               Set as Default
             </label>
 
             <button
-              onClick={handleSaveNewCard}
+              onClick={handleSaveCard}
               className="mt-3 px-5 py-3 rounded-2xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white font-semibold"
             >
-              Save Card
+              {editingCardId ? "Update Card" : "Save Card"}
             </button>
           </div>
         )}
 
         {/* Add New Card Button */}
-        {!showAddForm && (
+        {!showForm && (
           <button
-            onClick={() => setShowAddForm(true)}
+            onClick={handleAddNew}
             className="flex items-center gap-2 px-5 py-3 rounded-2xl border-2 border-dashed text-[var(--color-primary)] font-semibold hover:bg-[var(--bg-hover)] transition-all duration-300 justify-center"
           >
             <Plus size={20} /> ADD NEW CARD
@@ -198,4 +218,4 @@ export default function PaymentOptions() {
       </div>
     </div>
   );
-} 
+}

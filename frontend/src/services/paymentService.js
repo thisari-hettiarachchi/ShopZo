@@ -17,7 +17,8 @@ export const setDefaultCardApi = async (id) => {
 };
 
 export const updateCardApi = async (id, data) => {
-  return await axios.patch(`${API_URL}/${id}`, data, {
+  const token = localStorage.getItem("token");
+  return await axios.put(`http://localhost:5000/api/user/cards/${id}`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
 };

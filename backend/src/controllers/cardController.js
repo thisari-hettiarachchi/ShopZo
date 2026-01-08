@@ -51,22 +51,9 @@ export const setDefaultCard = async (req, res) => {
 
 export const updateCard = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { cardHolder, cardNumber, expiry, isDefault } = req.body;
-
-    if (isDefault) {
-      await Card.updateMany({ user: req.user._id }, { isDefault: false });
-    }
-
-    const updatedCard = await Card.findByIdAndUpdate(
-      id,
-      { cardHolder, cardNumber, expiry, isDefault },
-      { new: true }
-    );
-
-    if (!updatedCard) return res.status(404).json({ message: "Card not found" });
-
-    res.json(updatedCard);
+    const card = await Card.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!card) return res.status(404).json({ message: "Card not found" });
+    res.json(card);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
