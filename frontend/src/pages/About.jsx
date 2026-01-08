@@ -267,7 +267,7 @@ export default function AboutUs() {
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-16">
+          <div className="text-center mb-20">
             <span className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-4 block">Our Direction</span>
             <h2 className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-yellow-600 via-orange-500 to-amber-600 bg-clip-text text-transparent">
               Vision & Mission
@@ -277,50 +277,114 @@ export default function AboutUs() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Vision */}
+          {/* Vision */}
+          <div className="mb-16">
             <div
               onMouseEnter={() => setHoveredTeam(0)}
               onMouseLeave={() => setHoveredTeam(null)}
-              className={`relative p-10 rounded-3xl bg-white border-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden group ${
-                hoveredTeam === 0 ? 'shadow-2xl -translate-y-2 scale-[1.02] border-yellow-400' : 'shadow-lg border-yellow-100 hover:shadow-xl'
+              className={`relative rounded-3xl bg-white border-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden group ${
+                hoveredTeam === 0 ? 'shadow-2xl -translate-y-2 border-yellow-400' : 'shadow-lg border-yellow-100 hover:shadow-xl'
               }`}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br from-yellow-400 to-orange-500 opacity-0 transition-opacity duration-500 ${hoveredTeam === 0 ? 'opacity-10' : ''}`}></div>
-              
-              <div className="relative z-10">
-                <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl mb-6 shadow-lg transition-all duration-500 ${
-                  hoveredTeam === 0 ? 'scale-110 rotate-6' : 'group-hover:scale-105'
-                }`}>
-                  <Sparkles className="w-8 h-8 text-white" />
+              <div className="grid md:grid-cols-2 gap-0">
+                {/* Image Side */}
+                <div className="relative h-80 md:h-auto overflow-hidden">
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                    style={{
+                      backgroundImage: 'url("https://images.unsplash.com/photo-1552664730-d307ca884978?w=800")',
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/80 to-orange-600/80 mix-blend-multiply"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className={`w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 ${
+                      hoveredTeam === 0 ? 'scale-110 rotate-12' : 'group-hover:scale-105'
+                    }`}>
+                      <Sparkles className="w-12 h-12 text-orange-500" />
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-3xl font-black mb-4 text-gray-800">Our Vision</h3>
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  To become the world's most trusted and innovative marketplace, where entrepreneurs and customers connect seamlessly across borders, cultures, and communities. We envision a future where every vendor has the tools to succeed and every customer finds exactly what they're looking for.
-                </p>
+
+                {/* Content Side */}
+                <div className="p-12">
+                  <h3 className="text-4xl font-black mb-6 text-gray-800">Our Vision</h3>
+                  <p className="text-gray-600 leading-relaxed text-lg mb-6">
+                    To become the world's most trusted and innovative marketplace, where entrepreneurs and customers connect seamlessly across borders, cultures, and communities.
+                  </p>
+                  <p className="text-gray-600 leading-relaxed text-lg">
+                    We envision a future where every vendor has the tools to succeed and every customer finds exactly what they're looking for.
+                  </p>
+                  <div className="mt-8 flex gap-4">
+                    <div className="flex-1 p-4 bg-yellow-50 rounded-xl border-2 border-yellow-200">
+                      <div className="text-2xl font-black text-yellow-600 mb-1">Global</div>
+                      <div className="text-sm text-gray-600">Marketplace</div>
+                    </div>
+                    <div className="flex-1 p-4 bg-orange-50 rounded-xl border-2 border-orange-200">
+                      <div className="text-2xl font-black text-orange-600 mb-1">Innovation</div>
+                      <div className="text-sm text-gray-600">Driven</div>
+                    </div>
+                    <div className="flex-1 p-4 bg-amber-50 rounded-xl border-2 border-amber-200">
+                      <div className="text-2xl font-black text-amber-600 mb-1">Trust</div>
+                      <div className="text-sm text-gray-600">First</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* Mission */}
+          {/* Mission */}
+          <div>
             <div
               onMouseEnter={() => setHoveredTeam(1)}
               onMouseLeave={() => setHoveredTeam(null)}
-              className={`relative p-10 rounded-3xl bg-white border-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden group ${
-                hoveredTeam === 1 ? 'shadow-2xl -translate-y-2 scale-[1.02] border-orange-400' : 'shadow-lg border-orange-100 hover:shadow-xl'
+              className={`relative rounded-3xl bg-white border-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden group ${
+                hoveredTeam === 1 ? 'shadow-2xl -translate-y-2 border-orange-400' : 'shadow-lg border-orange-100 hover:shadow-xl'
               }`}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br from-orange-400 to-amber-500 opacity-0 transition-opacity duration-500 ${hoveredTeam === 1 ? 'opacity-10' : ''}`}></div>
-              
-              <div className="relative z-10">
-                <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-400 to-amber-500 rounded-xl mb-6 shadow-lg transition-all duration-500 ${
-                  hoveredTeam === 1 ? 'scale-110 rotate-6' : 'group-hover:scale-105'
-                }`}>
-                  <TrendingUp className="w-8 h-8 text-white" />
+              <div className="grid md:grid-cols-2 gap-0">
+                {/* Content Side */}
+                <div className="p-12 order-2 md:order-1">
+                  <h3 className="text-4xl font-black mb-6 text-gray-800">Our Mission</h3>
+                  <p className="text-gray-600 leading-relaxed text-lg mb-6">
+                    To empower vendors with cutting-edge technology and support while providing customers with a secure, diverse shopping experience.
+                  </p>
+                  <p className="text-gray-600 leading-relaxed text-lg">
+                    We're committed to building a sustainable ecosystem that benefits all stakeholders through transparency, innovation, and exceptional service.
+                  </p>
+                  <div className="mt-8 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500"></div>
+                      <span className="text-gray-700 font-medium">Empower entrepreneurs worldwide</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500"></div>
+                      <span className="text-gray-700 font-medium">Deliver exceptional customer experiences</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500"></div>
+                      <span className="text-gray-700 font-medium">Foster sustainable growth and innovation</span>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-3xl font-black mb-4 text-gray-800">Our Mission</h3>
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  To empower vendors with cutting-edge technology and support while providing customers with a secure, diverse shopping experience. We're committed to building a sustainable ecosystem that benefits all stakeholders through transparency, innovation, and exceptional service.
-                </p>
+
+                {/* Image Side */}
+                <div className="relative h-80 md:h-auto overflow-hidden order-1 md:order-2">
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                    style={{
+                      backgroundImage: 'url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800")',
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-l from-orange-600/80 to-amber-600/80 mix-blend-multiply"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className={`w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 ${
+                      hoveredTeam === 1 ? 'scale-110 rotate-12' : 'group-hover:scale-105'
+                    }`}>
+                      <TrendingUp className="w-12 h-12 text-orange-500" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -547,6 +611,39 @@ export default function AboutUs() {
                     <span>Customer feedback system</span>
                   </li>
                 </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Our Commitment Section */}
+      <div className="max-w-7xl mx-auto px-6 py-28">
+        <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-3xl p-12 md:p-16 border-2 border-yellow-200 shadow-xl">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 via-orange-500 to-amber-500 rounded-full mb-8 shadow-2xl">
+              <Award className="w-12 h-12 text-white" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black mb-6 text-gray-800">Our Commitment to Excellence</h2>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              We're dedicated to maintaining the highest standards in everything we do. From vendor verification to customer service, quality assurance to platform security—excellence isn't just a goal, it's our standard.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
+              <div className="p-6 bg-white rounded-2xl shadow-md">
+                <div className="text-3xl font-black text-yellow-600 mb-2">100%</div>
+                <div className="text-sm text-gray-600 font-semibold">Verified Vendors</div>
+              </div>
+              <div className="p-6 bg-white rounded-2xl shadow-md">
+                <div className="text-3xl font-black text-orange-600 mb-2">A+</div>
+                <div className="text-sm text-gray-600 font-semibold">Security Rating</div>
+              </div>
+              <div className="p-6 bg-white rounded-2xl shadow-md">
+                <div className="text-3xl font-black text-amber-600 mb-2">4.9★</div>
+                <div className="text-sm text-gray-600 font-semibold">User Rating</div>
+              </div>
+              <div className="p-6 bg-white rounded-2xl shadow-md">
+                <div className="text-3xl font-black text-yellow-600 mb-2">24/7</div>
+                <div className="text-sm text-gray-600 font-semibold">Support Available</div>
               </div>
             </div>
           </div>
