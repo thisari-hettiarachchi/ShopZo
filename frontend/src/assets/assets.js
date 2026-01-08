@@ -12,5 +12,25 @@ import lap from "./lap.jpg";
 import lap1 from "./lap1.jpg";
 import Contact from "./contact.jpg";
 import about from "./about.jpg";
+import flashSale from "./flashsale.jpg";
+import newArrival from "./NewArrival.jpg";
 
-export default { logo, favicon, payment, download, hero, heroSide, hero1, heroSide1, hero2, heroSide3, lap, lap1, Contact, about };
+
+export default { 
+    logo, 
+    favicon, 
+    payment, 
+    download, 
+    hero, 
+    heroSide, 
+    hero1, 
+    heroSide1, 
+    hero2, 
+    heroSide3,
+    lap, 
+    lap1, 
+    Contact, 
+    about,
+    flashSale,
+    newArrival
+};
