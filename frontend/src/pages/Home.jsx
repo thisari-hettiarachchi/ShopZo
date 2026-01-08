@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star, TrendingUp, Award } from "lucide-react";
 import Assets from "../assets/assets";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 export default function Hero() {
   const bgImages = [Assets.hero, Assets.hero1, Assets.hero2];
@@ -189,9 +190,11 @@ export default function Hero() {
             </AnimatePresence>
 
             <div className="relative inline-block p-0.5 rounded-full overflow-hidden hover:scale-105 transition duration-300 active:scale-100 before:content-[''] before:absolute before:inset-0 before:bg-[conic-gradient(from_0deg,_#FFFFFF,_#FFFFFF,_#FFFFFF)] button-wrapper ml-20">
-              <button className="relative z-10 bg-[var(--color-primary)] text-white rounded-full px-8 py-3 font-medium text-sm ">
-                Shop Now
-              </button>
+              <Link to="/products">
+                <button className="relative z-10 bg-[var(--color-primary)] text-white rounded-full px-8 py-3 font-medium text-sm ">
+                  Shop Now
+                </button>
+              </Link>
             </div>
           </div>
 
