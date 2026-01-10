@@ -5,6 +5,7 @@ import {
   addCard,
   setDefaultCardApi,
 } from "../services/paymentService";
+import { createOrder } from "../services/orderService";
 
 export default function ProceedToPay() {
   const [method, setMethod] = useState("card");
@@ -19,6 +20,8 @@ export default function ProceedToPay() {
     expiry: "",
     isDefault: false,
   });
+
+  const [cartItems, setCartItems] = useState([]);
 
   // 🔹 Load saved cards
   useEffect(() => {
@@ -38,6 +41,12 @@ export default function ProceedToPay() {
     };
 
     loadCards();
+  }, []);
+
+  // 🔹 Load cart from localStorage
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCartItems(savedCart);
   }, []);
 
   // 🔹 Handle card input
@@ -78,6 +87,50 @@ export default function ProceedToPay() {
     } catch (err) {
       console.error(err);
       alert("Failed to add card");
+    }
+  };
+
+  // 🔹 Place Order
+  const handlePlaceOrder = async () => {
+    if (!cartItems.length) {
+      alert("Your cart is empty!");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      // Map cart items to backend structure
+      const items = cartItems.map((item) => ({
+        product: item.product._id,
+        vendor: item.product.vendor || null, // adjust if vendor exists
+        qty: item.quantity || 1,
+        price: item.price,
+      }));
+
+      const totalAmount = items.reduce(
+        (sum, item) => sum + item.price * item.qty,
+        0
+      );
+
+      const orderData = {
+        items,
+        totalAmount,
+        paymentMethod: method,
+        cardId: selectedCardId || null,
+      };
+
+      const response = await createOrder(orderData, token);
+      console.log("Order placed:", response);
+
+      alert("Order placed successfully!");
+      // Optionally, clear cart after order
+      localStorage.removeItem("cart");
+      setCartItems([]);
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to place order");
     }
   };
 
@@ -191,10 +244,14 @@ export default function ProceedToPay() {
 
           <div className="border-t pt-3 flex justify-between font-bold text-lg">
             <span>Total Amount</span>
-            <span className="text-[var(--color-primary)]">Rs. 636</span>
+            <span className="text-[var(--color-primary)]">
+              Rs. {cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+            </span>
           </div>
 
-          <button className="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white font-semibold text-lg">
+          <button 
+            onClick={handlePlaceOrder}
+            className="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white font-semibold text-lg">
             Confirm Order
           </button>
         </div>
