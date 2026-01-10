@@ -6,6 +6,8 @@ import {
   setDefaultCardApi,
 } from "../services/paymentService";
 import { createOrder } from "../services/orderService";
+import { useNavigate } from "react-router-dom";
+
 
 export default function ProceedToPay() {
   const [method, setMethod] = useState("card");
@@ -23,7 +25,9 @@ export default function ProceedToPay() {
 
   const [cartItems, setCartItems] = useState([]);
 
-  // 🔹 Load saved cards
+  const navigate = useNavigate();
+
+  // Load saved cards
   useEffect(() => {
     const loadCards = async () => {
       try {
@@ -43,13 +47,13 @@ export default function ProceedToPay() {
     loadCards();
   }, []);
 
-  // 🔹 Load cart from localStorage
+  // Load cart from localStorage
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
     setCartItems(savedCart);
   }, []);
 
-  // 🔹 Handle card input
+  // Handle card input
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -65,7 +69,7 @@ export default function ProceedToPay() {
     }
   };
 
-  // 🔹 Save new card
+  // Save new card
   const handleSaveCard = async () => {
     try {
       const res = await addCard(newCard);
@@ -90,7 +94,7 @@ export default function ProceedToPay() {
     }
   };
 
-  // 🔹 Place Order
+  // Place Order
   const handlePlaceOrder = async () => {
     if (!cartItems.length) {
       alert("Your cart is empty!");
@@ -100,10 +104,9 @@ export default function ProceedToPay() {
     try {
       const token = localStorage.getItem("token");
 
-      // Map cart items to backend structure
       const items = cartItems.map((item) => ({
         product: item.product._id,
-        vendor: item.product.vendor || null, // adjust if vendor exists
+        vendor: item.product.vendor || null,
         qty: item.quantity || 1,
         price: item.price,
       }));
@@ -124,14 +127,18 @@ export default function ProceedToPay() {
       console.log("Order placed:", response);
 
       alert("Order placed successfully!");
-      // Optionally, clear cart after order
+
+      // Clear cart
       localStorage.removeItem("cart");
       setCartItems([]);
       window.dispatchEvent(new Event("cartUpdated"));
+
+      navigate("/"); 
     } catch (err) {
       console.error(err);
       alert("Failed to place order");
     }
+
   };
 
   return (
