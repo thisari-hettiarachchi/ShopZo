@@ -27,6 +27,15 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
+
+    const handleWindowClose = () => {
+      localStorage.removeItem("token");
+    };
+    window.addEventListener("beforeunload", handleWindowClose);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleWindowClose);
+    };
   }, []);
 
   const handleInputChange = (e) => {
