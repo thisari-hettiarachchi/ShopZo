@@ -186,7 +186,9 @@ export default function CheckoutPage() {
               </span>
             </div>
 
-            <button className="w-full mt-6 py-3 rounded-xl search-btn">
+            <button 
+              onClick={() => navigate(`/proceedtopay`)}
+              className="w-full mt-6 py-3 rounded-xl search-btn">
               Proceed to Pay
             </button>
           </div>
