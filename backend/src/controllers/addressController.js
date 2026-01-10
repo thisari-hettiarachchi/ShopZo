@@ -1,9 +1,5 @@
 import User from "../models/User.js";
 
-// For simplicity, assume addresses are stored in the User model:
-// user.addresses = [{ id, fullName, addressLine, region, phone, isDefaultShipping, isDefaultBilling }]
-// You can adjust based on your actual schema
-
 export const getAddresses = async (req, res) => {
   const user = await User.findById(req.user._id);
   res.json(user.addresses || []);
@@ -11,7 +7,7 @@ export const getAddresses = async (req, res) => {
 
 export const addAddress = async (req, res) => {
   const user = await User.findById(req.user._id);
-  const newAddress = { ...req.body, id: Date.now() }; // simple ID
+  const newAddress = { ...req.body, id: Date.now() };
   user.addresses = user.addresses ? [...user.addresses, newAddress] : [newAddress];
   await user.save();
   res.json(newAddress);
@@ -28,7 +24,7 @@ export const updateAddress = async (req, res) => {
 
 export const setDefaultAddress = async (req, res) => {
   const user = await User.findById(req.user._id);
-  const type = req.body.type; // 'shipping' or 'billing'
+  const type = req.body.type; 
   user.addresses = user.addresses.map(addr => ({
     ...addr,
     isDefaultShipping: type === "shipping" ? addr.id == req.params.id : addr.isDefaultShipping,
