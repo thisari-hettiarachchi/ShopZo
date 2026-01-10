@@ -38,3 +38,26 @@ export const getCancellations = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch cancellations" });
   }
 };
+
+export const createOrder = async (req, res) => {
+  try {
+    const { items, totalAmount } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "No order items" });
+    }
+
+    const order = new Order({
+      user: req.user._id,
+      items,
+      totalAmount,
+      status: "pending",
+    });
+
+    const savedOrder = await order.save();
+    res.status(201).json(savedOrder);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to create order" });
+  }
+};

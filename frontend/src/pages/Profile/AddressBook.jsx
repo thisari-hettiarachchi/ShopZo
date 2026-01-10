@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Edit2, Plus, X } from "lucide-react";
-import { getAddresses, addAddress, setDefaultAddress } from "../../services/addressService";
+import {
+  getAddresses,
+  addAddress,
+  setDefaultAddress,
+} from "../../services/addressService";
 
 export default function AddressBook() {
   const [addresses, setAddresses] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
+
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+
   const [newAddress, setNewAddress] = useState({
     fullName: "",
     addressLine: "",
@@ -28,7 +36,7 @@ export default function AddressBook() {
     fetchAll();
   }, []);
 
-  // Handle input changes for new address form
+  // Handle input changes (Add)
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setNewAddress((prev) => ({
@@ -37,11 +45,20 @@ export default function AddressBook() {
     }));
   };
 
-  // Save new address to backend
+  // Handle input changes (Edit)
+  const handleEditChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditingAddress((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  // Save new address
   const handleSaveNewAddress = async () => {
     try {
-      const res = await addAddress(newAddress); 
-      setAddresses((prev) => [...prev, res.data]); 
+      const res = await addAddress(newAddress);
+      setAddresses((prev) => [...prev, res.data]);
       setNewAddress({
         fullName: "",
         addressLine: "",
@@ -57,14 +74,17 @@ export default function AddressBook() {
     }
   };
 
+  // Set default address
   const handleSetDefault = async (id, type) => {
     try {
       await setDefaultAddress(id, type);
       setAddresses((prev) =>
         prev.map((addr) => ({
           ...addr,
-          isDefaultShipping: type === "shipping" ? addr.id === id : addr.isDefaultShipping,
-          isDefaultBilling: type === "billing" ? addr.id === id : addr.isDefaultBilling,
+          isDefaultShipping:
+            type === "shipping" ? addr.id === id : addr.isDefaultShipping,
+          isDefaultBilling:
+            type === "billing" ? addr.id === id : addr.isDefaultBilling,
         }))
       );
     } catch (err) {
@@ -73,11 +93,42 @@ export default function AddressBook() {
     }
   };
 
-  const editAddress = (id) => alert(`Edit Address ID: ${id}`);
+  // Open edit popup
+  const editAddress = (address) => {
+    setEditingAddress(address);
+    setShowEditForm(true);
+  };
+
+  // Save edited address
+  const handleUpdateAddress = async () => {
+    try {
+      setAddresses((prev) =>
+        prev.map((addr) =>
+          addr.id === editingAddress.id ? editingAddress : addr
+        )
+      );
+      setShowEditForm(false);
+      setEditingAddress(null);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update address");
+    }
+  };
 
   return (
-    <div className="p-6 rounded-2xl shadow-2xl" style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 10px 40px var(--shadow)" }}>
-      <h2 className="text-2xl font-bold mb-6" style={{ color: "var(--text-primary)" }}>Address Book</h2>
+    <div
+      className="p-6 rounded-2xl shadow-2xl"
+      style={{
+        backgroundColor: "var(--bg-card)",
+        boxShadow: "0 10px 40px var(--shadow)",
+      }}
+    >
+      <h2
+        className="text-2xl font-bold mb-6"
+        style={{ color: "var(--text-primary)" }}
+      >
+        Address Book
+      </h2>
 
       <div className="flex flex-col gap-6">
         {/* Existing Addresses */}
@@ -88,10 +139,30 @@ export default function AddressBook() {
             style={{ backgroundColor: "var(--bg-muted)" }}
           >
             <div>
-              <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{addr.fullName}</p>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{addr.addressLine}</p>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{addr.region}</p>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{addr.phone}</p>
+              <p
+                className="font-semibold text-sm"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {addr.fullName}
+              </p>
+              <p
+                className="text-sm"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                {addr.addressLine}
+              </p>
+              <p
+                className="text-sm"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                {addr.region}
+              </p>
+              <p
+                className="text-sm"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                {addr.phone}
+              </p>
             </div>
 
             <div className="flex flex-col md:flex-row md:items-center gap-2 mt-3 md:mt-0">
@@ -105,6 +176,7 @@ export default function AddressBook() {
               >
                 Default Shipping
               </button>
+
               <button
                 onClick={() => handleSetDefault(addr.id, "billing")}
                 className={`px-3 py-1 rounded-lg text-sm font-medium border-2 transition-all duration-300 ${
@@ -115,8 +187,9 @@ export default function AddressBook() {
               >
                 Default Billing
               </button>
+
               <button
-                onClick={() => editAddress(addr.id)}
+                onClick={() => editAddress(addr)}
                 className="flex items-center gap-1 px-3 py-1 rounded-lg border-2 text-sm font-medium border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-300"
               >
                 <Edit2 size={16} /> EDIT
@@ -127,10 +200,20 @@ export default function AddressBook() {
 
         {/* Add New Address Form */}
         {showAddForm && (
-          <div className="p-5 rounded-2xl border-2 border-[var(--border)] flex flex-col gap-3" style={{ backgroundColor: "var(--bg-muted)" }}>
+          <div
+            className="p-5 rounded-2xl border-2 border-[var(--border)] flex flex-col gap-3"
+            style={{ backgroundColor: "var(--bg-muted)" }}
+          >
             <div className="flex justify-between items-center mb-2">
-              <h3 className="font-semibold text-lg" style={{ color: "var(--text-primary)" }}>Add New Address</h3>
-              <button onClick={() => setShowAddForm(false)}><X size={20} /></button>
+              <h3
+                className="font-semibold text-lg"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Add New Address
+              </h3>
+              <button onClick={() => setShowAddForm(false)}>
+                <X size={20} />
+              </button>
             </div>
 
             <input
@@ -141,6 +224,7 @@ export default function AddressBook() {
               onChange={handleInputChange}
               className="w-full p-3 rounded-lg border-2 border-[var(--border)]"
             />
+
             <input
               type="text"
               name="addressLine"
@@ -149,6 +233,7 @@ export default function AddressBook() {
               onChange={handleInputChange}
               className="w-full p-3 rounded-lg border-2 border-[var(--border)]"
             />
+
             <input
               type="text"
               name="region"
@@ -157,6 +242,7 @@ export default function AddressBook() {
               onChange={handleInputChange}
               className="w-full p-3 rounded-lg border-2 border-[var(--border)]"
             />
+
             <input
               type="text"
               name="phone"
@@ -168,11 +254,22 @@ export default function AddressBook() {
 
             <div className="flex gap-2 mt-2">
               <label className="flex items-center gap-1">
-                <input type="checkbox" name="isDefaultShipping" checked={newAddress.isDefaultShipping} onChange={handleInputChange} />
+                <input
+                  type="checkbox"
+                  name="isDefaultShipping"
+                  checked={newAddress.isDefaultShipping}
+                  onChange={handleInputChange}
+                />
                 Default Shipping
               </label>
+
               <label className="flex items-center gap-1">
-                <input type="checkbox" name="isDefaultBilling" checked={newAddress.isDefaultBilling} onChange={handleInputChange} />
+                <input
+                  type="checkbox"
+                  name="isDefaultBilling"
+                  checked={newAddress.isDefaultBilling}
+                  onChange={handleInputChange}
+                />
                 Default Billing
               </label>
             </div>
@@ -186,7 +283,6 @@ export default function AddressBook() {
           </div>
         )}
 
-        {/* Add New Address Button */}
         {!showAddForm && (
           <button
             onClick={() => setShowAddForm(true)}
@@ -196,6 +292,89 @@ export default function AddressBook() {
           </button>
         )}
       </div>
+
+      {/* Edit Popup */}
+      {showEditForm && editingAddress && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div
+            className="w-full max-w-lg p-6 rounded-2xl"
+            style={{ backgroundColor: "var(--bg-card)" }}
+          >
+            <h3 className="text-xl font-bold mb-4">Edit Address</h3>
+
+            <div className="flex flex-col gap-3">
+              <input
+                name="fullName"
+                value={editingAddress.fullName}
+                onChange={handleEditChange}
+                className="p-3 rounded-lg border-2 border-[var(--border)]"
+              />
+
+              <input
+                name="addressLine"
+                value={editingAddress.addressLine}
+                onChange={handleEditChange}
+                className="p-3 rounded-lg border-2 border-[var(--border)]"
+              />
+
+              <input
+                name="region"
+                value={editingAddress.region}
+                onChange={handleEditChange}
+                className="p-3 rounded-lg border-2 border-[var(--border)]"
+              />
+
+              <input
+                name="phone"
+                value={editingAddress.phone}
+                onChange={handleEditChange}
+                className="p-3 rounded-lg border-2 border-[var(--border)]"
+              />
+
+              <div className="flex gap-4">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="isDefaultShipping"
+                    checked={editingAddress.isDefaultShipping}
+                    onChange={handleEditChange}
+                  />{" "}
+                  Default Shipping
+                </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    name="isDefaultBilling"
+                    checked={editingAddress.isDefaultBilling}
+                    onChange={handleEditChange}
+                  />{" "}
+                  Default Billing
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <button
+                  onClick={() => {
+                    setShowEditForm(false);
+                    setEditingAddress(null);
+                  }}
+                  className="px-5 py-2 rounded-xl border-2"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleUpdateAddress}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white font-semibold"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
