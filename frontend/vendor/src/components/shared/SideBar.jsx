@@ -12,16 +12,16 @@ import {
   LogOut,
 } from "lucide-react";
 
-export default function Sidebar() {
+export default function Sidebar({ active, setActive }) {
   const [theme, setTheme] = useState("light");
-  const [active, setActive] = useState("overview");
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
 
   return (
-    <aside className="w-64 bg-[var(--bg-card)] border-r border-[var(--border)] p-6 flex flex-col">
+    <aside className="w-64 h-screen sticky top-0 bg-[var(--bg-card)] border-r border-[var(--border)] p-6 flex flex-col mt-[-60px]">
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-[var(--color-primary)]">VendorHub</h1>
         <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-[var(--bg-muted)] transition">
@@ -29,6 +29,7 @@ export default function Sidebar() {
         </button>
       </div>
 
+      {/* Navigation */}
       <nav className="space-y-2 flex-1">
         {[
           { id: "overview", label: "Overview", icon: BarChart3 },
@@ -54,6 +55,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
+      {/* Profile & Logout */}
       <div className="mt-auto pt-6 border-t border-[var(--border)]">
         <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-[var(--bg-muted)]">
           <div className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white font-bold">
