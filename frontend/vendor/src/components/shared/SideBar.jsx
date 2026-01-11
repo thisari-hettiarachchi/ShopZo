@@ -38,7 +38,6 @@ export default function Sidebar({ active, setActive }) {
           { id: "customers", label: "Customers", icon: Users },
           { id: "analytics", label: "Analytics", icon: TrendingUp },
           { id: "reviews", label: "Reviews", icon: Star },
-          { id: "settings", label: "Settings", icon: Settings },
         ].map((item) => (
           <button
             key={item.id}

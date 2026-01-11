@@ -3,6 +3,9 @@ import Sidebar from "../components/shared/SideBar";
 import Dashboard from "../pages/Dashboard";
 import ProductsPage from "../pages/Products";
 import OrdersPage from "../pages/Orders";
+import CustomersPage from "../pages/CustomersPage";
+import AnalyticsPage from "../pages/AnalyticsPage";
+import ReviewsPage from "../pages/ReviewsPage";
 
 export default function App() {
   const [active, setActive] = useState("overview");
@@ -15,6 +18,9 @@ export default function App() {
         {active === "overview" && <Dashboard active={active} />}
         {active === "products" && <ProductsPage active={active} />}
         {active === "orders" && <OrdersPage active={active} />}
+        {active === "customers" && <CustomersPage active={active} />}
+        {active === "analytics" && <AnalyticsPage active={active} />}
+        {active === "reviews" && <ReviewsPage active={active} />}
       </main>
     </div>
   );
