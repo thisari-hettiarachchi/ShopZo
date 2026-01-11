@@ -1,5 +1,7 @@
 import { useLocation } from 'react-router-dom';
-import AppRoutes from './routes/AppRoutes';;
+import AppRoutes from './routes/AppRoutes';
+import Navbar from './components/shared/Navbar';
+import Sidebar from './components/shared/SideBar';
 
 export default function App() {
   const location = useLocation();
@@ -7,6 +9,8 @@ export default function App() {
 
   return (
     <>
+      {!noHeaderFooter && <Navbar />}
+      <Sidebar />
       <AppRoutes />
     </>
   );
