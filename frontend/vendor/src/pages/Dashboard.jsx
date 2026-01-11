@@ -65,9 +65,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      {/* Sidebar */}
-      <Sidebar active={active} setActive={setActive} />
-
+      
       {/* Main content */}
       <main className="flex-1 p-6 overflow-auto">
         {/* Overview Page */}
@@ -184,14 +182,6 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
-        {/* Other Pages */}
-        {active === "products" && <div>Products Page Content</div>}
-        {active === "orders" && <div>Orders Page Content</div>}
-        {active === "customers" && <div>Customers Page Content</div>}
-        {active === "analytics" && <div>Analytics Page Content</div>}
-        {active === "reviews" && <div>Reviews Page Content</div>}
-        {active === "settings" && <div>Settings Page Content</div>}
       </main>
     </div>
   );
