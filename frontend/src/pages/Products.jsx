@@ -94,7 +94,7 @@ export default function Products() {
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
 
         {/* FILTER SIDEBAR */}
-        <aside className="w-full lg:w-72 flex-shrink-0 bg-[var(--bg-card)] dark:bg-[var(--bg-muted)] rounded-2xl p-6 shadow-lg">
+        <aside className="w-full lg:w-72 flex-shrink-0 bg-[var(--bg-card)] dark:bg-[var(--bg-muted)] rounded-2xl p-6 shadow-lg ml-[-110px]">
           <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Filters</h2>
 
           {/* Brand */}
