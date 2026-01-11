@@ -15,6 +15,14 @@ export default function Products() {
     color: false,
   });
 
+  // ✅ FILTER STATE
+  const [filters, setFilters] = useState({
+    brand: [],
+    shippedFrom: [],
+    rating: null,
+    price: { min: "", max: "" },
+  });
+
   useEffect(() => {
     fetchProducts().then(setProducts);
   }, []);
@@ -22,6 +30,64 @@ export default function Products() {
   const toggleFilter = (filter) => {
     setFiltersOpen((prev) => ({ ...prev, [filter]: !prev[filter] }));
   };
+
+  // ✅ HANDLERS
+  const handleCheckbox = (type, value) => {
+    setFilters((prev) => {
+      const exists = prev[type].includes(value);
+      return {
+        ...prev,
+        [type]: exists
+          ? prev[type].filter((v) => v !== value)
+          : [...prev[type], value],
+      };
+    });
+  };
+
+  const handlePriceChange = (field, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      price: { ...prev.price, [field]: value },
+    }));
+  };
+
+  const handleRatingChange = (value) => {
+    setFilters((prev) => ({ ...prev, rating: value }));
+  };
+
+  const removeFilter = (type, value = null) => {
+    setFilters((prev) => {
+      if (type === "price") return { ...prev, price: { min: "", max: "" } };
+      if (type === "rating") return { ...prev, rating: null };
+      return {
+        ...prev,
+        [type]: prev[type].filter((v) => v !== value),
+      };
+    });
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      brand: [],
+      shippedFrom: [],
+      rating: null,
+      price: { min: "", max: "" },
+    });
+  };
+
+  // ✅ FILTER LOGIC
+  const filteredProducts = products.filter((p) => {
+    if (filters.brand.length && !filters.brand.includes(p.brand)) return false;
+    if (
+      filters.shippedFrom.length &&
+      !filters.shippedFrom.includes(p.shippedFrom)
+    )
+      return false;
+    if (filters.rating && p.rating < filters.rating) return false;
+    if (filters.price.min && p.price < filters.price.min) return false;
+    if (filters.price.max && p.price > filters.price.max) return false;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-[var(--bg-main)] px-4 py-10">
@@ -31,48 +97,22 @@ export default function Products() {
         <aside className="w-full lg:w-72 flex-shrink-0 bg-[var(--bg-card)] dark:bg-[var(--bg-muted)] rounded-2xl p-6 shadow-lg">
           <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Filters</h2>
 
-          {/* Brand Filter */}
+          {/* Brand */}
           <div className="mb-4">
-            <div
-              onClick={() => toggleFilter("brand")}
-              className="flex justify-between items-center cursor-pointer"
-            >
-              <span className="font-semibold text-[var(--text-primary)]">Brand</span>
+            <div onClick={() => toggleFilter("brand")} className="flex justify-between items-center cursor-pointer">
+              <span className="font-semibold">Brand</span>
               <span>{filtersOpen.brand ? "-" : "+"}</span>
             </div>
             {filtersOpen.brand && (
               <div className="mt-2 flex flex-col space-y-1">
                 {["Brand A", "Brand B", "Brand C", "Brand D"].map((b) => (
-                  <label key={b} className="flex items-center space-x-2 text-[var(--text-secondary)]">
-                    <input type="checkbox" />
+                  <label key={b} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={filters.brand.includes(b)}
+                      onChange={() => handleCheckbox("brand", b)}
+                    />
                     <span>{b}</span>
-                  </label>
-                ))}
-                <button
-                  className="text-[var(--color-primary)] text-sm mt-1"
-                  onClick={() => alert("Show more brands")}
-                >
-                  VIEW MORE
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Service & Promotion */}
-          <div className="mb-4">
-            <div
-              onClick={() => toggleFilter("service")}
-              className="flex justify-between items-center cursor-pointer"
-            >
-              <span className="font-semibold text-[var(--text-primary)]">Service & Promotion</span>
-              <span>{filtersOpen.service ? "-" : "+"}</span>
-            </div>
-            {filtersOpen.service && (
-              <div className="mt-2 flex flex-col space-y-1">
-                {["Free Shipping", "Discount", "Buy 1 Get 1"].map((s) => (
-                  <label key={s} className="flex items-center space-x-2 text-[var(--text-secondary)]">
-                    <input type="checkbox" />
-                    <span>{s}</span>
                   </label>
                 ))}
               </div>
@@ -81,38 +121,30 @@ export default function Products() {
 
           {/* Shipped From */}
           <div className="mb-4">
-            <div
-              onClick={() => toggleFilter("shippedFrom")}
-              className="flex justify-between items-center cursor-pointer"
-            >
-              <span className="font-semibold text-[var(--text-primary)]">Shipped From</span>
+            <div onClick={() => toggleFilter("shippedFrom")} className="flex justify-between items-center cursor-pointer">
+              <span className="font-semibold">Shipped From</span>
               <span>{filtersOpen.shippedFrom ? "-" : "+"}</span>
             </div>
             {filtersOpen.shippedFrom && (
               <div className="mt-2 flex flex-col space-y-1">
                 {["Colombo", "Kandy", "Galle"].map((loc) => (
-                  <label key={loc} className="flex items-center space-x-2 text-[var(--text-secondary)]">
-                    <input type="checkbox" />
+                  <label key={loc} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={filters.shippedFrom.includes(loc)}
+                      onChange={() => handleCheckbox("shippedFrom", loc)}
+                    />
                     <span>{loc}</span>
                   </label>
                 ))}
-                <button
-                  className="text-[var(--color-primary)] text-sm mt-1"
-                  onClick={() => alert("Show more locations")}
-                >
-                  VIEW MORE
-                </button>
               </div>
             )}
           </div>
 
           {/* Price */}
           <div className="mb-4">
-            <div
-              onClick={() => toggleFilter("price")}
-              className="flex justify-between items-center cursor-pointer"
-            >
-              <span className="font-semibold text-[var(--text-primary)]">Price</span>
+            <div onClick={() => toggleFilter("price")} className="flex justify-between items-center cursor-pointer">
+              <span className="font-semibold">Price</span>
               <span>{filtersOpen.price ? "-" : "+"}</span>
             </div>
             {filtersOpen.price && (
@@ -120,12 +152,16 @@ export default function Products() {
                 <input
                   type="number"
                   placeholder="Min"
-                  className="w-1/2 p-2 rounded border border-[var(--border)]"
+                  value={filters.price.min}
+                  onChange={(e) => handlePriceChange("min", e.target.value)}
+                  className="w-1/2 p-2 rounded border"
                 />
                 <input
                   type="number"
                   placeholder="Max"
-                  className="w-1/2 p-2 rounded border border-[var(--border)]"
+                  value={filters.price.max}
+                  onChange={(e) => handlePriceChange("max", e.target.value)}
+                  className="w-1/2 p-2 rounded border"
                 />
               </div>
             )}
@@ -133,90 +169,22 @@ export default function Products() {
 
           {/* Rating */}
           <div className="mb-4">
-            <div
-              onClick={() => toggleFilter("rating")}
-              className="flex justify-between items-center cursor-pointer"
-            >
-              <span className="font-semibold text-[var(--text-primary)]">Rating</span>
+            <div onClick={() => toggleFilter("rating")} className="flex justify-between items-center cursor-pointer">
+              <span className="font-semibold">Rating</span>
               <span>{filtersOpen.rating ? "-" : "+"}</span>
             </div>
             {filtersOpen.rating && (
               <div className="mt-2 flex flex-col space-y-1">
-                {["4 & Up", "3 & Up", "2 & Up", "1 & Up"].map((r) => (
-                  <label key={r} className="flex items-center space-x-2 text-[var(--text-secondary)]">
-                    <input type="radio" name="rating" />
-                    <span>{r}</span>
+                {[4, 3, 2, 1].map((r) => (
+                  <label key={r} className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="rating"
+                      checked={filters.rating === r}
+                      onChange={() => handleRatingChange(r)}
+                    />
+                    <span>{r} & Up</span>
                   </label>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Warranty */}
-          <div className="mb-4">
-            <div
-              onClick={() => toggleFilter("warranty")}
-              className="flex justify-between items-center cursor-pointer"
-            >
-              <span className="font-semibold text-[var(--text-primary)]">Warranty</span>
-              <span>{filtersOpen.warranty ? "-" : "+"}</span>
-            </div>
-            {filtersOpen.warranty && (
-              <div className="mt-2 flex flex-col space-y-1">
-                {["Warranty Type", "Warranty Period"].map((w) => (
-                  <label key={w} className="flex items-center space-x-2 text-[var(--text-secondary)]">
-                    <input type="checkbox" />
-                    <span>{w}</span>
-                  </label>
-                ))}
-                <button
-                  className="text-[var(--color-primary)] text-sm mt-1"
-                  onClick={() => alert("Show less")}
-                >
-                  VIEW LESS
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Delivery Option */}
-          <div className="mb-4">
-            <div
-              onClick={() => toggleFilter("delivery")}
-              className="flex justify-between items-center cursor-pointer"
-            >
-              <span className="font-semibold text-[var(--text-primary)]">Delivery Option</span>
-              <span>{filtersOpen.delivery ? "-" : "+"}</span>
-            </div>
-            {filtersOpen.delivery && (
-              <div className="mt-2 flex flex-col space-y-1">
-                {["Standard", "Express"].map((d) => (
-                  <label key={d} className="flex items-center space-x-2 text-[var(--text-secondary)]">
-                    <input type="checkbox" />
-                    <span>{d}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Color Family */}
-          <div className="mb-4">
-            <div
-              onClick={() => toggleFilter("color")}
-              className="flex justify-between items-center cursor-pointer"
-            >
-              <span className="font-semibold text-[var(--text-primary)]">Color Family</span>
-              <span>{filtersOpen.color ? "-" : "+"}</span>
-            </div>
-            {filtersOpen.color && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {["Red", "Blue", "Green", "Black", "White"].map((c) => (
-                  <label
-                    key={c}
-                    className="w-6 h-6 rounded-full border border-[var(--border)] cursor-pointer"
-                    style={{ backgroundColor: c.toLowerCase() }}
-                  ></label>
                 ))}
               </div>
             )}
@@ -225,12 +193,58 @@ export default function Products() {
 
         {/* PRODUCT GRID */}
         <main className="flex-1">
+          {/* ✅ ACTIVE FILTERS */}
+          {(filters.brand.length ||
+            filters.shippedFrom.length ||
+            filters.rating ||
+            filters.price.min ||
+            filters.price.max) && (
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-2 items-center">
+                {filters.brand.map((b) => (
+                  <span key={b} className="px-3 py-1 bg-gray-200 rounded-full text-sm flex items-center gap-2">
+                    {b}
+                    <button onClick={() => removeFilter("brand", b)}>×</button>
+                  </span>
+                ))}
+
+                {filters.shippedFrom.map((l) => (
+                  <span key={l} className="px-3 py-1 bg-gray-200 rounded-full text-sm flex items-center gap-2">
+                    {l}
+                    <button onClick={() => removeFilter("shippedFrom", l)}>×</button>
+                  </span>
+                ))}
+
+                {filters.rating && (
+                  <span className="px-3 py-1 bg-gray-200 rounded-full text-sm flex items-center gap-2">
+                    {filters.rating} & Up
+                    <button onClick={() => removeFilter("rating")}>×</button>
+                  </span>
+                )}
+
+                {(filters.price.min || filters.price.max) && (
+                  <span className="px-3 py-1 bg-gray-200 rounded-full text-sm flex items-center gap-2">
+                    Rs {filters.price.min || 0} - {filters.price.max || "∞"}
+                    <button onClick={() => removeFilter("price")}>×</button>
+                  </span>
+                )}
+
+                <button
+                  onClick={clearAllFilters}
+                  className="text-sm text-red-600 underline ml-2"
+                >
+                  Clear All
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Products</h1>
-            <span className="text-[var(--text-secondary)]">{products.length} items</span>
+            <h1 className="text-3xl font-bold">Products</h1>
+            <span>{filteredProducts.length} items</span>
           </div>
 
-          <ProductGrid products={products} />
+          <ProductGrid products={filteredProducts} />
         </main>
       </div>
     </div>
