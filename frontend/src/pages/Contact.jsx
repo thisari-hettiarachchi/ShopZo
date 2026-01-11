@@ -262,7 +262,7 @@ export default function Contact() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-4 md:px-16 bg-[var(--bg-muted)] shadow-inner">
+      <section className="py-20 px-4 md:px-16 bg-[var(--bg-muted)] shadow-inner mb-[-60px]">
         <div className="max-w-6xl mx-auto space-y-8">
           <h2 className="text-4xl font-bold text-center logo-text mb-12">
             Frequently Asked Questions
