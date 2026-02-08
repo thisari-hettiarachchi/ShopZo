@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Search, Filter, Download, Star, Edit, Eye, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, Filter, Download, Star, Edit, Eye, Trash2, Plus } from "lucide-react";
 
 // Function to determine status color
 const getStatusColor = (status) => {
@@ -23,6 +24,7 @@ const sampleProducts = [
 ];
 
 export default function ProductsPage() {
+  const navigate = useNavigate();
   const [products] = useState(sampleProducts);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -47,6 +49,14 @@ export default function ProductsPage() {
             className="w-full pl-10 pr-4 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           />
         </div>
+        <button
+          type="button"
+          onClick={() => navigate("/products/new")}
+          className="px-4 py-2 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-muted)] flex items-center gap-2"
+        >
+          <Plus size={18} />
+          Add
+        </button>
         <button className="px-4 py-2 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-muted)] flex items-center gap-2">
           <Filter size={18} />
           Filter

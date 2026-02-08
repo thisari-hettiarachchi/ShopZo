@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Sidebar from "../components/shared/SideBar";
 import Dashboard from "../pages/Dashboard";
 import ProductsPage from "../pages/Products";
+import AddProductPage from "../pages/AddProduct";
 import OrdersPage from "../pages/Orders";
 import CustomersPage from "../pages/CustomersPage";
 import AnalyticsPage from "../pages/AnalyticsPage";
@@ -10,9 +11,9 @@ import VendorProfilePage from "../pages/VendorProfile";
 import AuthPages from "../pages/Auth";
 
 const getActiveFromPath = (pathname) => {
+  if (pathname.startsWith("/products")) return "products";
+
   switch (pathname) {
-    case "/products":
-      return "products";
     case "/orders":
       return "orders";
     case "/customers":
@@ -44,13 +45,17 @@ function VendorDashboardShell() {
       <Sidebar active={active} />
 
       <main className="flex-1 overflow-auto">
-        {active === "overview" && <Dashboard />}
-        {active === "products" && <ProductsPage />}
-        {active === "orders" && <OrdersPage />}
-        {active === "customers" && <CustomersPage />}
-        {active === "analytics" && <AnalyticsPage />}
-        {active === "reviews" && <ReviewsPage />}
-        {active === "profile" && <VendorProfilePage />}
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/products/new" element={<AddProductPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/customers" element={<CustomersPage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/reviews" element={<ReviewsPage />} />
+          <Route path="/profile" element={<VendorProfilePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
     </div>
   );
