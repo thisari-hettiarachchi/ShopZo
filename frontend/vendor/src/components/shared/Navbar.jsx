@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
-  Search,
-  ShoppingCart,
   User,
   Menu,
   X,
-  Heart,
-  Bell,
   Home,
   Package,
   Info,
@@ -19,47 +15,10 @@ import Assets from '../../assets/assets'
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [activeMenu, setActiveMenu] = useState('home')
   const [isDarkMode, setIsDarkMode] = useState(false)
 
-  const [cartCount, setCartCount] = useState(0)
-  const [wishlistCount, setWishlistCount] = useState(0)
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'))
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
-
-  const updateCartCount = () => {
-    const cart = JSON.parse(localStorage.getItem('cart')) || []
-    setCartCount(cart.length)
-  }
-
-  const updateWishlistCount = () => {
-    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || []
-    setWishlistCount(wishlist.length)
-  }
-
-  useEffect(() => {
-    updateCartCount()
-    updateWishlistCount()
-    setIsLoggedIn(!!localStorage.getItem('token'))
-  }, [])
-
-  useEffect(() => {
-    const handleStorage = () => {
-      updateCartCount()
-      updateWishlistCount()
-    }
-    window.addEventListener('storage', handleStorage)
-    window.addEventListener('cartUpdated', handleStorage)
-    window.addEventListener('wishlistUpdated', handleStorage)
-
-    return () => {
-      window.removeEventListener('storage', handleStorage)
-      window.removeEventListener('cartUpdated', handleStorage)
-      window.removeEventListener('wishlistUpdated', handleStorage)
-    }
-  }, [])
 
   useEffect(() => {
     if (isDarkMode) {
@@ -150,17 +109,6 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-
-        {/* MOBILE SEARCH */}
-        {isSearchOpen && (
-          <div className="md:hidden mt-3">
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="w-full px-4 py-2 rounded-full search-input"
-            />
-          </div>
-        )}
 
         {/* MOBILE MENU */}
         {isMobileMenuOpen && (

@@ -1,4 +1,3 @@
-import React from "react";
 import { Star } from "lucide-react";
 
 const sampleReviews = [
@@ -8,28 +7,24 @@ const sampleReviews = [
   { id: 4, customer: "Diana", rating: 5, comment: "Loved it!" },
 ];
 
-export default function ReviewsPage({ active }) {
+export default function ReviewsPage() {
   return (
     <div className="p-6">
-      {active === "reviews" && (
-        <>
-          <h2 className="text-xl font-bold mb-4">Reviews</h2>
-          <div className="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
-            {sampleReviews.map((review) => (
-              <div key={review.id} className="flex items-start gap-3 p-4 border-b border-[var(--border)] last:border-b-0">
-                <div className="flex items-center gap-1">
-                  <Star size={16} className="text-amber-500 fill-amber-500" />
-                  <span className="text-sm font-medium">{review.rating}</span>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{review.customer}</p>
-                  <p className="text-xs text-[var(--text-secondary)]">{review.comment}</p>
-                </div>
-              </div>
-            ))}
+      <h2 className="text-xl font-bold mb-4">Reviews</h2>
+      <div className="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
+        {sampleReviews.map((review) => (
+          <div key={review.id} className="flex items-start gap-3 p-4 border-b border-[var(--border)] last:border-b-0">
+            <div className="flex items-center gap-1">
+              <Star size={16} className="text-amber-500 fill-amber-500" />
+              <span className="text-sm font-medium">{review.rating}</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium">{review.customer}</p>
+              <p className="text-xs text-[var(--text-secondary)]">{review.comment}</p>
+            </div>
           </div>
-        </>
-      )}
+        ))}
+      </div>
     </div>
   );
 }
