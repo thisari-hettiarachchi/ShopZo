@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, Store, ArrowRight, Check } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Store, ArrowRight, Check } from 'lucide-react';
 import { registerUser, loginUser } from "../services/authService";
 
 export default function AuthPages() {
@@ -9,7 +9,7 @@ export default function AuthPages() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    storeName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -36,12 +36,10 @@ export default function AuthPages() {
 
         console.log(res.data);
 
-        if (res.data?.user?.role === 'vendor') {
-          alert('Vendor accounts can’t sign in here. Please use the vendor portal.');
-          return;
-        }
-
         localStorage.setItem("token", res.data.token);
+        if (res.data?.vendor) {
+          localStorage.setItem("vendor", JSON.stringify(res.data.vendor));
+        }
         alert("Login successful");
 
         navigate("/"); 
@@ -53,10 +51,9 @@ export default function AuthPages() {
         }
 
         const res = await registerUser({
-          name: formData.name,
+          storeName: formData.storeName,
           email: formData.email,
           password: formData.password,
-          accountType: 'customer'
         });
 
         console.log(res.data);
@@ -127,19 +124,19 @@ export default function AuthPages() {
             </p>
 
             <div className="flex flex-col gap-5">
-              {/* Name Field - Only for Register */}
+              {/* Store Name Field - Only for Register */}
               {!isLogin && (
                 <div className="animate-slide-in relative">
                   <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                    Full Name
+                    Store Name
                   </label>
-                  <User size={18} className="absolute left-3 top-[42px]" style={{ color: 'var(--text-muted)' }} />
+                  <Store size={18} className="absolute left-3 top-[42px]" style={{ color: 'var(--text-muted)' }} />
                   <input
                     type="text"
-                    name="name"
-                    value={formData.name}
+                    name="storeName"
+                    value={formData.storeName}
                     onChange={handleInputChange}
-                    placeholder="John Doe"
+                    placeholder="John's Store"
                     className="w-full pl-11 pr-3 py-3 rounded-lg border-2 text-sm transition-all duration-300 focus:outline-none focus:shadow-lg"
                     style={{
                       borderColor: 'var(--border)',

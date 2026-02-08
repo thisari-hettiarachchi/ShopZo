@@ -1,5 +1,3 @@
-import { useState } from "react";
-import Sidebar from "../components/shared/SideBar";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -9,8 +7,6 @@ import {
 } from "lucide-react";
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
   CartesianGrid,
   XAxis,
   YAxis,
@@ -23,22 +19,12 @@ import {
 } from "recharts";
 
 export default function Dashboard() {
-  const [active, setActive] = useState("overview");
-
   // Stats cards
   const stats = [
     { title: "Sales", value: "$12,430", change: "+12%", up: true, bg: "bg-yellow-100", icon: TrendingUp, iconColor: "text-yellow-500" },
     { title: "Orders", value: "320", change: "-5%", up: false, bg: "bg-red-100", icon: ShoppingBag, iconColor: "text-red-500" },
     { title: "Customers", value: "1,024", change: "+8%", up: true, bg: "bg-green-100", icon: Users, iconColor: "text-green-500" },
     { title: "Reviews", value: "85", change: "+2%", up: true, bg: "bg-blue-100", icon: Star, iconColor: "text-blue-500" },
-  ];
-
-  // Chart data
-  const salesData = [
-    { month: "Jan", sales: 4000 },
-    { month: "Feb", sales: 3000 },
-    { month: "Mar", sales: 5000 },
-    { month: "Apr", sales: 4000 },
   ];
 
   const categoryData = [
@@ -64,13 +50,11 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+    <div className="flex min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">
       
       {/* Main content */}
       <main className="flex-1 p-6 overflow-auto">
-        {/* Overview Page */}
-        {active === "overview" && (
-          <div className="space-y-6">
+        <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map((stat, i) => (
@@ -181,7 +165,6 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        )}
       </main>
     </div>
   );
