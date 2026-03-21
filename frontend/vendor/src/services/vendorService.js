@@ -18,3 +18,5 @@ export const updateVendorProfile = (data) =>
   API.put("/profile", data, {
     headers: authHeaders(),
   });
+
+export const getVendors = () => API.get("/");
