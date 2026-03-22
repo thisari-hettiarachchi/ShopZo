@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, PackagePlus, Save } from "lucide-react";
+import { addProduct } from "../services/productService";
 
 export default function AddProductPage() {
   const navigate = useNavigate();
@@ -12,16 +13,27 @@ export default function AddProductPage() {
     description: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const onChange = (key) => (e) => {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-
-    // Placeholder: hook to backend later
-    // For now just redirect back to Products
-    navigate("/products");
+    setLoading(true);
+    try {
+      await addProduct({
+        ...form,
+        price: Number(form.price),
+        stock: Number(form.stock),
+      });
+      navigate("/products");
+    } catch (error) {
+      console.error("Failed to add product", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -128,9 +140,10 @@ export default function AddProductPage() {
           </button>
           <button
             type="submit"
-            className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90"
+            disabled={loading}
+            className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 disabled:opacity-50"
           >
-            Save Product
+            {loading ? "Saving..." : "Save Product"}
           </button>
         </div>
       </form>

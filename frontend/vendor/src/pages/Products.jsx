@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, Download, Star, Edit, Eye, Trash2, Plus } from "lucide-react";
+import { Search, Filter, Download, Star, Edit, Eye, Trash2, Plus, Loader } from "lucide-react";
+import { getProducts, deleteProduct } from "../services/productService";
 
 // Function to determine status color
 const getStatusColor = (status) => {
@@ -16,17 +17,39 @@ const getStatusColor = (status) => {
   }
 };
 
-// Sample products
-const sampleProducts = [
-  { id: 1, name: "Product 1", image: "📦", status: "Available", rating: 4.5, sales: 120, price: 29.99, stock: 50 },
-  { id: 2, name: "Product 2", image: "📦", status: "Limited", rating: 4.0, sales: 80, price: 19.99, stock: 15 },
-  { id: 3, name: "Product 3", image: "📦", status: "Out of Stock", rating: 3.8, sales: 45, price: 39.99, stock: 0 },
-];
+// Removed sample products
 
 export default function ProductsPage() {
   const navigate = useNavigate();
-  const [products] = useState(sampleProducts);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await getProducts();
+      setProducts(res.data || []);
+    } catch (error) {
+      console.error("Failed to fetch products", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    try {
+      await deleteProduct(id);
+      setProducts(products.filter((p) => p._id !== id));
+    } catch (error) {
+      console.error("Failed to delete product", error);
+    }
+  };
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -68,10 +91,26 @@ export default function ProductsPage() {
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProducts.map((product) => (
-          <div
-            key={product.id}
+      {loading ? (
+        <div className="flex items-center justify-center p-12 text-[var(--text-secondary)]">
+          <Loader className="animate-spin mr-2" />
+          Loading products...
+        </div>
+      ) : filteredProducts.length === 0 ? (
+        <div className="text-center p-12 bg-[var(--bg-card)] rounded-xl border border-[var(--border)]">
+          <p className="text-[var(--text-secondary)] mb-4">No products found.</p>
+          <button
+            onClick={() => navigate("/products/new")}
+            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90"
+          >
+            Add Your First Product
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProducts.map((product) => (
+            <div
+              key={product._id}
             className="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden hover:shadow-md transition"
           >
             <div className="aspect-video bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-6xl">
@@ -89,9 +128,9 @@ export default function ProductsPage() {
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center gap-1">
                   <Star size={14} className="text-amber-500 fill-amber-500" />
-                  <span className="text-sm font-medium">{product.rating}</span>
+                  <span className="text-sm font-medium">{product.rating || 0}</span>
                 </div>
-                <span className="text-sm text-[var(--text-secondary)]">• {product.sales} sold</span>
+                <span className="text-sm text-[var(--text-secondary)]">• {product.sales || 0} sold</span>
               </div>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-2xl font-bold text-[var(--color-primary)]">${product.price}</span>
@@ -104,7 +143,10 @@ export default function ProductsPage() {
                 <button className="px-3 py-2 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-muted)] flex items-center justify-center">
                   <Eye size={16} />
                 </button>
-                <button className="px-3 py-2 border border-red-300 text-red-500 rounded-lg hover:bg-red-50 flex items-center justify-center">
+                <button 
+                  onClick={() => handleDelete(product._id)}
+                  className="px-3 py-2 border border-red-300 text-red-500 rounded-lg hover:bg-red-50 flex items-center justify-center"
+                >
                   <Trash2 size={16} />
                 </button>
               </div>
@@ -112,6 +154,7 @@ export default function ProductsPage() {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

@@ -5,8 +5,9 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import vendorRoutes from './routes/vendorRoutes.js';
 import authRoutes from './routes/authRoutes.js';
-import Product from './models/Product.js';
-import Order from './models/Order.js';
+import productRoutes from './routes/productRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -20,6 +21,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.use('/api/vendor/products', productRoutes);
+app.use('/api/vendor/orders', orderRoutes);
+app.use('/api/vendor', analyticsRoutes);
 app.use('/api/vendor', vendorRoutes);
 
 app.use('/api/auth', authRoutes);
