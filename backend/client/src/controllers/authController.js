@@ -16,7 +16,7 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: accountType === "vendor" ? "vendor" : "user"
+      role: accountType === "admin" ? "admin" : "user"
     });
 
     res.status(201).json({

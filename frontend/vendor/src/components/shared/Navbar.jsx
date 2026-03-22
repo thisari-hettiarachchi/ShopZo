@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
   User,
   Menu,
@@ -16,6 +16,7 @@ import Assets from '../../assets/assets'
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const navigate = useNavigate()
 
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'))
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
@@ -89,7 +90,9 @@ export default function Navbar() {
                         className="w-full text-left px-4 py-2 hover:bg-[var(--bg-muted)]"
                         onClick={() => {
                           localStorage.removeItem('token')
+                          localStorage.removeItem('vendor')
                           setIsLoggedIn(false)
+                          navigate('/auth')
                         }}
                       >
                         Logout

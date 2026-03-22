@@ -1,15 +1,18 @@
 import User from "../models/User.js";
+import Vendor from "../models/Vendor.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try {
     const { storeName, email, password } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "Email already exists" });
+    // Check if vendor already exists by email
+    const existingVendor = await Vendor.findOne({ email });
+    if (existingVendor) return res.status(400).json({ message: "Email already exists" });
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name: storeName, email, password: hashedPassword, role: "vendor" });
-    await user.save();
+    // Save vendor directly in Vendor collection
+    const vendor = new Vendor({ storeName, email, password: hashedPassword });
+    await vendor.save();
     res.status(201).json({ message: "Vendor registered successfully" });
   } catch (error) {
     res.status(500).json({ message: "Registration failed" });
@@ -19,12 +22,19 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email, role: "vendor" });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
-    const isMatch = await bcrypt.compare(password, user.password);
+    const vendor = await Vendor.findOne({ email });
+    if (!vendor) return res.status(400).json({ message: "Invalid credentials" });
+    const isMatch = await bcrypt.compare(password, vendor.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || "secret", { expiresIn: "7d" });
-    res.json({ token, vendor: { id: user._id, name: user.name, email: user.email } });
+    const token = jwt.sign({ id: vendor._id, role: "vendor" }, process.env.JWT_SECRET || "secret", { expiresIn: "7d" });
+    res.json({ token, vendor: {
+      id: vendor._id,
+      storeName: vendor.storeName,
+      email: vendor.email,
+      phone: vendor.phone || '',
+      address: vendor.address || '',
+      description: vendor.description || ''
+    } });
   } catch (error) {
     res.status(500).json({ message: "Login failed" });
   }

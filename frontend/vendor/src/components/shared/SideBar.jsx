@@ -29,6 +29,18 @@ export default function Sidebar({ active }) {
     }
   }, [theme]);
 
+  // Get vendor info from localStorage
+  const vendor = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("vendor"));
+    } catch {
+      return null;
+    }
+  })();
+  const initials = vendor?.storeName
+    ? vendor.storeName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0,2)
+    : "V";
+
   return (
     <aside className="w-64 h-screen sticky top-0 bg-[var(--bg-card)] border-r border-[var(--border)] p-6 flex flex-col">
       {/* Header */}
@@ -77,11 +89,11 @@ export default function Sidebar({ active }) {
           className="w-full flex items-center gap-3 mb-4 p-3 rounded-lg bg-[var(--bg-muted)] hover:bg-[var(--bg-hover)] transition"
         >
           <div className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white font-bold">
-            JD
+            {initials}
           </div>
           <div className="flex-1 text-left">
-            <p className="font-medium text-sm">John's Store</p>
-            <p className="text-xs text-[var(--text-secondary)]">Vendor</p>
+            <p className="font-medium text-sm">{vendor?.storeName || "Vendor"}</p>
+            <p className="text-xs text-[var(--text-secondary)]">{vendor?.email || "Vendor"}</p>
           </div>
         </button>
         <button

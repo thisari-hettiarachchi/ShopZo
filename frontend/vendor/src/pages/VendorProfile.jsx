@@ -41,14 +41,15 @@ export default function VendorProfilePage() {
         if (cancelled) return;
         const vendor = res.data?.vendor;
         if (!vendor) return;
-        setProfile((prev) => ({
-          ...prev,
-          storeName: vendor.storeName ?? prev.storeName,
-          email: vendor.email ?? prev.email,
-          phone: vendor.phone ?? prev.phone,
-          address: vendor.address ?? prev.address,
-          description: vendor.description ?? prev.description,
-        }));
+        setProfile({
+          storeName: vendor.storeName || "",
+          email: vendor.email || "",
+          phone: vendor.phone || "",
+          address: vendor.address || "",
+          description: vendor.description || "",
+        });
+        // Always update localStorage with latest vendor info
+        localStorage.setItem("vendor", JSON.stringify(vendor));
       })
       .catch(() => {
         // Silent fallback to local state/localStorage
