@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, MapPin, User, Tag, Edit, X } from "lucide-react";
 import { fetchCart } from "../api/cartApi";
-import { getAddresses } from "../services/addressService";
+import { getAddresses, addAddress } from "../services/addressService";
 import { useNavigate } from "react-router-dom";
 
 export default function CheckoutPage() {
@@ -17,6 +17,14 @@ export default function CheckoutPage() {
   const [showAddressPopup, setShowAddressPopup] = useState(false);
   const [allAddresses, setAllAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
+
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    fullName: "",
+    phone: "",
+    region: "",
+    addressLine: "",
+  });
 
   useEffect(() => {
     const loadCheckoutData = async () => {
@@ -51,10 +59,28 @@ export default function CheckoutPage() {
 
   const handleSaveAddress = () => {
     const selected = allAddresses.find(
-      (a) => a.id === selectedAddressId
+      (a) => a.id === selectedAddressId || a._id === selectedAddressId
     );
     setAddress(selected || null);
     setShowAddressPopup(false);
+  };
+
+  const handleAddNewAddress = async () => {
+    if (!newAddress.fullName || !newAddress.phone || !newAddress.region || !newAddress.addressLine) {
+      return alert("Please fill all fields");
+    }
+    try {
+      const res = await addAddress({ ...newAddress, isDefaultShipping: true });
+      const added = res.data; 
+      
+      const addressesRes = await getAddresses();
+      setAllAddresses(addressesRes.data || []);
+      
+      setSelectedAddressId(added._id || added.id);
+      setIsAddingAddress(false);
+    } catch (err) {
+      alert("Failed to add address");
+    }
   };
 
   return (
@@ -187,8 +213,16 @@ export default function CheckoutPage() {
             </div>
 
             <button 
-              onClick={() => navigate(`/proceedtopay`)}
-              className="w-full mt-6 py-3 rounded-xl search-btn">
+              onClick={() => {
+                if (!address) {
+                  alert("Please select or add a shipping & billing address before proceeding.");
+                  setShowAddressPopup(true);
+                  if (allAddresses.length === 0) setIsAddingAddress(true);
+                  return;
+                }
+                navigate(`/proceedtopay`);
+              }}
+              className="w-full mt-6 flex items-center justify-center gap-2 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90">
               Proceed to Pay
             </button>
           </div>
@@ -200,52 +234,81 @@ export default function CheckoutPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-[var(--bg-card)] w-full max-w-lg p-6 rounded-2xl">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Select Address</h3>
+              <h3 className="text-xl font-bold">{isAddingAddress ? "Add New Address" : "Select Address"}</h3>
               <button onClick={() => setShowAddressPopup(false)}>
                 <X />
               </button>
             </div>
 
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {allAddresses.map((addr) => (
-                <label
-                  key={addr.id}
-                  className={`block p-4 rounded-xl border-2 cursor-pointer ${
-                    selectedAddressId === addr.id
-                      ? "border-[var(--color-primary)]"
-                      : "border-[var(--border)]"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="address"
-                    className="mr-2"
-                    checked={selectedAddressId === addr.id}
-                    onChange={() => setSelectedAddressId(addr.id)}
-                  />
-                  <span className="font-semibold">{addr.fullName}</span>
-                  <p className="text-sm">{addr.phone}</p>
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    {addr.addressLine}, {addr.region}
-                  </p>
-                </label>
-              ))}
-            </div>
+            {isAddingAddress ? (
+              <div className="space-y-4">
+                <input type="text" placeholder="Full Name" className="w-full p-3 border rounded-lg focus:outline-[var(--color-primary)]" value={newAddress.fullName} onChange={e => setNewAddress({...newAddress, fullName: e.target.value})} />
+                <input type="text" placeholder="Phone Number" className="w-full p-3 border rounded-lg focus:outline-[var(--color-primary)]" value={newAddress.phone} onChange={e => setNewAddress({...newAddress, phone: e.target.value})} />
+                <input type="text" placeholder="Region / City" className="w-full p-3 border rounded-lg focus:outline-[var(--color-primary)]" value={newAddress.region} onChange={e => setNewAddress({...newAddress, region: e.target.value})} />
+                <textarea placeholder="Full Address Line" className="w-full p-3 border rounded-lg focus:outline-[var(--color-primary)] h-24" value={newAddress.addressLine} onChange={e => setNewAddress({...newAddress, addressLine: e.target.value})} />
+                
+                <div className="flex justify-end gap-3 mt-5">
+                  <button onClick={() => setIsAddingAddress(false)} className="px-5 py-2 rounded-xl border-2">Cancel</button>
+                  <button onClick={handleAddNewAddress} className="px-5 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white font-semibold">Save Address</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {allAddresses.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">No addresses saved yet.</p>
+                  ) : (
+                    allAddresses.map((addr) => (
+                      <label
+                        key={addr._id || addr.id}
+                        className={`block p-4 rounded-xl border-2 cursor-pointer transition ${
+                          selectedAddressId === (addr._id || addr.id)
+                            ? "border-[var(--color-primary)] bg-orange-50"
+                            : "border-[var(--border)]"
+                        }`}
+                      >
+                        <div className="flex items-start">
+                          <input
+                            type="radio"
+                            name="address"
+                            className="mr-3 mt-1 cursor-pointer"
+                            checked={selectedAddressId === (addr._id || addr.id)}
+                            onChange={() => setSelectedAddressId(addr._id || addr.id)}
+                          />
+                          <div>
+                            <span className="font-semibold text-[var(--text-primary)]">{addr.fullName}</span>
+                            <p className="text-sm text-gray-600 mt-1">{addr.phone}</p>
+                            <p className="text-sm text-[var(--text-secondary)] mt-1">
+                              {addr.addressLine}, {addr.region}
+                            </p>
+                          </div>
+                        </div>
+                      </label>
+                    ))
+                  )}
+                </div>
 
-            <div className="flex justify-end gap-3 mt-5">
-              <button
-                onClick={() => setShowAddressPopup(false)}
-                className="px-5 py-2 rounded-xl border-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveAddress}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white font-semibold"
-              >
-                Save
-              </button>
-            </div>
+                <div className="flex justify-between items-center mt-5">
+                  <button onClick={() => setIsAddingAddress(true)} className="text-[var(--color-primary)] font-semibold text-sm hover:underline">
+                    + Add New Address
+                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowAddressPopup(false)}
+                      className="px-5 py-2 rounded-xl border-2"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveAddress}
+                      className="px-5 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white font-semibold"
+                    >
+                      Use Selected
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

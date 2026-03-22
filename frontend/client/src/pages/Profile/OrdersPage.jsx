@@ -48,14 +48,14 @@ export default function OrdersPage() {
               className="p-4 rounded-xl border border-[var(--border)] flex items-center gap-4"
             >
               <img
-                src={order.items[0]?.product?.image || "https://via.placeholder.com/80"}
+                src={order.products?.[0]?.product?.images?.[0] || "https://via.placeholder.com/80"}
                 alt=""
                 className="w-20 h-20 rounded-lg object-cover"
               />
 
               <div className="flex-1">
                 <p className="font-semibold text-[var(--text-primary)]">
-                  {order.items[0]?.product?.name}
+                  {order.products?.[0]?.product?.name || "Product"}
                 </p>
                 <p className="text-sm text-[var(--text-secondary)]">
                   {new Date(order.createdAt).toLocaleDateString()}
@@ -65,7 +65,7 @@ export default function OrdersPage() {
               <div className="text-right">
                 <p className="text-sm text-[var(--text-primary)]">{order.status}</p>
                 <p className="font-semibold text-[var(--text-primary)]">
-                  ₹{order.totalAmount}
+                  ₹{order.total}
                 </p>
               </div>
             </div>

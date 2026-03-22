@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Star, TrendingUp, Award } from "lucide-react
 import Assets from "../assets/assets";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import ProductCard from "../components/product/ProductCard";
 
 export default function Hero() {
   const bgImages = [Assets.hero, Assets.hero1, Assets.hero2];
@@ -82,6 +83,47 @@ export default function Hero() {
     };
     fetchVendors();
   }, []);
+
+  const [justForYou, setJustForYou] = useState([]);
+  useEffect(() => {
+    const fetchJustForYou = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/products");
+        setJustForYou(res.data);
+      } catch (err) {
+        console.error("Failed to fetch just for you products:", err);
+      }
+    };
+    fetchJustForYou();
+  }, []);
+
+  const [timeLeft, setTimeLeft] = useState({ hours: 4, minutes: 23, seconds: 59 });
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        let { hours, minutes, seconds } = prev;
+        if (seconds > 0) {
+          seconds--;
+        } else {
+          seconds = 59;
+          if (minutes > 0) {
+            minutes--;
+          } else {
+            minutes = 59;
+            if (hours > 0) {
+              hours--;
+            } else {
+              hours = 23;
+            }
+          }
+        }
+        return { hours, minutes, seconds };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (val) => val.toString().padStart(2, '0');
 
 
   const SLIDE_DURATION = 5000;
@@ -256,10 +298,15 @@ export default function Hero() {
                 <TrendingUp className="text-white" size={28} />
               </div>
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-4">
                   Flash Sale
+                  <div className="flex items-center gap-1 text-xl font-mono text-white bg-amber-600 px-3 py-1 rounded-lg">
+                    <span>{formatTime(timeLeft.hours)}</span>:
+                    <span>{formatTime(timeLeft.minutes)}</span>:
+                    <span>{formatTime(timeLeft.seconds)}</span>
+                  </div>
                 </h2>
-                <p className="text-gray-600">Limited time offers</p>
+                <p className="text-gray-600 mt-1">Limited time offers</p>
               </div>
             </div>
             <button className="text-base font-semibold text-amber-600 hover:text-amber-700 px-6 py-2 rounded-full border-2 border-amber-600 hover:bg-amber-50 transition-all">
@@ -389,6 +436,23 @@ export default function Hero() {
         </div>
       </div>
     </section>
+
+      {/* JUST FOR YOU SECTION */}
+      <section className="py-16 px-4 bg-[var(--bg-main)]">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center mb-10 relative">
+            <h2 className="text-3xl font-bold text-gray-900 bg-[var(--bg-main)] px-6 z-10 relative text-center">
+              Just For You
+            </h2>
+            <div className="absolute left-0 right-0 top-1/2 h-px bg-gray-300 -z-0"></div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {justForYou.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
 
 
     </>

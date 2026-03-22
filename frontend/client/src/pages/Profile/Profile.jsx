@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, Mail, Lock, Shield, LogOut } from "lucide-react";
+import { User, Mail, Lock, LogOut } from "lucide-react";
 import { getUserProfile, updateUserProfile } from "../../services/userService";
 
 export default function ProfilePage() {
@@ -103,14 +103,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Account Type */}
-            <div className="mb-4 relative">
-              <label className="block mb-1 font-semibold text-sm" style={{ color: "var(--text-secondary)" }}>Account Type</label>
-              <div className="flex items-center gap-2">
-                <Shield size={18} />
-                <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{userData.accountType}</span>
-              </div>
-            </div>
 
             {/* Password */}
             <div className="mb-4 relative">

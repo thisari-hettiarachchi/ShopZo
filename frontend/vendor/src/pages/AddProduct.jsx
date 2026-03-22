@@ -11,6 +11,7 @@ export default function AddProductPage() {
     stock: "",
     status: "Available",
     description: "",
+    image: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -27,6 +28,7 @@ export default function AddProductPage() {
         ...form,
         price: Number(form.price),
         stock: Number(form.stock),
+        images: form.image ? [form.image] : ["https://via.placeholder.com/150"],
       });
       navigate("/products");
     } catch (error) {
@@ -115,6 +117,16 @@ export default function AddProductPage() {
               placeholder="50"
               inputMode="numeric"
               required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Image URL</label>
+            <input
+              value={form.image}
+              onChange={onChange("image")}
+              className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              placeholder="https://example.com/image.jpg"
             />
           </div>
 

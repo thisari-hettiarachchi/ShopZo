@@ -1,17 +1,17 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  items: [
+  products: [
     {
       product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-      vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Vendor" },
-      qty: Number,
+      quantity: { type: Number, required: true },
       price: Number,
     },
   ],
-  totalAmount: Number,
-  status: { type: String, default: "pending" },
+  vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Vendor" },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  total: { type: Number, required: true },
+  status: { type: String, default: "Pending" },
 }, { timestamps: true });
 
 export default mongoose.model("Order", orderSchema);

@@ -8,7 +8,7 @@ export const getVendorOrders = async (req, res) => {
 
     const orders = await Order.find({ vendor: vendorId })
       .populate("user", "name email")
-      .populate("products.product", "name price image")
+      .populate("products.product", "name price images")
       .sort({ createdAt: -1 });
 
     res.json(orders);

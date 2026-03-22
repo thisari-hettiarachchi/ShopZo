@@ -20,7 +20,7 @@ export const addVendorProduct = async (req, res) => {
     const vendorId = req.user?.id;
     if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
 
-    const { name, price, description, stock, category, image } = req.body;
+    const { name, price, description, stock, category, images, sizes, rating, oldPrice, discount } = req.body;
 
     const newProduct = new Product({
       name,
@@ -28,7 +28,11 @@ export const addVendorProduct = async (req, res) => {
       description,
       stock,
       category: category || "General",
-      image: image || "📦", // Temporary placeholder or icon
+      images: images && images.length > 0 ? images : ["https://via.placeholder.com/150"],
+      sizes: sizes && sizes.length > 0 ? sizes : ["S", "M", "L"],
+      rating: rating || 0,
+      oldPrice: oldPrice || null,
+      discount: discount || 0,
       vendor: vendorId,
     });
 
@@ -51,14 +55,18 @@ export const updateVendorProduct = async (req, res) => {
     const product = await Product.findOne({ _id: id, vendor: vendorId });
     if (!product) return res.status(404).json({ message: "Product not found or unauthorized" });
 
-    const { name, price, description, stock, category, image } = req.body;
+    const { name, price, description, stock, category, images, sizes, rating, oldPrice, discount } = req.body;
     
     product.name = name !== undefined ? name : product.name;
     product.price = price !== undefined ? price : product.price;
     product.description = description !== undefined ? description : product.description;
     product.stock = stock !== undefined ? stock : product.stock;
     product.category = category !== undefined ? category : product.category;
-    product.image = image !== undefined ? image : product.image;
+    product.images = images !== undefined ? images : product.images;
+    product.sizes = sizes !== undefined ? sizes : product.sizes;
+    product.rating = rating !== undefined ? rating : product.rating;
+    product.oldPrice = oldPrice !== undefined ? oldPrice : product.oldPrice;
+    product.discount = discount !== undefined ? discount : product.discount;
 
     await product.save();
     res.json(product);

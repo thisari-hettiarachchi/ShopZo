@@ -1,7 +1,7 @@
 import { Star } from "lucide-react";
 
 export default function ReviewsPage() {
-  const reviews = []; // Database model not yet implemented
+  const reviews = [];
 
   return (
     <div className="p-6">

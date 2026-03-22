@@ -113,8 +113,12 @@ export default function ProductsPage() {
               key={product._id}
             className="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden hover:shadow-md transition"
           >
-            <div className="aspect-video bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-6xl">
-              {product.image}
+            <div className="aspect-video bg-[var(--bg-muted)] flex items-center justify-center overflow-hidden">
+              <img 
+                src={product.images?.[0] || "https://via.placeholder.com/300x200"} 
+                alt={product.name} 
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="p-5">
               <div className="flex justify-between items-start mb-2">
