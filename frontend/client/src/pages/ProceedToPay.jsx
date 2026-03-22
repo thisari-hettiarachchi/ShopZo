@@ -6,6 +6,7 @@ import {
   setDefaultCardApi,
 } from "../services/paymentService";
 import { createOrder } from "../services/orderService";
+import { clearCartApi } from "../api/cartApi";
 import { useNavigate } from "react-router-dom";
 
 
@@ -101,6 +102,13 @@ export default function ProceedToPay() {
       return;
     }
 
+    // Payment validation for Card method
+    if (method === "card" && !selectedCardId) {
+      alert("Please select or add a credit/debit card to proceed with this payment method.");
+      if (cards.length === 0) setShowAddCard(true);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
 
@@ -128,7 +136,13 @@ export default function ProceedToPay() {
 
       alert("Order placed successfully!");
 
-      // Clear cart
+      // Clear cart locally and in DB
+      try {
+        await clearCartApi(token);
+      } catch (err) {
+        console.error("Failed to clear cart on server:", err);
+      }
+
       localStorage.removeItem("cart");
       setCartItems([]);
       window.dispatchEvent(new Event("cartUpdated"));

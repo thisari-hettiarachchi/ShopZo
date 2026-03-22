@@ -18,8 +18,8 @@ export default function ProfilePage() {
         setUserData({
           name: res.data.name,
           email: res.data.email,
-          accountType: res.data.role, 
-          password: "", 
+          accountType: res.data.role,
+          password: "",
         });
       } catch (err) {
         alert(err.response?.data?.message || "Failed to fetch profile");
@@ -46,7 +46,7 @@ export default function ProfilePage() {
   const handleSave = async () => {
     try {
       const updateData = { ...userData };
-      if (!updateData.password) delete updateData.password; 
+      if (!updateData.password) delete updateData.password;
       const res = await updateUserProfile(updateData);
       setUserData({
         ...res.data.user,
@@ -68,7 +68,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen flex justify-center items-start p-6" style={{ backgroundColor: "var(--bg-main)" }}>
       <div className="w-full max-w-3xl p-8 rounded-2xl shadow-2xl" style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 10px 40px var(--shadow)" }}>
-        
+
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Profile</h1>
           <button onClick={handleLogout} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg" style={{ color: "white", background: "linear-gradient(to right, var(--color-primary), var(--color-secondary))" }}>
