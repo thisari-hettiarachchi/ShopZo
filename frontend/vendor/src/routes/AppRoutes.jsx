@@ -8,6 +8,7 @@ import CustomersPage from "../pages/CustomersPage";
 import AnalyticsPage from "../pages/AnalyticsPage";
 import ReviewsPage from "../pages/ReviewsPage";
 import VendorProfilePage from "../pages/VendorProfile";
+import EditProfilePage from "../pages/EditProfile";
 import AuthPages from "../pages/Auth";
 
 const getActiveFromPath = (pathname) => {
@@ -54,6 +55,7 @@ function VendorDashboardShell() {
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/profile" element={<VendorProfilePage />} />
+          <Route path="/profile/edit" element={<EditProfilePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
