@@ -3,6 +3,7 @@ import Sidebar from "../components/shared/SideBar";
 import Dashboard from "../pages/Dashboard";
 import ProductsPage from "../pages/Products";
 import AddProductPage from "../pages/AddProduct";
+import EditProductPage from "../pages/EditProduct";
 import OrdersPage from "../pages/Orders";
 import CustomersPage from "../pages/CustomersPage";
 import AnalyticsPage from "../pages/AnalyticsPage";
@@ -45,11 +46,12 @@ function VendorDashboardShell() {
     <div className="flex min-h-screen">
       <Sidebar active={active} />
 
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto ml-64">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/new" element={<AddProductPage />} />
+          <Route path="/products/edit/:id" element={<EditProductPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />

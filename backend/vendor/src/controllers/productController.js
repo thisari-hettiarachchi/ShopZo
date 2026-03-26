@@ -56,7 +56,21 @@ export const updateVendorProduct = async (req, res) => {
     if (!product) return res.status(404).json({ message: "Product not found or unauthorized" });
 
     const { name, price, description, stock, category, images, sizes, rating, oldPrice, discount } = req.body;
-    
+
+    // Validate required fields
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return res.status(400).json({ message: "Images are required and must be a non-empty array." });
+    }
+    if (!sizes || !Array.isArray(sizes) || sizes.length === 0) {
+      return res.status(400).json({ message: "Sizes are required and must be a non-empty array." });
+    }
+    if (rating === undefined || rating === null) {
+      return res.status(400).json({ message: "Rating is required." });
+    }
+    if (!category || typeof category !== "string" || category.trim() === "") {
+      return res.status(400).json({ message: "Category is required." });
+    }
+
     product.name = name !== undefined ? name : product.name;
     product.price = price !== undefined ? price : product.price;
     product.description = description !== undefined ? description : product.description;

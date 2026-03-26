@@ -12,6 +12,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import Assets from '../../assets/assets'
 
 export default function Sidebar({ active }) {
   const [theme, setTheme] = useState("light");
@@ -41,14 +42,12 @@ export default function Sidebar({ active }) {
     ? vendor.storeName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0,2)
     : "V";
 
-  return (
-    <aside className="w-64 h-screen sticky top-0 bg-[var(--bg-card)] border-r border-[var(--border)] p-6 flex flex-col">
+    return (
+      <aside className="w-64 h-screen fixed top-0 left-0 bg-[var(--bg-card)] border-r border-[var(--border)] p-6 flex flex-col z-40">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">VendorHub</h1>
-        <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-[var(--bg-muted)] transition">
-          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-        </button>
+        <img src={Assets.logo} alt="ShopZo" className="h-8 w-auto" />
+        <h1 className="text-2xl font-bold text-[var(--color-primary)]">ShopZo</h1>
       </div>
 
       {/* Navigation */}

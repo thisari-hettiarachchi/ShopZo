@@ -80,14 +80,7 @@ export default function ProductsPage() {
           <Plus size={18} />
           Add
         </button>
-        <button className="px-4 py-2 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-muted)] flex items-center gap-2">
-          <Filter size={18} />
-          Filter
-        </button>
-        <button className="px-4 py-2 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-muted)] flex items-center gap-2">
-          <Download size={18} />
-          Export
-        </button>
+        {/* Filter and Export buttons removed */}
       </div>
 
       {/* Products Grid */}
@@ -141,7 +134,10 @@ export default function ProductsPage() {
                 <span className="text-sm text-[var(--text-secondary)]">Stock: {product.stock}</span>
               </div>
               <div className="flex gap-2">
-                <button className="flex-1 px-3 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 flex items-center justify-center gap-2">
+                <button
+                  className="flex-1 px-3 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 flex items-center justify-center gap-2"
+                  onClick={() => navigate(`/products/edit/${product._id}`)}
+                >
                   <Edit size={16} /> Edit
                 </button>
                 <button className="px-3 py-2 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-muted)] flex items-center justify-center">
