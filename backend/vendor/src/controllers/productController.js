@@ -1,3 +1,19 @@
+// Get a single product for the logged-in vendor
+export const getVendorProductById = async (req, res) => {
+  try {
+    const vendorId = req.user?.id;
+    const { id } = req.params;
+    if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
+
+    const product = await Product.findOne({ _id: id, vendor: vendorId });
+    if (!product) return res.status(404).json({ message: "Product not found or unauthorized" });
+
+    res.json(product);
+  } catch (error) {
+    console.error("Error fetching product by id:", error);
+    res.status(500).json({ message: "Failed to fetch product" });
+  }
+};
 import Product from "../models/Product.js";
 
 // Get all products for the logged-in vendor

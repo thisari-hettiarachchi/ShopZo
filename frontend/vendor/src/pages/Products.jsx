@@ -140,7 +140,10 @@ export default function ProductsPage() {
                 >
                   <Edit size={16} /> Edit
                 </button>
-                <button className="px-3 py-2 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-muted)] flex items-center justify-center">
+                <button 
+                  className="px-3 py-2 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-muted)] flex items-center justify-center"
+                  onClick={() => navigate(`/products/${product._id}`)}
+                >
                   <Eye size={16} />
                 </button>
                 <button 

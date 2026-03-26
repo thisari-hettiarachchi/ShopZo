@@ -4,6 +4,7 @@ import Dashboard from "../pages/Dashboard";
 import ProductsPage from "../pages/Products";
 import AddProductPage from "../pages/AddProduct";
 import EditProductPage from "../pages/EditProduct";
+import ProductDetailsPage from "../pages/ProductDetails";
 import OrdersPage from "../pages/Orders";
 import CustomersPage from "../pages/CustomersPage";
 import AnalyticsPage from "../pages/AnalyticsPage";
@@ -52,6 +53,7 @@ function VendorDashboardShell() {
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/new" element={<AddProductPage />} />
           <Route path="/products/edit/:id" element={<EditProductPage />} />
+          <Route path="/products/:id" element={<ProductDetailsPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
