@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Search,
@@ -20,8 +20,48 @@ import Assets from '../../assets/assets'
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    category: "",
+    vendor: "",
+    priceMin: "",
+    priceMax: "",
+    rating: "",
+    availability: "",
+    color: "",
+    size: "",
+  });
+  const [sortBy, setSortBy] = useState("popularity");
+  const searchDropdownRef = useRef(null);
+  const [showFilters, setShowFilters] = useState(false);
+    // Example: categories, vendors, colors, sizes for dropdowns (replace with real data or fetch from API)
+    const categories = ["Electronics", "Clothing", "Books", "Home"];
+    const vendors = ["Vendor A", "Vendor B", "Vendor C"];
+    const colors = ["Red", "Blue", "Green", "Black"];
+    const sizes = ["S", "M", "L", "XL"];
+    // Close search dropdown on outside click
+    useEffect(() => {
+      function handleClickOutside(event) {
+        if (searchDropdownRef.current && !searchDropdownRef.current.contains(event.target)) {
+          setIsSearchOpen(false);
+        }
+      }
+      if (isSearchOpen) {
+        document.addEventListener("mousedown", handleClickOutside);
+      } else {
+        document.removeEventListener("mousedown", handleClickOutside);
+      }
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isSearchOpen]);
   const [activeMenu, setActiveMenu] = useState('home')
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Read theme from localStorage or system preference
+    const stored = localStorage.getItem('theme');
+    if (stored === 'dark') return true;
+    if (stored === 'light') return false;
+    // fallback to system preference
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
 
   const [cartCount, setCartCount] = useState(0)
   const [wishlistCount, setWishlistCount] = useState(0)
@@ -63,11 +103,13 @@ export default function Navbar() {
 
   useEffect(() => {
     if (isDarkMode) {
-      document.documentElement.setAttribute('data-theme', 'dark')
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.removeAttribute('data-theme')
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
     }
-  }, [isDarkMode])
+  }, [isDarkMode]);
 
   const mainMenuItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/' },
@@ -123,10 +165,11 @@ export default function Navbar() {
 
           {/* RIGHT ICONS */}
           <div className="flex items-center gap-2">
-            {/* SEARCH */}
+            {/* SEARCH ICON (always visible) */}
             <button
-              className="p-2 rounded-full btn-icon md:hidden"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="p-2 rounded-full btn-icon"
+              onClick={() => setIsSearchOpen((v) => !v)}
+              aria-label="Open search"
             >
               <Search size={20} />
             </button>
@@ -201,14 +244,66 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* MOBILE SEARCH */}
+        {/* SEARCH & FILTER DROPDOWN */}
         {isSearchOpen && (
-          <div className="md:hidden mt-3">
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="w-full px-4 py-2 rounded-full search-input"
-            />
+          <div ref={searchDropdownRef} className="absolute left-0 right-0 mx-auto max-w-xl w-full mt-4 z-50 bg-[var(--bg-card)] border rounded-2xl shadow-lg p-6">
+            <div className="flex flex-col gap-3">
+              <input
+                type="text"
+                placeholder="Search by name..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border"
+              />
+              <div className="flex flex-wrap gap-2 items-center">
+                <button
+                  className="px-4 py-2 rounded-lg border bg-[var(--bg-muted)] text-[var(--color-primary)] font-medium"
+                  onClick={() => setShowFilters(v => !v)}
+                >
+                  {showFilters ? 'Hide Filters' : 'Show Filters'}
+                </button>
+                <select className="border rounded-lg px-2 py-1" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                  <option value="popularity">Popularity</option>
+                  <option value="newest">Newest</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="discount">Discount</option>
+                </select>
+                <button className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white" onClick={() => {/* TODO: trigger search/filter action */}}>Search</button>
+              </div>
+              {showFilters && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <select className="border rounded-lg px-2 py-1" value={filters.category} onChange={e => setFilters(f => ({...f, category: e.target.value}))}>
+                    <option value="">Category</option>
+                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                  <select className="border rounded-lg px-2 py-1" value={filters.vendor} onChange={e => setFilters(f => ({...f, vendor: e.target.value}))}>
+                    <option value="">Vendor</option>
+                    {vendors.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                  <input type="number" placeholder="Min Price" className="border rounded-lg px-2 py-1 w-20" value={filters.priceMin} onChange={e => setFilters(f => ({...f, priceMin: e.target.value}))} />
+                  <input type="number" placeholder="Max Price" className="border rounded-lg px-2 py-1 w-20" value={filters.priceMax} onChange={e => setFilters(f => ({...f, priceMax: e.target.value}))} />
+                  <select className="border rounded-lg px-2 py-1" value={filters.rating} onChange={e => setFilters(f => ({...f, rating: e.target.value}))}>
+                    <option value="">Rating</option>
+                    {[5,4,3,2,1].map(r => <option key={r} value={r}>{r} & Up</option>)}
+                  </select>
+                  <select className="border rounded-lg px-2 py-1" value={filters.availability} onChange={e => setFilters(f => ({...f, availability: e.target.value}))}>
+                    <option value="">Availability</option>
+                    <option value="Available">Available</option>
+                    <option value="Limited">Limited</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                  </select>
+                  <select className="border rounded-lg px-2 py-1" value={filters.color} onChange={e => setFilters(f => ({...f, color: e.target.value}))}>
+                    <option value="">Color</option>
+                    {colors.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <select className="border rounded-lg px-2 py-1" value={filters.size} onChange={e => setFilters(f => ({...f, size: e.target.value}))}>
+                    <option value="">Size</option>
+                    {sizes.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

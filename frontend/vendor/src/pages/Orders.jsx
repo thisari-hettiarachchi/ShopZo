@@ -34,40 +34,40 @@ export default function OrdersPage() {
     }
   };
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Orders</h2>
-      <div className="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
+    <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
+      <h2 className="text-3xl font-extrabold mb-8 text-[var(--color-primary)]">Orders</h2>
+      <div className="bg-[var(--bg-card)] rounded-3xl shadow-lg border border-[var(--border)] overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center p-12 text-[var(--text-secondary)]">
+          <div className="flex items-center justify-center p-16 text-[var(--text-secondary)]">
             <Loader className="animate-spin mr-2" />
             Loading orders...
           </div>
         ) : orders.length === 0 ? (
-          <div className="p-12 text-center text-[var(--text-secondary)]">
+          <div className="p-16 text-center text-[var(--text-secondary)]">
             No orders found.
           </div>
         ) : (
           orders.map((order) => (
-            <div key={order._id}>
+            <div key={order._id} className="hover:bg-[var(--bg-muted)] transition-all duration-200">
               <div
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-[var(--border)] last:border-b-0 gap-4 cursor-pointer hover:bg-[var(--bg-muted)]"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-6 border-b border-[var(--border)] last:border-b-0 gap-4 cursor-pointer"
                 onClick={() => setExpandedOrderId(expandedOrderId === order._id ? null : order._id)}
               >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-[var(--bg-muted)] rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-[var(--bg-muted)] rounded-xl shadow-sm">
                     <ShoppingBag size={20} className="text-[var(--color-primary)]" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Order #{order._id.slice(-6).toUpperCase()}</p>
+                    <p className="text-base font-semibold">Order #{order._id.slice(-6).toUpperCase()}</p>
                     <p className="text-xs text-[var(--text-secondary)]">{order.user?.name || "Unknown Customer"}</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
-                  <span className="font-semibold">${order.total}</span>
+                <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                  <span className="font-bold text-lg">${order.total}</span>
                   <select
                     value={order.status}
                     onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium border-0 cursor-pointer outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
+                    className={`px-4 py-2 rounded-xl text-base font-semibold border-0 cursor-pointer outline-none focus:ring-2 focus:ring-[var(--color-primary)] shadow-sm ${
                       order.status === "Delivered"
                         ? "bg-green-100 text-green-800"
                         : order.status === "Pending"
@@ -85,34 +85,34 @@ export default function OrdersPage() {
                 </div>
               </div>
               {expandedOrderId === order._id && (
-                <div className="bg-[var(--bg-muted)] p-4 border-b border-[var(--border)]">
-                  <div className="mb-2">
+                <div className="bg-[var(--bg-muted)] p-6 border-b border-[var(--border)] rounded-b-2xl">
+                  <div className="mb-3">
                     <span className="font-semibold">Customer:</span> {order.user?.name || "Unknown Customer"} ({order.user?.email || "No email"})
                   </div>
-                  <div className="mb-2">
+                  <div className="mb-3">
                     <span className="font-semibold">Order Date:</span> {order.createdAt ? new Date(order.createdAt).toLocaleString() : "-"}
                   </div>
-                  <div className="mb-2">
+                  <div className="mb-3">
                     <span className="font-semibold">Products:</span>
                     <ul className="ml-0">
                       {order.products?.map((item, idx) => (
-                        <li key={idx} className="flex items-center gap-3 mb-2">
+                        <li key={idx} className="flex items-center gap-4 mb-2">
                           {item.product?.images?.[0] && (
                             <img
                               src={item.product.images[0]}
                               alt={item.product?.name || "Product"}
-                              className="w-12 h-12 object-cover rounded border"
+                              className="w-14 h-14 object-cover rounded-xl border"
                             />
                           )}
                           <div>
-                            <div className="font-medium">{item.product?.name || "Product"}</div>
+                            <div className="font-semibold text-base">{item.product?.name || "Product"}</div>
                             <div className="text-xs text-[var(--text-secondary)]">x{item.quantity} (${item.price} each)</div>
                           </div>
                         </li>
                       ))}
                     </ul>
                   </div>
-                  <div className="mb-2">
+                  <div className="mb-3">
                     <span className="font-semibold">Total:</span> ${order.total}
                   </div>
                   <div>

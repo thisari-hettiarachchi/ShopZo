@@ -48,14 +48,14 @@ export default function ProductDetailsPage() {
   }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-6 md:p-10 max-w-2xl mx-auto bg-[var(--bg-main)] min-h-screen">
       <button
-        className="mb-4 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg"
+        className="mb-6 px-6 py-3 bg-[var(--color-primary)] text-white rounded-xl shadow-md hover:opacity-90"
         onClick={() => navigate(-1)}
       >
         <ArrowLeft size={16} className="inline mr-2" /> Back
       </button>
-      <div className="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
+      <div className="bg-[var(--bg-card)] rounded-3xl shadow-lg border border-[var(--border)] overflow-hidden">
         <div className="aspect-video bg-[var(--bg-muted)] flex items-center justify-center overflow-hidden">
           <img
             src={product.images?.[0] || "https://via.placeholder.com/300x200"}
@@ -63,16 +63,16 @@ export default function ProductDetailsPage() {
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
-          <p className="mb-2 text-[var(--text-secondary)]">{product.description}</p>
-          <div className="flex gap-4 mb-2">
-            <span className="text-lg font-semibold text-[var(--color-primary)]">${product.price}</span>
-            <span className="text-sm text-[var(--text-secondary)]">Stock: {product.stock}</span>
-            <span className="text-sm text-[var(--text-secondary)]">Status: {product.status}</span>
+        <div className="p-8">
+          <h2 className="text-3xl font-extrabold mb-4 text-[var(--color-primary)]">{product.name}</h2>
+          <p className="mb-4 text-[var(--text-secondary)] text-lg">{product.description}</p>
+          <div className="flex flex-wrap gap-6 mb-4">
+            <span className="text-2xl font-bold text-[var(--color-primary)]">${product.price}</span>
+            <span className="text-base text-[var(--text-secondary)]">Stock: {product.stock}</span>
+            <span className="text-base text-[var(--text-secondary)]">Status: {product.status}</span>
           </div>
-          <div className="text-sm text-[var(--text-secondary)] mb-2">Category: {product.category?.name || product.category}</div>
-          <div className="text-sm text-[var(--text-secondary)]">Rating: {product.rating || 0} | Sales: {product.sales || 0}</div>
+          <div className="text-base text-[var(--text-secondary)] mb-2">Category: {product.category?.name || product.category}</div>
+          <div className="text-base text-[var(--text-secondary)]">Rating: {product.rating || 0} | Sales: {product.sales || 0}</div>
         </div>
       </div>
     </div>
