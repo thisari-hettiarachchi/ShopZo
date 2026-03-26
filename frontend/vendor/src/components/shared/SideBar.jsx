@@ -15,11 +15,15 @@ import {
 import Assets from '../../assets/assets'
 
 export default function Sidebar({ active }) {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "light";
+  });
   const navigate = useNavigate();
 
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
   };
 
   useEffect(() => {
@@ -28,6 +32,7 @@ export default function Sidebar({ active }) {
     } else {
       document.documentElement.removeAttribute("data-theme");
     }
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   // Get vendor info from localStorage

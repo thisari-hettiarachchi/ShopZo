@@ -15,19 +15,24 @@ import Assets from '../../assets/assets'
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const navigate = useNavigate()
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const stored = localStorage.getItem('theme');
+    return stored === 'dark';
+  });
+  const navigate = useNavigate();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'))
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
-      document.documentElement.setAttribute('data-theme', 'dark')
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.removeAttribute('data-theme')
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
     }
-  }, [isDarkMode])
+  }, [isDarkMode]);
 
   const mainMenuItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/' },
