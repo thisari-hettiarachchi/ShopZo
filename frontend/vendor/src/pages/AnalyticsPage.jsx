@@ -21,8 +21,11 @@ export default function AnalyticsPage() {
     fetchAnalytics();
   }, []);
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Analytics</h2>
+    <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
+      <h2 className="text-3xl font-extrabold text-[var(--color-primary)]">Analytics</h2>
+      <p className="mt-1 mb-10 text-sm text-[var(--text-secondary)]">
+        Analyze performance, track sales trends, and gain insights to grow your business.
+      </p>
       <div className="bg-[var(--bg-card)] p-6 rounded-xl shadow-sm border border-[var(--border)]">
         <h3 className="text-lg font-semibold mb-4">Monthly Sales</h3>
         {loading ? (

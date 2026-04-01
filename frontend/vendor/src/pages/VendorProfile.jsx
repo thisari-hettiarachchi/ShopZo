@@ -69,9 +69,9 @@ export default function VendorProfilePage() {
   return (
     <div className="mx-auto max-w-5xl px-4 pb-10 pt-3 md:px-6">
       <div className="mb-6 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)]/80 px-5 py-5 shadow-[0_18px_44px_-30px_var(--shadow)] backdrop-blur md:px-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">Vendor Identity</p>
-        <h2 className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">Store Profile</h2>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">View your store details and public appearance.</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] mb-4 text-[var(--text-secondary)]">Vendor Identity</p>
+        <h2 className="text-3xl font-extrabold mb-4 text-[var(--color-primary)]">Store Profile</h2>
+        <p className="text-sm text-[var(--text-secondary)]">View your store details and public appearance.</p>
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_22px_56px_-34px_var(--shadow)]">

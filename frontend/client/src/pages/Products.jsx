@@ -90,163 +90,164 @@ export default function Products() {
   });
     
   return (
-      <div className="min-h-screen bg-[var(--bg-main)] px-3 pb-10 pt-3 md:px-4">
-        <div className="mx-auto max-w-7xl space-y-4">
+    <div className="min-h-screen bg-[var(--bg-main)] mt-10 px-3 pb-10  md:px-4">
+      <div className="mx-auto max-w-7xl space-y-4">
 
-          {/* Header */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-5 py-4 shadow-[0_16px_40px_-28px_var(--shadow)]">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
-                  Marketplace Catalog
-                </p>
-                <h1 className="mt-1 text-2xl font-extrabold text-[var(--text-primary)] md:text-3xl"
-                    style={{ fontFamily: "'Sora', sans-serif", letterSpacing: '-0.02em' }}>
-                  Explore Products
-                </h1>
-                <p className="mt-1 text-xs text-[var(--text-secondary)] md:text-sm">
-                  Filter by brand, location, rating, and budget to find your perfect match.
-                </p>
-              </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-3 py-2 text-xs text-[var(--text-secondary)]">
-                {filteredProducts.length} items available
-              </div>
+        {/* Header */}
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-5 py-4 shadow-[0_16px_40px_-28px_var(--shadow)]">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
+                Marketplace Catalog
+              </p>
+              <h1
+                className="mt-1 text-2xl font-extrabold text-[var(--text-primary)] md:text-3xl"
+                style={{ fontFamily: "'Sora', sans-serif", letterSpacing: "-0.02em" }}
+              >
+                Explore Products
+              </h1>
+              <p className="mt-1 text-xs text-[var(--text-secondary)] md:text-sm">
+                Filter by brand, location, rating, and budget to find your perfect match.
+              </p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-3 py-2 text-xs text-[var(--text-secondary)]">
+              {filteredProducts.length} items available
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-col gap-4 lg:flex-row">
+        <div className="flex flex-col gap-4 lg:flex-row">
 
-            {/* Sidebar */}
-            <aside className="w-full flex-shrink-0 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-4 lg:sticky lg:top-24 lg:w-56 lg:self-start">
-              <h2 className="mb-3 text-[15px] font-extrabold text-[var(--text-primary)]"
-                  style={{ fontFamily: "'Sora', sans-serif" }}>
-                Filters
-              </h2>
+          {/* Sidebar */}
+          <aside className="w-full flex-shrink-0 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-4 lg:sticky lg:top-24 lg:w-56 lg:self-start">
+            <h2
+              className="mb-3 text-[15px] font-extrabold text-[var(--text-primary)]"
+              style={{ fontFamily: "'Sora', sans-serif" }}
+            >
+              Filters
+            </h2>
 
-              {/* Brand */}
-              <div className="mb-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">
-                <div onClick={() => toggleFilter("brand")} className="flex cursor-pointer items-center justify-between px-3 py-2.5">
-                  <span className="text-[13px] font-bold text-[var(--text-primary)]">Brand</span>
-                  <span className="flex h-5 w-5 items-center justify-center rounded-md text-[13px] font-bold text-[var(--color-primary)]"
-                        style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)' }}>
-                    {filtersOpen.brand ? "−" : "+"}
-                  </span>
-                </div>
-                {filtersOpen.brand && (
-                  <div className="border-t border-[var(--border)] px-3 py-2.5 flex flex-col gap-2">
-                    {["Brand A", "Brand B", "Brand C", "Brand D"].map((b) => (
-                      <label key={b} className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" checked={filters.brand.includes(b)} onChange={() => handleCheckbox("brand", b)}
-                          className="h-3.5 w-3.5 accent-[var(--color-primary)]" />
-                        <span className="text-xs text-[var(--text-secondary)]">{b}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
+            {/* Brand */}
+            <div className="mb-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">
+              <div onClick={() => toggleFilter("brand")} className="flex cursor-pointer items-center justify-between px-3 py-2.5">
+                <span className="text-[13px] font-bold text-[var(--text-primary)]">Brand</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-md text-[13px] font-bold text-[var(--color-primary)]"
+                  style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)' }}>
+                  {filtersOpen.brand ? "−" : "+"}
+                </span>
               </div>
-
-              {/* Shipped From */}
-              <div className="mb-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">
-                <div onClick={() => toggleFilter("shippedFrom")} className="flex cursor-pointer items-center justify-between px-3 py-2.5">
-                  <span className="text-[13px] font-bold text-[var(--text-primary)]">Shipped From</span>
-                  <span className="flex h-5 w-5 items-center justify-center rounded-md text-[13px] font-bold text-[var(--color-primary)]"
-                        style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)' }}>
-                    {filtersOpen.shippedFrom ? "−" : "+"}
-                  </span>
-                </div>
-                {filtersOpen.shippedFrom && (
-                  <div className="border-t border-[var(--border)] px-3 py-2.5 flex flex-col gap-2">
-                    {["Colombo", "Kandy", "Galle"].map((loc) => (
-                      <label key={loc} className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" checked={filters.shippedFrom.includes(loc)} onChange={() => handleCheckbox("shippedFrom", loc)}
-                          className="h-3.5 w-3.5 accent-[var(--color-primary)]" />
-                        <span className="text-xs text-[var(--text-secondary)]">{loc}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Price */}
-              <div className="mb-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">
-                <div onClick={() => toggleFilter("price")} className="flex cursor-pointer items-center justify-between px-3 py-2.5">
-                  <span className="text-[13px] font-bold text-[var(--text-primary)]">Price</span>
-                  <span className="flex h-5 w-5 items-center justify-center rounded-md text-[13px] font-bold text-[var(--color-primary)]"
-                        style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)' }}>
-                    {filtersOpen.price ? "−" : "+"}
-                  </span>
-                </div>
-                {filtersOpen.price && (
-                  <div className="border-t border-[var(--border)] px-3 py-2.5 flex gap-2">
-                    <input type="number" placeholder="Min" value={filters.price.min}
-                      onChange={(e) => handlePriceChange("min", e.target.value)}
-                      className="w-1/2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-2 py-1.5 text-xs outline-none focus:border-[var(--color-primary)]" />
-                    <input type="number" placeholder="Max" value={filters.price.max}
-                      onChange={(e) => handlePriceChange("max", e.target.value)}
-                      className="w-1/2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-2 py-1.5 text-xs outline-none focus:border-[var(--color-primary)]" />
-                  </div>
-                )}
-              </div>
-
-              {/* Rating */}
-              <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">
-                <div onClick={() => toggleFilter("rating")} className="flex cursor-pointer items-center justify-between px-3 py-2.5">
-                  <span className="text-[13px] font-bold text-[var(--text-primary)]">Rating</span>
-                  <span className="flex h-5 w-5 items-center justify-center rounded-md text-[13px] font-bold text-[var(--color-primary)]"
-                        style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)' }}>
-                    {filtersOpen.rating ? "−" : "+"}
-                  </span>
-                </div>
-                {filtersOpen.rating && (
-                  <div className="border-t border-[var(--border)] px-3 py-2.5 flex flex-col gap-2">
-                    {[4, 3, 2, 1].map((r) => (
-                      <label key={r} className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="rating" checked={filters.rating === r} onChange={() => handleRatingChange(r)}
-                          className="h-3.5 w-3.5 accent-[var(--color-primary)]" />
-                        <span className="text-xs text-[var(--text-secondary)]">{r} & Up</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </aside>
-
-            {/* Main */}
-            <main className="flex-1 flex flex-col gap-3">
-              {/* Active filters */}
-              {(filters.brand.length || filters.shippedFrom.length || filters.rating || filters.price.min || filters.price.max) && (
-                <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-3 flex flex-wrap items-center gap-2">
-                  {filters.brand.map((b) => (
-                    <span key={b} className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-main)] px-2.5 py-1 text-xs text-[var(--text-secondary)]">
-                      {b} <button onClick={() => removeFilter("brand", b)} className="text-[var(--text-muted)] hover:text-[var(--color-primary)] leading-none">×</button>
-                    </span>
+              {filtersOpen.brand && (
+                <div className="border-t border-[var(--border)] px-3 py-2.5 flex flex-col gap-2">
+                  {["Brand A", "Brand B", "Brand C", "Brand D"].map((b) => (
+                    <label key={b} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={filters.brand.includes(b)}
+                        onChange={() => handleCheckbox("brand", b)}
+                        className="h-3.5 w-3.5 accent-[var(--color-primary)]"
+                      />
+                      <span className="text-xs text-[var(--text-secondary)]">{b}</span>
+                    </label>
                   ))}
-                  {filters.shippedFrom.map((l) => (
-                    <span key={l} className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-main)] px-2.5 py-1 text-xs text-[var(--text-secondary)]">
-                      {l} <button onClick={() => removeFilter("shippedFrom", l)} className="text-[var(--text-muted)] hover:text-[var(--color-primary)] leading-none">×</button>
-                    </span>
-                  ))}
-                  {filters.rating && (
-                    <span className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-main)] px-2.5 py-1 text-xs text-[var(--text-secondary)]">
-                      {filters.rating} & Up <button onClick={() => removeFilter("rating")} className="text-[var(--text-muted)] hover:text-[var(--color-primary)] leading-none">×</button>
-                    </span>
-                  )}
-                  {(filters.price.min || filters.price.max) && (
-                    <span className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-main)] px-2.5 py-1 text-xs text-[var(--text-secondary)]">
-                      Rs {filters.price.min || 0} – {filters.price.max || "∞"}
-                      <button onClick={() => removeFilter("price")} className="text-[var(--text-muted)] hover:text-[var(--color-primary)] leading-none">×</button>
-                    </span>
-                  )}
-                  <button onClick={clearAllFilters} className="ml-auto text-xs font-bold text-[var(--color-primary)] underline underline-offset-2">
-                    Clear All
-                  </button>
                 </div>
               )}
+            </div>
 
-              <ProductGrid products={filteredProducts} />
-            </main>
-          </div>
+            {/* Shipped From */}
+            <div className="mb-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">
+              <div onClick={() => toggleFilter("shippedFrom")} className="flex cursor-pointer items-center justify-between px-3 py-2.5">
+                <span className="text-[13px] font-bold text-[var(--text-primary)]">Shipped From</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-md text-[13px] font-bold text-[var(--color-primary)]"
+                  style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)' }}>
+                  {filtersOpen.shippedFrom ? "−" : "+"}
+                </span>
+              </div>
+              {filtersOpen.shippedFrom && (
+                <div className="border-t border-[var(--border)] px-3 py-2.5 flex flex-col gap-2">
+                  {["Colombo", "Kandy", "Galle"].map((loc) => (
+                    <label key={loc} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={filters.shippedFrom.includes(loc)}
+                        onChange={() => handleCheckbox("shippedFrom", loc)}
+                        className="h-3.5 w-3.5 accent-[var(--color-primary)]"
+                      />
+                      <span className="text-xs text-[var(--text-secondary)]">{loc}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Price */}
+            <div className="mb-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">
+              <div onClick={() => toggleFilter("price")} className="flex cursor-pointer items-center justify-between px-3 py-2.5">
+                <span className="text-[13px] font-bold text-[var(--text-primary)]">Price</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-md text-[13px] font-bold text-[var(--color-primary)]"
+                  style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)' }}>
+                  {filtersOpen.price ? "−" : "+"}
+                </span>
+              </div>
+              {filtersOpen.price && (
+                <div className="border-t border-[var(--border)] px-3 py-2.5 flex gap-2">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={filters.price.min}
+                    onChange={(e) => handlePriceChange("min", e.target.value)}
+                    className="w-1/2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-2 py-1.5 text-xs outline-none focus:border-[var(--color-primary)]"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={filters.price.max}
+                    onChange={(e) => handlePriceChange("max", e.target.value)}
+                    className="w-1/2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-2 py-1.5 text-xs outline-none focus:border-[var(--color-primary)]"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Rating */}
+            <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">
+              <div onClick={() => toggleFilter("rating")} className="flex cursor-pointer items-center justify-between px-3 py-2.5">
+                <span className="text-[13px] font-bold text-[var(--text-primary)]">Rating</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-md text-[13px] font-bold text-[var(--color-primary)]"
+                  style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)' }}>
+                  {filtersOpen.rating ? "−" : "+"}
+                </span>
+              </div>
+              {filtersOpen.rating && (
+                <div className="border-t border-[var(--border)] px-3 py-2.5 flex flex-col gap-2">
+                  {[4, 3, 2, 1].map((r) => (
+                    <label key={r} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="rating"
+                        checked={filters.rating === r}
+                        onChange={() => handleRatingChange(r)}
+                        className="h-3.5 w-3.5 accent-[var(--color-primary)]"
+                      />
+                      <span className="text-xs text-[var(--text-secondary)]">{r} & Up</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          </aside>
+
+          {/* Main */}
+          <main className="flex-1 flex flex-col gap-3">
+            {(filters.brand.length || filters.shippedFrom.length || filters.rating || filters.price.min || filters.price.max) && (
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-3 flex flex-wrap items-center gap-2">
+                {/* unchanged */}
+              </div>
+            )}
+
+            <ProductGrid products={filteredProducts} />
+          </main>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}

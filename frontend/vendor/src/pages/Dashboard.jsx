@@ -57,7 +57,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <section className="bg-[var(--bg-main)] text-[var(--text-primary)] px-6 pt-0 pb-8 md:px-10 md:pt-1 md:pb-10">
+    <section className="bg-[var(--bg-main)] text-[var(--text-primary)] px-6 mt-10 pb-8 md:px-10 md:pt-1 md:pb-10">
       <div className="space-y-8">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">

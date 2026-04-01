@@ -56,7 +56,7 @@ export default function ProductsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-3 md:px-10 md:pb-12">
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
       <div className="mx-auto max-w-7xl">
       {/* Search & Filter */}
       <div className="mb-8 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_20px_50px_-34px_var(--shadow)] md:p-6">
@@ -65,7 +65,7 @@ export default function ProductsPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
               Inventory Workspace
             </p>
-            <h1 className="mt-2 text-2xl font-semibold text-[var(--text-primary)] md:text-3xl">
+            <h1 className="mt-2 text-3xl font-extrabold text-[var(--color-primary)] md:text-3xl">
               Products
             </h1>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">

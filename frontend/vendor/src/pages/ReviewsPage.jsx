@@ -4,8 +4,11 @@ export default function ReviewsPage() {
   const reviews = [];
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Reviews</h2>
+    <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
+      <h2 className="text-3xl font-extrabold text-[var(--color-primary)]">Reviews</h2>
+      <p className="mt-1 mb-10 text-sm text-[var(--text-secondary)]">
+        Monitor feedback, respond to reviews, and improve customer satisfaction.
+      </p>
       <div className="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
         {reviews.length === 0 ? (
           <div className="p-12 text-center text-[var(--text-secondary)]">

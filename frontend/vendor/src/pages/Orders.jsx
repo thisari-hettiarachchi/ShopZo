@@ -35,7 +35,10 @@ export default function OrdersPage() {
   };
   return (
     <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
-      <h2 className="text-3xl font-extrabold mb-8 text-[var(--color-primary)]">Orders</h2>
+      <h2 className="text-3xl font-extrabold text-[var(--color-primary)]">Orders</h2>
+      <p className="mt-1 mb-10 text-sm text-[var(--text-secondary)]">
+        Track orders, manage deliveries, and handle order status efficiently.
+      </p>
       <div className="bg-[var(--bg-card)] rounded-3xl shadow-lg border border-[var(--border)] overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center p-16 text-[var(--text-secondary)]">

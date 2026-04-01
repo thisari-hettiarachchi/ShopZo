@@ -55,10 +55,7 @@ body,
 }
 
 body {
-  background:
-    radial-gradient(circle at 10% -10%, rgba(251, 146, 60, 0.22) 0%, rgba(251, 146, 60, 0) 42%),
-    radial-gradient(circle at 90% -20%, rgba(34, 211, 238, 0.2) 0%, rgba(34, 211, 238, 0) 45%),
-    linear-gradient(160deg, var(--bg-main) 0%, color-mix(in srgb, var(--bg-main) 88%, #ffffff 12%) 100%);
+  background: linear-gradient(160deg, var(--bg-main) 0%, color-mix(in srgb, var(--bg-main) 94%, #ffffff 6%) 100%);
   color: var(--text-primary);
   margin: 0;
   line-height: 1.6;
@@ -66,10 +63,7 @@ body {
 }
 
 [data-theme="dark"] body {
-  background:
-    radial-gradient(circle at 10% -10%, rgba(249, 115, 22, 0.2) 0%, rgba(249, 115, 22, 0) 44%),
-    radial-gradient(circle at 90% -30%, rgba(103, 232, 249, 0.16) 0%, rgba(103, 232, 249, 0) 48%),
-    linear-gradient(170deg, var(--bg-main) 0%, #020b1c 100%);
+  background: linear-gradient(170deg, var(--bg-main) 0%, #020b1c 100%);
 }
 
 h1,
