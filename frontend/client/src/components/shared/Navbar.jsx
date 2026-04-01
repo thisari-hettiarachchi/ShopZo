@@ -104,9 +104,11 @@ export default function Navbar() {
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.style.colorScheme = 'dark';
       localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.removeAttribute('data-theme');
+      document.documentElement.style.colorScheme = 'light';
       localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
@@ -119,7 +121,7 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="sticky top-4 z-50">
+    <nav className="sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="navbar-main h-16 px-6 rounded-full flex items-center justify-between">
           {/* LEFT */}

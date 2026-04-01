@@ -8,33 +8,75 @@ export default function Footer() {
   return (
     <footer className="bg-[var(--bg-card)] border-t-2 border-[var(--border)] mt-16">
       {/* Newsletter Section */}
+      <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[var(--shadow)] md:p-10"
+          style={{ boxShadow: 'var(--shadow)' }}>
 
-      <div className="w-full py-16 md:pl-20 md:w-full mx-2 md:mx-auto p-4 flex flex-col md:flex-row items-center justify-between text-left bg-gradient-to-b from-[#F59E0B] to-[#FDE68A] rounded-2xl md:p-10 text-white">
-        <div>
-          <div>
-            <p className="text-slate-200">Trusted by 12k+ developers</p>
-              <div className="flex items-center gap-2">
-                <svg width="95" height="18" viewBox="0 0 95 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8.52447 1.46353C8.67415 1.00287 9.32585 1.00287 9.47553 1.46353L10.9084 5.87336C10.9753 6.07937 11.1673 6.21885 11.3839 6.21885H16.0207C16.505 6.21885 16.7064 6.83865 16.3146 7.12336L12.5633 9.84878C12.3881 9.9761 12.3148 10.2018 12.3817 10.4078L13.8145 14.8176C13.9642 15.2783 13.437 15.6613 13.0451 15.3766L9.29389 12.6512C9.11865 12.5239 8.88135 12.5239 8.70611 12.6512L4.95488 15.3766C4.56303 15.6613 4.03578 15.2783 4.18546 14.8176L5.6183 10.4078C5.68524 10.2018 5.61191 9.9761 5.43667 9.84878L1.68544 7.12336C1.29358 6.83866 1.49497 6.21885 1.97933 6.21885H6.6161C6.83272 6.21885 7.02469 6.07937 7.09163 5.87336L8.52447 1.46353Z" fill="#FDE68A"/>
-                  <path d="M27.5831 1.46353C27.7327 1.00287 28.3844 1.00287 28.5341 1.46353L29.967 5.87336C30.0339 6.07937 30.2259 6.21885 30.4425 6.21885H35.0793C35.5636 6.21885 35.765 6.83865 35.3732 7.12336L31.6219 9.84878C31.4467 9.9761 31.3734 10.2018 31.4403 10.4078L32.8731 14.8176C33.0228 15.2783 32.4956 15.6613 32.1037 15.3766L28.3525 12.6512C28.1772 12.5239 27.9399 12.5239 27.7647 12.6512L24.0135 15.3766C23.6216 15.6613 23.0944 15.2783 23.2441 14.8176L24.6769 10.4078C24.7438 10.2018 24.6705 9.9761 24.4953 9.84878L20.744 7.12336C20.3522 6.83866 20.5536 6.21885 21.0379 6.21885H25.6747C25.8913 6.21885 26.0833 6.07937 26.1502 5.87336L27.5831 1.46353Z" fill="#FDE68A"/>
-                  <path d="M46.6417 1.46353C46.7913 1.00287 47.443 1.00287 47.5927 1.46353L49.0256 5.87336C49.0925 6.07937 49.2845 6.21885 49.5011 6.21885H54.1379C54.6222 6.21885 54.8236 6.83865 54.4317 7.12336L50.6805 9.84878C50.5053 9.9761 50.4319 10.2018 50.4989 10.4078L51.9317 14.8176C52.0814 15.2783 51.5542 15.6613 51.1623 15.3766L47.4111 12.6512C47.2358 12.5239 46.9985 12.5239 46.8233 12.6512L43.0721 15.3766C42.6802 15.6613 42.153 15.2783 42.3026 14.8176L43.7355 10.4078C43.8024 10.2018 43.7291 9.9761 43.5539 9.84878L39.8026 7.12336C39.4108 6.83866 39.6122 6.21885 40.0965 6.21885H44.7333C44.9499 6.21885 45.1419 6.07937 45.2088 5.87336L46.6417 1.46353Z" fill="#FDE68A"/>
-                  <path d="M65.6963 1.46353C65.846 1.00287 66.4977 1.00287 66.6474 1.46353L68.0802 5.87336C68.1472 6.07937 68.3392 6.21885 68.5558 6.21885H73.1925C73.6769 6.21885 73.8783 6.83865 73.4864 7.12336L69.7352 9.84878C69.56 9.9761 69.4866 10.2018 69.5536 10.4078L70.9864 14.8176C71.1361 15.2783 70.6089 15.6613 70.217 15.3766L66.4658 12.6512C66.2905 12.5239 66.0532 12.5239 65.878 12.6512L62.1268 15.3766C61.7349 15.6613 61.2077 15.2783 61.3573 14.8176L62.7902 10.4078C62.8571 10.2018 62.7838 9.9761 62.6085 9.84878L58.8573 7.12336C58.4655 6.83866 58.6668 6.21885 59.1512 6.21885H63.788C64.0046 6.21885 64.1966 6.07937 64.2635 5.87336L65.6963 1.46353Z" fill="#FDE68A"/>
-                  <path d="M84.7588 1.46353C84.9085 1.00287 85.5602 1.00287 85.7099 1.46353L87.1427 5.87336C87.2097 6.07937 87.4017 6.21885 87.6183 6.21885H92.255C92.7394 6.21885 92.9408 6.83865 92.5489 7.12336L88.7977 9.84878C88.6225 9.9761 88.5491 10.2018 88.6161 10.4078L90.0489 14.8176C90.1986 15.2783 89.6714 15.6613 89.2795 15.3766L85.5283 12.6512C85.353 12.5239 85.1157 12.5239 84.9405 12.6512L81.1893 15.3766C80.7974 15.6613 80.2702 15.2783 80.4198 14.8176L81.8527 10.4078C81.9196 10.2018 81.8463 9.9761 81.671 9.84878L77.9198 7.12336C77.528 6.83866 77.7293 6.21885 78.2137 6.21885H82.8505C83.0671 6.21885 83.2591 6.07937 83.326 5.87336L84.7588 1.46353Z" fill="#FDE68A"/>
+        {/* Top accent bar */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-3xl"
+            style={{ background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-accent))' }} />
+
+        {/* Glow blobs */}
+        <div className="pointer-events-none absolute -right-16 -top-14 h-48 w-48 rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.12), transparent 70%)' }} />
+        <div className="pointer-events-none absolute -bottom-20 left-10 h-56 w-56 rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.10), transparent 70%)' }} />
+
+        <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-xl">
+
+            {/* Badge */}
+            <p className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-widest"
+              style={{ background: 'linear-gradient(90deg, rgba(249,115,22,0.12), rgba(34,211,238,0.08))', borderColor: 'rgba(249,115,22,0.3)', color: 'var(--color-primary)' }}>
+              <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-primary)' }} />
+              Trusted by 12k+ developers
+            </p>
+
+            {/* Stars */}
+            <div className="mt-3 flex items-center gap-2">
+              {/* your existing stars SVG */}
+              <span className="text-sm text-[var(--text-secondary)]">4.5/5 · 2,300+ Reviews</span>
+            </div>
+
+            <h2 className="mt-4 text-3xl font-bold leading-tight md:text-[40px] md:leading-[1.1]"
+                style={{ fontFamily: "'Sora', sans-serif", letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+              Get fresh deals, launches &{' '}
+              <span className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] bg-clip-text text-transparent">
+                insider drops
+              </span>{' '}first.
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed md:text-base" style={{ color: 'var(--text-secondary)' }}>
+              Weekly updates with no noise. Curated picks, price alerts, and exclusive seasonal offers — straight to your inbox.
+            </p>
+          </div>
+
+          {/* Form box */}
+          <div className="w-full max-w-md rounded-2xl border p-2.5"
+              style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)', boxShadow: '0 4px 20px rgba(249,115,22,0.08)' }}>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex h-11 flex-1 items-center gap-2 rounded-xl border px-3"
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+                {/* mail icon */}
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16.5 5.25L9 9.75 1.5 5.25"/><rect x="1.5" y="3" width="15" height="12" rx="1.5"/>
                 </svg>
-                <span className="text-sm text-slate-300">4.5/5 • 2300+ Reviews</span>
+                <input type="email" placeholder="Enter your email"
+                  className="h-full w-full bg-transparent text-sm outline-none"
+                  style={{ color: 'var(--text-primary)' }} />
               </div>
+              <button className="h-11 rounded-xl px-5 text-sm font-bold text-white"
+                      style={{ background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary))', boxShadow: '0 6px 18px rgba(249,115,22,0.28)' }}>
+                Subscribe
+              </button>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-4 px-1">
+              {['No spam, ever', 'Unsubscribe anytime', 'Weekly digest'].map(t => (
+                <span key={t} className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--color-accent)' }} />
+                  {t}
+                </span>
+              ))}
+            </div>
           </div>
-            <h1 className="text-4xl md:text-[46px] max-md:mt-3 text-balance md:leading-[60px] max-w-md font-semibold bg-gradient-to-r from-white to-[#CAABFF] text-transparent bg-clip-text">
-              Join our newsletter & Stay Updated
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 bg-[#FDE047] max-md:mt-6 pl-4 h-11 text-sm rounded-full overflow-hidden">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16.5 5.25L9.75675 9.54525C9.52792 9.67816 9.268 9.74817 9.00337 9.74817C8.73875 9.74817 8.47883 9.67816 8.25 9.54525L1.5 5.25" stroke="#FB923C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M15 3H3C2.17157 3 1.5 3.67157 1.5 4.5V13.5C1.5 14.3284 2.17157 15 3 15H15C15.8284 15 16.5 14.3284 16.5 13.5V4.5C16.5 3.67157 15.8284 3 15 3Z" stroke="#FB923C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <input type="text" placeholder="Enter your email..." className="outline-none h-11 bg-transparent" />
-            <button className="px-6 h-10 mr-1 rounded-full border bg-[#FB923C]">Subscribe</button>
         </div>
       </div>
     

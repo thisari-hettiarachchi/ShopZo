@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, Download, Star, Edit, Eye, Trash2, Plus, Loader } from "lucide-react";
+import { Search, Star, Edit, Eye, Trash2, Plus, Loader } from "lucide-react";
 import { getProducts, deleteProduct } from "../services/productService";
 
 // Function to determine status color
@@ -56,12 +56,31 @@ export default function ProductsPage() {
   );
 
   return (
-    <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-3 md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
       {/* Search & Filter */}
-      <div className="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border)] flex flex-wrap gap-4 mb-8 shadow-lg items-center">
+      <div className="mb-8 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_20px_50px_-34px_var(--shadow)] md:p-6">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+              Inventory Workspace
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold text-[var(--text-primary)] md:text-3xl">
+              Products
+            </h1>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              Manage listings, stock, and pricing in one place.
+            </p>
+          </div>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text-secondary)]">
+            {filteredProducts.length} total items
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4">
         <div className="flex-1 relative min-w-[200px]">
           <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-secondary)]"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
             size={18}
           />
           <input
@@ -69,18 +88,18 @@ export default function ProductsPage() {
             placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-main)] py-2.5 pl-10 pr-4 text-sm focus:border-[var(--color-primary)] focus:outline-none"
           />
         </div>
         <button
           type="button"
           onClick={() => navigate("/products/new")}
-          className="px-4 py-2 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-muted)] flex items-center gap-2"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90"
         >
           <Plus size={18} />
           Add
         </button>
-        {/* Filter and Export buttons removed */}
+        </div>
       </div>
 
       {/* Products Grid */}
@@ -90,11 +109,11 @@ export default function ProductsPage() {
           Loading products...
         </div>
       ) : filteredProducts.length === 0 ? (
-        <div className="text-center p-16 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] shadow-lg">
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-16 text-center shadow-[0_20px_50px_-34px_var(--shadow)]">
           <p className="text-[var(--text-secondary)] mb-4">No products found.</p>
           <button
             onClick={() => navigate("/products/new")}
-            className="px-6 py-3 bg-[var(--color-primary)] text-white rounded-xl hover:opacity-90 shadow-md"
+            className="rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-6 py-3 text-white shadow-md transition hover:opacity-90"
           >
             Add Your First Product
           </button>
@@ -104,13 +123,13 @@ export default function ProductsPage() {
           {filteredProducts.map((product) => (
             <div
               key={product._id}
-              className="bg-[var(--bg-card)] rounded-3xl shadow-lg border border-[var(--border)] overflow-hidden hover:shadow-2xl transition-all duration-200 group"
+              className="group overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_16px_44px_-32px_var(--shadow)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_64px_-30px_var(--shadow)]"
             >
-              <div className="aspect-video bg-[var(--bg-muted)] flex items-center justify-center overflow-hidden">
+              <div className="aspect-video overflow-hidden bg-[linear-gradient(145deg,var(--bg-muted),var(--bg-card))]">
                 <img 
                   src={product.images?.[0] || 'https://via.placeholder.com/300x200'} 
                   alt={product.name} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
               <div className="p-6">
@@ -135,20 +154,20 @@ export default function ProductsPage() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    className="flex-1 px-4 py-2 bg-[var(--color-primary)] text-white rounded-xl hover:opacity-90 flex items-center justify-center gap-2 shadow-md"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2 text-white shadow-md transition hover:opacity-90"
                     onClick={() => navigate(`/products/edit/${product._id}`)}
                   >
                     <Edit size={16} /> Edit
                   </button>
                   <button 
-                    className="px-4 py-2 border border-[var(--border)] rounded-xl hover:bg-[var(--bg-muted)] flex items-center justify-center shadow-sm"
+                    className="flex items-center justify-center rounded-xl border border-[var(--border)] px-4 py-2 shadow-sm transition hover:bg-[var(--bg-muted)]"
                     onClick={() => navigate(`/products/${product._id}`)}
                   >
                     <Eye size={16} />
                   </button>
                   <button 
                     onClick={() => handleDelete(product._id)}
-                    className="px-4 py-2 border border-red-300 text-red-500 rounded-xl hover:bg-red-50 flex items-center justify-center shadow-sm"
+                    className="flex items-center justify-center rounded-xl border border-red-300 px-4 py-2 text-red-500 shadow-sm transition hover:bg-red-50"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -158,6 +177,7 @@ export default function ProductsPage() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

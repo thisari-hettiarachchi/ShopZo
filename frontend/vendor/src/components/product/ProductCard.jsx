@@ -66,17 +66,22 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
   return (
     <div
       onClick={() => navigate(`/products/${product._id}`)}
-      className="bg-[var(--bg-card)] rounded-2xl shadow-md hover:shadow-lg transition group overflow-hidden cursor-pointer"
+      className="group cursor-pointer overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_14px_40px_-30px_var(--shadow)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_56px_-26px_var(--shadow)]"
     >
-      <div className="relative bg-[var(--bg-muted)] p-4">
+      <div className="relative bg-[linear-gradient(160deg,var(--bg-muted),var(--bg-card))] p-5">
+        {product.oldPrice && (
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-slate-950/80 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur dark:bg-white/90 dark:text-slate-900">
+            Save Rs. {Math.max(product.oldPrice - product.price, 0)}
+          </span>
+        )}
         <img
           src={product.images?.[0]}
           alt={product.name}
-          className="w-full h-48 object-contain group-hover:scale-105 transition"
+          className="h-52 w-full object-contain transition duration-500 group-hover:scale-110"
         />
         <button
           onClick={handleWishlistClick}
-          className="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-[var(--bg-muted)]"
+          className="absolute right-3 top-3 rounded-full border border-[var(--border)] bg-[var(--bg-card)]/90 p-2.5 backdrop-blur transition hover:scale-105 hover:border-[var(--color-primary)]"
         >
           <Heart
             className={`w-5 h-5 ${
@@ -88,8 +93,8 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
         </button>
       </div>
 
-      <div className="p-4 space-y-2">
-        <h3 className="font-semibold text-[var(--text-primary)] line-clamp-1">
+      <div className="space-y-3 p-5 pt-4">
+        <h3 className="line-clamp-1 text-base font-semibold text-[var(--text-primary)]">
           {product.name}
         </h3>
 
@@ -109,8 +114,8 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-lg text-[var(--color-primary)]">
+        <div className="flex items-end justify-between gap-2">
+          <span className="text-xl font-bold text-[var(--color-primary)]">
             Rs. {product.price}
           </span>
           {product.oldPrice && (
@@ -120,13 +125,17 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
           )}
         </div>
 
-        <button
-          onClick={handleAddToCart}
-          className="w-full mt-3 flex items-center justify-center gap-2 py-2 rounded-xl text-white font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90"
-        >
-          <ShoppingCart className="w-4 h-4" />
-          Add to Cart
-        </button>
+        <div className="pt-2">
+          <button
+            onClick={handleAddToCart}
+            className="w-full rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] py-2.5 font-medium text-white transition duration-200 hover:opacity-90"
+          >
+            <span className="flex items-center justify-center gap-2">
+              <ShoppingCart className="h-4 w-4" />
+              Add to Cart
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );

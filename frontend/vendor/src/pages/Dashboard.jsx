@@ -57,11 +57,8 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">
-      
-      {/* Main content */}
-      <main className="flex-1 p-6 md:p-10 overflow-auto">
-        <div className="space-y-8">
+    <section className="bg-[var(--bg-main)] text-[var(--text-primary)] px-6 pt-0 pb-8 md:px-10 md:pt-1 md:pb-10">
+      <div className="space-y-8">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {displayStats.map((stat, i) => (
@@ -173,8 +170,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-          </div>
-      </main>
-    </div>
+      </div>
+    </section>
   );
 }

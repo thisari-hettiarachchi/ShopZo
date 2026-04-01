@@ -72,7 +72,7 @@ export default function AuthPages() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-5" style={{ backgroundColor: 'var(--bg-main)' }}>
+    <div className="min-h-screen flex items-center justify-center px-5 py-0 md:py-2" style={{ backgroundColor: 'var(--bg-main)' }}>
       <div className="w-full max-w-5xl grid md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-2xl" style={{ backgroundColor: 'var(--bg-card)', boxShadow: '0 10px 40px var(--shadow)' }}>
         
         {/* Left Side - Branding */}

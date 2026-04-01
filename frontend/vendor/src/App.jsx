@@ -3,11 +3,12 @@ import AppRoutes from './routes/AppRoutes';
 import Navbar from './components/shared/Navbar';
 
 export default function App() {
-  useLocation();
+  const location = useLocation();
+  const noNavbar = location.pathname === '/auth';
 
   return (
     <>
-      <Navbar />
+      {!noNavbar && <Navbar />}
       <AppRoutes />
     </>
   );
