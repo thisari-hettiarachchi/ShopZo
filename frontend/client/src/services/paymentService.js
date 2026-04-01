@@ -2,23 +2,25 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000/api/user/cards"; 
 
-const token = localStorage.getItem("token");
+const authHeaders = () => {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 export const getCards = async () => {
-  return await axios.get(API_URL, { headers: { Authorization: `Bearer ${token}` } });
+  return await axios.get(API_URL, { headers: authHeaders() });
 };
 
 export const addCard = async (data) => {
-  return await axios.post(API_URL, data, { headers: { Authorization: `Bearer ${token}` } });
+  return await axios.post(API_URL, data, { headers: authHeaders() });
 };
 
 export const setDefaultCardApi = async (id) => {
-  return await axios.patch(`${API_URL}/${id}/default`, { }, { headers: { Authorization: `Bearer ${token}` } });
+  return await axios.patch(`${API_URL}/${id}/default`, {}, { headers: authHeaders() });
 };
 
 export const updateCardApi = async (id, data) => {
-  const token = localStorage.getItem("token");
-  return await axios.put(`http://localhost:5000/api/user/cards/${id}`, data, {
-    headers: { Authorization: `Bearer ${token}` },
+  return await axios.put(`${API_URL}/${id}`, data, {
+    headers: authHeaders(),
   });
 };

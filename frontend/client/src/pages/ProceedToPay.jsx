@@ -7,6 +7,7 @@ import {
 } from "../services/paymentService";
 import { createOrder } from "../services/orderService";
 import { clearCartApi } from "../api/cartApi";
+import { fetchCart } from "../api/cartApi";
 import { useNavigate } from "react-router-dom";
 
 
@@ -48,10 +49,25 @@ export default function ProceedToPay() {
     loadCards();
   }, []);
 
-  // Load cart from localStorage
+  // Load cart from backend
   useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCartItems(savedCart);
+    const loadCart = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setCartItems([]);
+          return;
+        }
+
+        const cart = await fetchCart(token);
+        setCartItems(cart?.items || []);
+      } catch (err) {
+        console.error("Failed to load cart:", err);
+        setCartItems([]);
+      }
+    };
+
+    loadCart();
   }, []);
 
   // Handle card input
@@ -114,8 +130,8 @@ export default function ProceedToPay() {
 
       const items = cartItems.map((item) => ({
         product: item.product._id,
-        vendor: item.product.vendor || null,
-        qty: item.quantity || 1,
+        vendor: item.product.vendor?._id || item.product.vendor || null,
+        qty: item.qty || 1,
         price: item.price,
       }));
 
@@ -266,7 +282,7 @@ export default function ProceedToPay() {
           <div className="border-t pt-3 flex justify-between font-bold text-lg">
             <span>Total Amount</span>
             <span className="text-[var(--color-primary)]">
-              Rs. {cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+              Rs. {cartItems.reduce((sum, item) => sum + item.price * item.qty, 0)}
             </span>
           </div>
 
