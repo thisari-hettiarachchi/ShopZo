@@ -11,7 +11,6 @@ export default function AddProductPage() {
     name: "",
     price: "",
     stock: "",
-    status: "Available",
     description: "",
     category: "General",
     sizes: ["S", "M", "L"],
@@ -23,6 +22,13 @@ export default function AddProductPage() {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const categoryOptions = Array.from(
+    new Set([
+      "General",
+      ...categories.map((cat) => cat?.name).filter(Boolean),
+    ])
+  );
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -161,19 +167,6 @@ export default function AddProductPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Status</label>
-            <select
-              value={form.status}
-              onChange={onChange("status")}
-              className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-            >
-              <option value="Available">Available</option>
-              <option value="Limited">Limited</option>
-              <option value="Out of Stock">Out of Stock</option>
-            </select>
-          </div>
-
-          <div>
             <label className="block text-sm font-medium mb-2">Price</label>
             <input
               value={form.price}
@@ -229,12 +222,9 @@ export default function AddProductPage() {
               className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               required
             >
-              <option value="" disabled>
-                Select a category
-              </option>
-              {categories.map((cat) => (
-                <option key={cat._id} value={cat.name}>
-                  {cat.name}
+              {categoryOptions.map((categoryName) => (
+                <option key={categoryName} value={categoryName}>
+                  {categoryName}
                 </option>
               ))}
             </select>

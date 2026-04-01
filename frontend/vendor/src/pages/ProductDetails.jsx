@@ -3,6 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Loader, ArrowLeft } from "lucide-react";
 import { getProductById } from "../services/productService";
 
+const getStockStatus = (stock) => {
+  if (stock <= 0) return "Out of Stock";
+  if (stock <= 10) return "Limited";
+  return "Available";
+};
+
 export default function ProductDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -69,10 +75,10 @@ export default function ProductDetailsPage() {
           <div className="flex flex-wrap gap-6 mb-4">
             <span className="text-2xl font-bold text-[var(--color-primary)]">${product.price}</span>
             <span className="text-base text-[var(--text-secondary)]">Stock: {product.stock}</span>
-            <span className="text-base text-[var(--text-secondary)]">Status: {product.status}</span>
+            <span className="text-base text-[var(--text-secondary)]">Status: {getStockStatus(product.stock || 0)}</span>
           </div>
           <div className="text-base text-[var(--text-secondary)] mb-2">Category: {product.category?.name || product.category}</div>
-          <div className="text-base text-[var(--text-secondary)]">Rating: {product.rating || 0} | Sales: {product.sales || 0}</div>
+          <div className="text-base text-[var(--text-secondary)]">Rating: {product.rating || 0} | Discount: {product.discount || 0}%</div>
         </div>
       </div>
     </div>

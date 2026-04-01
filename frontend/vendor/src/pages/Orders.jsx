@@ -109,7 +109,9 @@ export default function OrdersPage() {
                           )}
                           <div>
                             <div className="font-semibold text-base">{item.product?.name || "Product"}</div>
-                            <div className="text-xs text-[var(--text-secondary)]">x{item.quantity} (${item.price} each)</div>
+                            <div className="text-xs text-[var(--text-secondary)]">
+                              x{item.quantity || 0} (${item.product?.price || 0} each)
+                            </div>
                           </div>
                         </li>
                       ))}

@@ -3,7 +3,7 @@ import User from "../models/User.js";
 
 export const getVendors = async (req, res) => {
   try {
-    const vendors = await Vendor.find().populate('user', 'name email').limit(10);
+    const vendors = await Vendor.find().limit(10);
     res.json(vendors);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch vendors" });

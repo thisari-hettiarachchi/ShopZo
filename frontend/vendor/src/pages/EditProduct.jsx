@@ -11,7 +11,6 @@ export default function EditProductPage() {
     name: "",
     price: "",
     stock: "",
-    status: "Available",
     description: "",
     category: "General",
     rating: 0,
@@ -36,7 +35,6 @@ export default function EditProductPage() {
           name: product.name || "",
           price: product.price || "",
           stock: product.stock || "",
-          status: product.status || "Available",
           description: product.description || "",
           category: product.category || "General",
           rating: product.rating || 0,
@@ -204,18 +202,6 @@ export default function EditProductPage() {
               placeholder="e.g. Wireless Headphones"
               required
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Status</label>
-            <select
-              value={form.status}
-              onChange={onChange("status")}
-              className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-            >
-              <option value="Available">Available</option>
-              <option value="Limited">Limited</option>
-              <option value="Out of Stock">Out of Stock</option>
-            </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Price</label>

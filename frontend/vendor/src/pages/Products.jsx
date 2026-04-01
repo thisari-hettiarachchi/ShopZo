@@ -3,8 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Search, Star, Edit, Eye, Trash2, Plus, Loader } from "lucide-react";
 import { getProducts, deleteProduct } from "../services/productService";
 
-// Function to determine status color
-const getStatusColor = (status) => {
+const getStockStatus = (stock) => {
+  if (stock <= 0) return "Out of Stock";
+  if (stock <= 10) return "Limited";
+  return "Available";
+};
+
+const getStatusColor = (stock) => {
+  const status = getStockStatus(stock);
   switch (status) {
     case "Available":
       return "bg-green-100 text-green-800";
@@ -136,9 +142,9 @@ export default function ProductsPage() {
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-semibold text-xl group-hover:text-[var(--color-primary)] transition-colors">{product.name}</h4>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(product.status)}`}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(product.stock || 0)}`}
                   >
-                    {product.status}
+                    {getStockStatus(product.stock || 0)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mb-3">
