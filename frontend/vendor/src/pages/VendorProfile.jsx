@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Store, Mail, Phone, MapPin, FileText, Save } from "lucide-react";
-import { getVendorProfile, updateVendorProfile } from "../services/vendorService";
+import { Phone, MapPin, Edit } from "lucide-react";
+import { getVendorProfile } from "../services/vendorService";
+import { useNavigate } from "react-router-dom";
 
 const STORAGE_KEY = "vendorProfile";
 
@@ -14,7 +15,7 @@ const safeParseJson = (value) => {
 };
 
 export default function VendorProfilePage() {
-  const [saved, setSaved] = useState(false);
+  const navigate = useNavigate();
 
   const initialProfile = useMemo(() => {
     const stored = safeParseJson(localStorage.getItem(STORAGE_KEY));
@@ -41,29 +42,22 @@ export default function VendorProfilePage() {
         if (cancelled) return;
         const vendor = res.data?.vendor;
         if (!vendor) return;
-        setProfile((prev) => ({
-          ...prev,
-          storeName: vendor.storeName ?? prev.storeName,
-          email: vendor.email ?? prev.email,
-          phone: vendor.phone ?? prev.phone,
-          address: vendor.address ?? prev.address,
-          description: vendor.description ?? prev.description,
-        }));
+        setProfile({
+          storeName: vendor.storeName || "",
+          email: vendor.email || "",
+          phone: vendor.phone || "",
+          address: vendor.address || "",
+          description: vendor.description || "",
+        });
+        localStorage.setItem("vendor", JSON.stringify(vendor));
       })
       .catch(() => {
-        // Silent fallback to local state/localStorage
       });
 
     return () => {
       cancelled = true;
     };
   }, []);
-
-  useEffect(() => {
-    if (!saved) return;
-    const timer = setTimeout(() => setSaved(false), 2000);
-    return () => clearTimeout(timer);
-  }, [saved]);
 
   const initials = useMemo(() => {
     const words = (profile.storeName || "V").trim().split(/\s+/).filter(Boolean);
@@ -72,171 +66,80 @@ export default function VendorProfilePage() {
     return (first + second).toUpperCase();
   }, [profile.storeName]);
 
-  const onChange = (key) => (e) => {
-    setProfile((prev) => ({ ...prev, [key]: e.target.value }));
-  };
-
-  const onSave = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setSaved(true);
-      return;
-    }
-
-    updateVendorProfile({
-      storeName: profile.storeName,
-      email: profile.email,
-      phone: profile.phone,
-      address: profile.address,
-      description: profile.description,
-    })
-      .then((res) => {
-        if (res.data?.vendor) {
-          localStorage.setItem("vendor", JSON.stringify(res.data.vendor));
-        }
-        setSaved(true);
-      })
-      .catch(() => {
-        // Keep local save, but don't block the UI
-        setSaved(true);
-      });
-  };
-
   return (
-    <div className="p-6">
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <h2 className="text-xl font-bold">Vendor Profile</h2>
-          <p className="text-sm text-[var(--text-secondary)]">Manage your store details.</p>
-        </div>
-        <button
-          type="button"
-          onClick={onSave}
-          className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 flex items-center gap-2"
-        >
-          <Save size={18} />
-          Save
-        </button>
+    <div className="mx-auto max-w-5xl px-4 pb-10 pt-3 md:px-6">
+      <div className="mb-6 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)]/80 px-5 py-5 shadow-[0_18px_44px_-30px_var(--shadow)] backdrop-blur md:px-7">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] mb-4 text-[var(--text-secondary)]">Vendor Identity</p>
+        <h2 className="text-3xl font-extrabold mb-4 text-[var(--color-primary)]">Store Profile</h2>
+        <p className="text-sm text-[var(--text-secondary)]">View your store details and public appearance.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Summary card */}
-        <div className="bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border)] p-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-bold text-lg">
-              {initials}
-            </div>
-            <div className="min-w-0">
-              <p className="font-semibold truncate">{profile.storeName || "Vendor"}</p>
-              <p className="text-sm text-[var(--text-secondary)] truncate">{profile.email || ""}</p>
-            </div>
-          </div>
-
-          {saved && (
-            <div className="mt-4 text-sm font-medium text-green-600">Saved.</div>
-          )}
-
-          <div className="mt-6 space-y-3 text-sm">
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-              <Store size={16} className="text-[var(--color-primary)]" />
-              <span className="truncate">{profile.storeName || ""}</span>
-            </div>
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-              <Mail size={16} className="text-[var(--color-primary)]" />
-              <span className="truncate">{profile.email || ""}</span>
-            </div>
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-              <Phone size={16} className="text-[var(--color-primary)]" />
-              <span className="truncate">{profile.phone || "—"}</span>
-            </div>
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-              <MapPin size={16} className="text-[var(--color-primary)]" />
-              <span className="truncate">{profile.address || "—"}</span>
-            </div>
-          </div>
+      <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_22px_56px_-34px_var(--shadow)]">
+        {/* Banner area */}
+        <div className="relative h-36 bg-[linear-gradient(125deg,var(--color-primary),var(--color-secondary))]">
+          <div className="absolute right-8 top-6 h-20 w-20 rounded-full bg-white/20 blur-2xl" />
+          <div className="absolute bottom-3 left-20 h-16 w-16 rounded-full bg-white/15 blur-xl" />
         </div>
+        
+        {/* Profile Pic & Main Details */}
+        <div className="relative px-6 pb-8 md:px-8">
+          <div className="mb-7 flex flex-col items-start gap-4 sm:-mt-12 sm:flex-row sm:items-end">
+            <div className="h-24 w-24 rounded-full border border-[var(--border)] bg-[var(--bg-card)] p-1.5 shadow-lg">
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] text-3xl font-bold text-white">
+                {initials}
+              </div>
+            </div>
+            <div className="pb-2">
+              <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{profile.storeName || "Vendor"}</h1>
+              <p className="text-[var(--text-secondary)]">{profile.email || ""}</p>
+            </div>
+          </div>
 
-        {/* Edit form */}
-        <div className="lg:col-span-2 bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border)] p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Store Name</label>
-              <div className="relative">
-                <Store size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-                <input
-                  value={profile.storeName}
-                  onChange={onChange("storeName")}
-                  className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  placeholder="Your store name"
-                />
+          <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-2">
+            <div className="space-y-6">
+              <div>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Contact Information</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3.5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-muted)]">
+                      <Phone size={18} className="text-[var(--color-primary)]" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-[var(--text-secondary)]">Phone Number</p>
+                      <p className="font-medium">{profile.phone || "Not provided"}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3.5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-muted)]">
+                      <MapPin size={18} className="text-[var(--color-primary)]" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-[var(--text-secondary)]">Address</p>
+                      <p className="font-medium">{profile.address || "Not provided"}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Email</label>
-              <div className="relative">
-                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-                <input
-                  type="email"
-                  value={profile.email}
-                  onChange={onChange("email")}
-                  className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  placeholder="you@store.com"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Phone</label>
-              <div className="relative">
-                <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-                <input
-                  value={profile.phone}
-                  onChange={onChange("phone")}
-                  className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  placeholder="+1 555 000 0000"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Address</label>
-              <div className="relative">
-                <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-                <input
-                  value={profile.address}
-                  onChange={onChange("address")}
-                  className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  placeholder="City, Country"
-                />
-              </div>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-2">Description</label>
-              <div className="relative">
-                <FileText size={18} className="absolute left-3 top-3 text-[var(--text-secondary)]" />
-                <textarea
-                  rows={5}
-                  value={profile.description}
-                  onChange={onChange("description")}
-                  className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  placeholder="Tell customers what you sell and what makes your store special..."
-                />
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">About the Store</h3>
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-5">
+                <p className="text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed text-sm min-h-[100px]">
+                  {profile.description || "No description provided."}
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end">
+          <div className="mt-10 flex justify-end border-t border-[var(--border)] pt-6">
             <button
-              type="button"
-              onClick={onSave}
-              className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 flex items-center gap-2"
+              onClick={() => navigate("/profile/edit")}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_16px_32px_-20px_var(--shadow)] transition hover:opacity-90"
             >
-              <Save size={18} />
-              Save Changes
+              <Edit size={18} />
+              Edit Profile
             </button>
           </div>
         </div>

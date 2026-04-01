@@ -12,13 +12,18 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import Assets from '../../assets/assets'
 
 export default function Sidebar({ active }) {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "light";
+  });
   const navigate = useNavigate();
 
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
   };
 
   useEffect(() => {
@@ -27,16 +32,27 @@ export default function Sidebar({ active }) {
     } else {
       document.documentElement.removeAttribute("data-theme");
     }
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
-  return (
-    <aside className="w-64 h-screen sticky top-0 bg-[var(--bg-card)] border-r border-[var(--border)] p-6 flex flex-col">
+  // Get vendor info from localStorage
+  const vendor = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("vendor"));
+    } catch {
+      return null;
+    }
+  })();
+  const initials = vendor?.storeName
+    ? vendor.storeName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0,2)
+    : "V";
+
+    return (
+      <aside className="w-64 h-screen fixed top-0 left-0 bg-[var(--bg-card)] border-r border-[var(--border)] p-6 flex flex-col z-40">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">VendorHub</h1>
-        <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-[var(--bg-muted)] transition">
-          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-        </button>
+        <img src={Assets.logo} alt="ShopZo" className="h-8 w-auto" />
+        <h1 className="text-2xl font-bold text-[var(--color-primary)]">ShopZo</h1>
       </div>
 
       {/* Navigation */}
@@ -77,11 +93,11 @@ export default function Sidebar({ active }) {
           className="w-full flex items-center gap-3 mb-4 p-3 rounded-lg bg-[var(--bg-muted)] hover:bg-[var(--bg-hover)] transition"
         >
           <div className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white font-bold">
-            JD
+            {initials}
           </div>
           <div className="flex-1 text-left">
-            <p className="font-medium text-sm">John's Store</p>
-            <p className="text-xs text-[var(--text-secondary)]">Vendor</p>
+            <p className="font-medium text-sm">{vendor?.storeName || "Vendor"}</p>
+            <p className="text-xs text-[var(--text-secondary)]">{vendor?.email || "Vendor"}</p>
           </div>
         </button>
         <button

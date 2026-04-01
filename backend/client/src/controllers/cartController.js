@@ -4,7 +4,10 @@ import Product from "../models/Product.js";
 // Get user's cart
 export const getCart = async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id })
-    .populate("items.product");
+    .populate({
+      path: "items.product",
+      populate: { path: "vendor" }
+    });
   res.json(cart || { items: [] });
 };
 
@@ -39,7 +42,11 @@ export const addToCart = async (req, res) => {
   });
 
   await cart.save();
-  res.json(cart);
+  const populatedCart = await Cart.findById(cart._id).populate({
+    path: "items.product",
+    populate: { path: "vendor" }
+  });
+  res.json(populatedCart);
 };
 
 // Update item quantity
@@ -59,7 +66,11 @@ export const updateCartItem = async (req, res) => {
   item.qty = qty;
   await cart.save();
 
-  res.json(cart);
+  const populatedCart = await Cart.findById(cart._id).populate({
+    path: "items.product",
+    populate: { path: "vendor" }
+  });
+  res.json(populatedCart);
 };
 
 // Remove item from cart 
@@ -79,6 +90,19 @@ export const removeCartItem = async (req, res) => {
   item.deleteOne(); 
   await cart.save();
 
-  res.json(cart);
+  const populatedCart = await Cart.findById(cart._id).populate({
+    path: "items.product",
+    populate: { path: "vendor" }
+  });
+  res.json(populatedCart);
 };
 
+// Clear all items from cart
+export const clearCart = async (req, res) => {
+  const cart = await Cart.findOne({ user: req.user._id });
+  if (cart) {
+    cart.items = [];
+    await cart.save();
+  }
+  res.json({ message: "Cart cleared", items: [] });
+};

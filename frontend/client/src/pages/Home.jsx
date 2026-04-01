@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Star, TrendingUp, Award } from "lucide-react
 import Assets from "../assets/assets";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import ProductCard from "../components/product/ProductCard";
 
 export default function Hero() {
   const bgImages = [Assets.hero, Assets.hero1, Assets.hero2];
@@ -82,6 +83,47 @@ export default function Hero() {
     };
     fetchVendors();
   }, []);
+
+  const [justForYou, setJustForYou] = useState([]);
+  useEffect(() => {
+    const fetchJustForYou = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/products");
+        setJustForYou(res.data);
+      } catch (err) {
+        console.error("Failed to fetch just for you products:", err);
+      }
+    };
+    fetchJustForYou();
+  }, []);
+
+  const [timeLeft, setTimeLeft] = useState({ hours: 4, minutes: 23, seconds: 59 });
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        let { hours, minutes, seconds } = prev;
+        if (seconds > 0) {
+          seconds--;
+        } else {
+          seconds = 59;
+          if (minutes > 0) {
+            minutes--;
+          } else {
+            minutes = 59;
+            if (hours > 0) {
+              hours--;
+            } else {
+              hours = 23;
+            }
+          }
+        }
+        return { hours, minutes, seconds };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (val) => val.toString().padStart(2, '0');
 
 
   const SLIDE_DURATION = 5000;
@@ -217,14 +259,14 @@ export default function Hero() {
       </section>
 
       
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 bg-white dark:bg-[var(--bg-card)]">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-[var(--text-primary)] mb-2">
                 Shop by Categories
               </h2>
-              <p className="text-gray-600">Explore our wide range of products</p>
+              <p className="text-gray-600 dark:text-[var(--text-secondary)]">Explore our wide range of products</p>
             </div>
           </div>
 
@@ -232,13 +274,13 @@ export default function Hero() {
             {categories.map((cat) => (
               <div
                 key={cat._id}
-                className="group relative overflow-hidden flex flex-col items-center justify-center h-44 bg-white rounded-2xl shadow-md hover:shadow-2xl p-4 cursor-pointer transform transition-all duration-300 hover:-translate-y-2 border border-gray-100"
+                className="group relative overflow-hidden flex flex-col items-center justify-center h-44 bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-md hover:shadow-2xl p-4 cursor-pointer transform transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-[var(--border)]"
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                 <div className="text-5xl mb-3 transform group-hover:scale-110 transition-transform duration-300">
                   {cat.icon}
                 </div>
-                <span className="text-sm md:text-base font-semibold text-gray-800 text-center group-hover:text-amber-600 transition-colors">
+                <span className="text-sm md:text-base font-semibold text-gray-800 dark:text-[var(--text-primary)] text-center group-hover:text-amber-600 transition-colors">
                   {cat.name}
                 </span>
               </div>
@@ -248,7 +290,7 @@ export default function Hero() {
       </section>
 
       {/* FLASH SALE SECTION */}
-      <section className="py-16 px-4 bg-gradient-to-br from-amber-50 to-orange-50">
+      <section className="py-16 px-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:bg-gradient-to-br dark:from-[var(--bg-main)] dark:to-[var(--bg-card)]">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-3">
@@ -256,13 +298,18 @@ export default function Hero() {
                 <TrendingUp className="text-white" size={28} />
               </div>
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-4">
                   Flash Sale
+                  <div className="flex items-center gap-1 text-xl font-mono text-white bg-amber-600 px-3 py-1 rounded-lg">
+                    <span>{formatTime(timeLeft.hours)}</span>:
+                    <span>{formatTime(timeLeft.minutes)}</span>:
+                    <span>{formatTime(timeLeft.seconds)}</span>
+                  </div>
                 </h2>
-                <p className="text-gray-600">Limited time offers</p>
+                <p className="text-gray-600 dark:text-[var(--text-secondary)] mt-1">Limited time offers</p>
               </div>
             </div>
-            <button className="text-base font-semibold text-amber-600 hover:text-amber-700 px-6 py-2 rounded-full border-2 border-amber-600 hover:bg-amber-50 transition-all">
+            <button className="text-base font-semibold text-amber-600 hover:text-amber-700 px-6 py-2 rounded-full border-2 border-amber-600 hover:bg-amber-50 dark:hover:bg-[var(--bg-muted)] transition-all">
               View All
             </button>
           </div>
@@ -271,7 +318,7 @@ export default function Hero() {
             {flashSaleProducts.map((product, idx) => (
               <div
                 key={idx}
-                className="group bg-white rounded-2xl shadow-md hover:shadow-2xl p-5 cursor-pointer transform transition-all duration-300 hover:-translate-y-2 border border-gray-100"
+                className="group bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-md hover:shadow-2xl p-5 cursor-pointer transform transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-[var(--border)]"
               >
                 <div className="relative w-full h-44 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-4 flex items-center justify-center text-6xl overflow-hidden">
                   <img
@@ -283,16 +330,16 @@ export default function Hero() {
                     -{product.discount}%
                   </div>
                 </div>
-                <h3 className="font-bold text-gray-800 mb-2 group-hover:text-amber-600 transition-colors">
+                <h3 className="font-bold text-gray-800 dark:text-[var(--text-primary)] mb-2 group-hover:text-amber-600 transition-colors">
                   {product.name}
                 </h3>
                 <div className="flex items-center gap-1 mb-2">
                   <Star size={14} className="fill-amber-400 text-amber-400" />
-                  <span className="text-sm text-gray-600">{product.rating}</span>
+                  <span className="text-sm text-gray-600 dark:text-[var(--text-secondary)]">{product.rating}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-xl text-amber-600">Rs. {product.price}</span>
-                  <span className="text-sm text-gray-400 line-through">Rs. {product.oldPrice}</span>
+                  <span className="text-sm text-gray-400 dark:text-[var(--text-muted)] line-through">Rs. {product.oldPrice}</span>
                 </div>
               </div>
             ))}
@@ -301,17 +348,17 @@ export default function Hero() {
       </section>
 
       {/* FEATURED VENDORS */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 bg-white dark:bg-[var(--bg-card)]">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-10">
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-xl">
               <Award className="text-white" size={28} />
             </div>
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-[var(--text-primary)]">
                 Featured Vendors
               </h2>
-              <p className="text-gray-600">Top-rated sellers you can trust</p>
+              <p className="text-gray-600 dark:text-[var(--text-secondary)]">Top-rated sellers you can trust</p>
             </div>
           </div>
           
@@ -319,20 +366,20 @@ export default function Hero() {
             {vendors.map((vendor, idx) => (
               <div
                 key={idx}
-                className="group flex flex-col items-center bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-md hover:shadow-2xl p-6 cursor-pointer hover:-translate-y-2 transition-all duration-300 border border-gray-100"
+                className="group flex flex-col items-center bg-gradient-to-br from-white to-gray-50 dark:from-[var(--bg-card)] dark:to-[var(--bg-main)] rounded-2xl shadow-md hover:shadow-2xl p-6 cursor-pointer hover:-translate-y-2 transition-all duration-300 border border-gray-100 dark:border-[var(--border)]"
               >
                 <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-5xl mb-4 group-hover:scale-110 transition-transform shadow-lg">
                   🏪
                   <div className="absolute -bottom-1 -right-1 bg-green-500 w-6 h-6 rounded-full border-4 border-white" />
                 </div>
-                <span className="text-gray-900 font-bold text-lg mb-2 text-center group-hover:text-amber-600 transition-colors">
+                <span className="text-gray-900 dark:text-[var(--text-primary)] font-bold text-lg mb-2 text-center group-hover:text-amber-600 transition-colors">
                   {vendor.name}
                 </span>
                 <div className="flex items-center gap-1 mb-1">
                   <Star size={14} className="fill-amber-400 text-amber-400" />
-                  <span className="text-sm font-semibold text-gray-700">{vendor.rating}</span>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-[var(--text-secondary)]">{vendor.rating}</span>
                 </div>
-                <span className="text-xs text-gray-500">{vendor.products} Products</span>
+                <span className="text-xs text-gray-500 dark:text-[var(--text-muted)]">{vendor.products} Products</span>
               </div>
             ))}
           </div>
@@ -340,13 +387,13 @@ export default function Hero() {
       </section>
 
      {/* PROMO BANNERS */}
-    <section className="py-16 px-4 bg-gradient-to-br from-amber-50 to-orange-50">
+    <section className="py-16 px-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:bg-gradient-to-br dark:from-[var(--bg-main)] dark:to-[var(--bg-card)]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="group relative aspect-square rounded-3xl shadow-xl hover:shadow-2xl overflow-hidden cursor-pointer transition-all duration-300">
           <img
             src={Assets.flashSale}
             alt="Mega Sale"
-            className="absolute inset-0 w-full h-full object-contain bg-white z-0"
+            className="absolute inset-0 w-full h-full object-contain bg-white dark:bg-[var(--bg-card)] z-0"
           />
           <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 flex items-center justify-center">
             <div
@@ -369,7 +416,7 @@ export default function Hero() {
           <img
             src={Assets.newArrival}
             alt="New Arrivals"
-            className="absolute inset-0 w-full h-full object-contain bg-white z-0"
+            className="absolute inset-0 w-full h-full object-contain bg-white dark:bg-[var(--bg-card)] z-0"
           />
           <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 flex items-center justify-center">
             <div
@@ -389,6 +436,23 @@ export default function Hero() {
         </div>
       </div>
     </section>
+
+      {/* JUST FOR YOU SECTION */}
+      <section className="py-16 px-4 bg-[var(--bg-main)]">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center mb-10 relative">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-[var(--text-primary)] bg-[var(--bg-main)] px-6 z-10 relative text-center">
+              Just For You
+            </h2>
+            <div className="absolute left-0 right-0 top-1/2 h-px bg-gray-300 dark:bg-[var(--border)] -z-0"></div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {justForYou.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
 
 
     </>

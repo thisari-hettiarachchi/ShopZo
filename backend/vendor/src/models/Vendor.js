@@ -1,13 +1,12 @@
 import mongoose from "mongoose";
 
 const vendorSchema = new mongoose.Schema({
-  storeName: { type: String, required: true, trim: true },
-  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  storeName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, default: "vendor" },
-  phone: { type: String, default: "" },
-  address: { type: String, default: "" },
-  description: { type: String, default: "" },
+  description: String,
+  phone: String,
+  address: String,
   isApproved: { type: Boolean, default: false },
 }, { timestamps: true });
 

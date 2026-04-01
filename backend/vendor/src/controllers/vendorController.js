@@ -1,67 +1,62 @@
 import Vendor from "../models/Vendor.js";
+import User from "../models/User.js";
+
+export const getVendors = async (req, res) => {
+  try {
+    const vendors = await Vendor.find().limit(10);
+    res.json(vendors);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch vendors" });
+  }
+};
 
 export const getVendorProfile = async (req, res) => {
   try {
-    if (!req.vendor?._id) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
+    const vendorId = req.user?.id;
+    if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
 
-    const vendor = await Vendor.findById(req.vendor._id).select("-password");
-    if (!vendor) {
-      return res.status(404).json({ message: "Vendor not found" });
-    }
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) return res.status(404).json({ message: "Vendor not found" });
 
-    res.json({ vendor });
+    res.json({ vendor: {
+      storeName: vendor.storeName,
+      email: vendor.email,
+      phone: vendor.phone || '',
+      address: vendor.address || '',
+      description: vendor.description || ''
+    } });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Failed to fetch profile" });
   }
 };
 
 export const updateVendorProfile = async (req, res) => {
   try {
-    if (!req.vendor?._id) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
+    const vendorId = req.user?.id;
+    if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
 
     const { storeName, email, phone, address, description } = req.body;
 
-    const vendor = await Vendor.findById(req.vendor._id);
-    if (!vendor) {
-      return res.status(404).json({ message: "Vendor not found" });
-    }
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) return res.status(404).json({ message: "Vendor not found" });
 
-    if (typeof storeName === "string") vendor.storeName = storeName;
-    if (typeof email === "string") vendor.email = email;
-    if (typeof phone === "string") vendor.phone = phone;
-    if (typeof address === "string") vendor.address = address;
-    if (typeof description === "string") vendor.description = description;
+    vendor.storeName = storeName || vendor.storeName;
+    vendor.email = email || vendor.email;
+    vendor.phone = phone !== undefined ? phone : vendor.phone;
+    vendor.address = address !== undefined ? address : vendor.address;
+    vendor.description = description !== undefined ? description : vendor.description;
 
     await vendor.save();
 
-    const sanitized = await Vendor.findById(req.vendor._id).select("-password");
-    res.json({ message: "Profile updated", vendor: sanitized });
+    res.json({ vendor: {
+      storeName: vendor.storeName,
+      email: vendor.email,
+      phone: vendor.phone,
+      address: vendor.address,
+      description: vendor.description
+    } });
   } catch (error) {
-    // Most common: duplicate email unique index
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Minimal placeholder endpoint for dashboard integration
-export const getDashboardSummary = async (req, res) => {
-  try {
-    if (!req.vendor?._id) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
-
-    res.json({
-      stats: {
-        sales: 0,
-        orders: 0,
-        customers: 0,
-        reviews: 0,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: "Failed to update profile" });
   }
 };

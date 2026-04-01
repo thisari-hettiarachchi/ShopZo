@@ -46,3 +46,17 @@ export const removeCartItemApi = async (itemId, token) => {
   return res.json();
 };
 
+export const clearCartApi = async (token) => {
+  const res = await fetch(BASE_URL, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to clear cart");
+  }
+
+  return res.json();
+};

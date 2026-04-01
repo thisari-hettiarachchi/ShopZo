@@ -1,38 +1,35 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
-import connectDB from "./config/db.js";
-import authRoutes from "./routes/authRoutes.js";
-import vendorRoutes from "./routes/vendorRoutes.js";
+import connectDB from './config/db.js';
+import vendorRoutes from './routes/vendorRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 dotenv.config();
+connectDB();
 
 const app = express();
+const PORT = process.env.PORT || 5001;
 
-app.use(
-	cors({
-		origin: process.env.CORS_ORIGINS
-			? process.env.CORS_ORIGINS.split(",").map((o) => o.trim())
-			: true,
-		credentials: true,
-	})
-);
+app.use(cors({
+  origin: ["http://localhost:5173", "http://localhost:5174"],
+  credentials: true
+}));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-app.use(express.json());
+app.use('/api/vendor/products', productRoutes);
+app.use('/api/vendor/orders', orderRoutes);
+app.use('/api/vendor', analyticsRoutes);
+app.use('/api/vendor', vendorRoutes);
 
-app.get("/", (req, res) => res.send("ShopZo Vendor API running 🚀"));
-app.use("/api/auth", authRoutes);
-app.use("/api/vendor", vendorRoutes);
+app.use('/api/auth', authRoutes);
 
-const PORT = process.env.PORT || 5002;
 
-const start = async () => {
-	await connectDB();
-	app.listen(PORT, () => console.log(`Vendor server running on port ${PORT}`));
-};
-
-start().catch((err) => {
-	console.error("Failed to start server ❌", err);
-	process.exit(1);
+app.listen(PORT, () => {
+	console.log(`Vendor backend server running on port ${PORT}`);
 });

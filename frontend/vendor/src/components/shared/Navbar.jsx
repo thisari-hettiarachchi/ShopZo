@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
   User,
   Menu,
@@ -15,18 +15,28 @@ import Assets from '../../assets/assets'
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const stored = localStorage.getItem('theme');
+    if (stored === 'dark') return true;
+    if (stored === 'light') return false;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+  const navigate = useNavigate();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'))
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
-      document.documentElement.setAttribute('data-theme', 'dark')
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.style.colorScheme = 'dark';
+      localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.removeAttribute('data-theme')
+      document.documentElement.removeAttribute('data-theme');
+      document.documentElement.style.colorScheme = 'light';
+      localStorage.setItem('theme', 'light');
     }
-  }, [isDarkMode])
+  }, [isDarkMode]);
 
   const mainMenuItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/' },
@@ -36,7 +46,7 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="sticky top-4 z-50">
+    <nav className="sticky top-0 z-50">
       <div className="max-w-4xl mx-auto px-4">
         <div className="navbar-main h-16 px-6 rounded-full flex items-center justify-between">
           {/* LEFT */}
@@ -89,7 +99,9 @@ export default function Navbar() {
                         className="w-full text-left px-4 py-2 hover:bg-[var(--bg-muted)]"
                         onClick={() => {
                           localStorage.removeItem('token')
+                          localStorage.removeItem('vendor')
                           setIsLoggedIn(false)
+                          navigate('/auth')
                         }}
                       >
                         Logout

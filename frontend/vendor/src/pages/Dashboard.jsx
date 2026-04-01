@@ -1,9 +1,11 @@
+import { useState, useEffect } from "react";
 import { 
   TrendingUp, 
   TrendingDown, 
   ShoppingBag,
   Users,
-  Star 
+  Star,
+  Loader
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -17,55 +19,57 @@ import {
   Pie,
   Cell
 } from "recharts";
+import { getDashboardAnalytics } from "../services/analyticsService";
 
 export default function Dashboard() {
-  // Stats cards
-  const stats = [
-    { title: "Sales", value: "$12,430", change: "+12%", up: true, bg: "bg-yellow-100", icon: TrendingUp, iconColor: "text-yellow-500" },
-    { title: "Orders", value: "320", change: "-5%", up: false, bg: "bg-red-100", icon: ShoppingBag, iconColor: "text-red-500" },
-    { title: "Customers", value: "1,024", change: "+8%", up: true, bg: "bg-green-100", icon: Users, iconColor: "text-green-500" },
-    { title: "Reviews", value: "85", change: "+2%", up: true, bg: "bg-blue-100", icon: Star, iconColor: "text-blue-500" },
-  ];
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const categoryData = [
-    { name: "Electronics", value: 45, color: "#F59E0B" },
-    { name: "Clothing", value: 30, color: "#3B82F6" },
-    { name: "Accessories", value: 25, color: "#10B981" },
-  ];
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const res = await getDashboardAnalytics();
+        setData(res.data);
+      } catch (error) {
+        console.error("Failed to fetch analytics", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, []);
 
-  const revenueData = [
-    { day: "Mon", revenue: 1200 },
-    { day: "Tue", revenue: 2100 },
-    { day: "Wed", revenue: 800 },
-    { day: "Thu", revenue: 1600 },
-    { day: "Fri", revenue: 900 },
-  ];
+  if (loading || !data) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-[var(--text-secondary)]">
+        <Loader className="animate-spin mr-2" /> Loading dashboard...
+      </div>
+    );
+  }
 
-  const orders = [
-    { id: 101, customer: "Alice", amount: 250 },
-    { id: 102, customer: "Bob", amount: 120 },
-    { id: 103, customer: "Charlie", amount: 300 },
-    { id: 104, customer: "Diana", amount: 180 },
-    { id: 105, customer: "Ethan", amount: 75 },
+  const { stats, revenueData, categoryData, recentOrders } = data;
+
+  const displayStats = [
+    { title: "Sales", value: `$${stats.sales.toFixed(2)}`, change: "--", up: true, bg: "bg-yellow-100", icon: TrendingUp, iconColor: "text-yellow-500" },
+    { title: "Orders", value: stats.orders, change: "--", up: true, bg: "bg-red-100", icon: ShoppingBag, iconColor: "text-red-500" },
+    { title: "Customers", value: stats.customers, change: "--", up: true, bg: "bg-green-100", icon: Users, iconColor: "text-green-500" },
+    { title: "Products", value: stats.products, change: "--", up: true, bg: "bg-blue-100", icon: Star, iconColor: "text-blue-500" },
   ];
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">
-      
-      {/* Main content */}
-      <main className="flex-1 p-6 overflow-auto">
-        <div className="space-y-6">
+    <section className="bg-[var(--bg-main)] text-[var(--text-primary)] px-6 mt-10 pb-8 md:px-10 md:pt-1 md:pb-10">
+      <div className="space-y-8">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {stats.map((stat, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {displayStats.map((stat, i) => (
                 <div
                   key={i}
-                  className="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm border border-[var(--border)] hover:shadow-md transition"
+                  className="bg-[var(--bg-card)] p-8 rounded-3xl shadow-lg border border-[var(--border)] hover:shadow-2xl transition-all duration-200 group"
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-sm text-[var(--text-secondary)] mb-1">{stat.title}</p>
-                      <h3 className="text-3xl font-bold mb-2">{stat.value}</h3>
+                      <h3 className="text-3xl font-extrabold mb-2 group-hover:text-[var(--color-primary)] transition-colors">{stat.value}</h3>
                       <div className="flex items-center gap-1">
                         {stat.up ? <TrendingUp size={14} className="text-green-600" /> : <TrendingDown size={14} className="text-red-600" />}
                         <span className={`text-xs font-medium ${stat.up ? 'text-green-600' : 'text-red-600'}`}>
@@ -74,7 +78,7 @@ export default function Dashboard() {
                         <span className="text-xs text-[var(--text-secondary)]">vs last month</span>
                       </div>
                     </div>
-                    <div className={`p-3 rounded-xl ${stat.bg}`}>
+                    <div className={`p-3 rounded-2xl ${stat.bg} shadow-md group-hover:scale-110 transition-transform`}> 
                       <stat.icon className={stat.iconColor} size={24} />
                     </div>
                   </div>
@@ -83,10 +87,10 @@ export default function Dashboard() {
             </div>
 
             {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
               {/* Category Distribution */}
-              <div className="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm border border-[var(--border)]">
+              <div className="bg-[var(--bg-card)] p-8 rounded-3xl shadow-lg border border-[var(--border)]">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-semibold">Category Distribution</h3>
                   <button className="text-sm text-[var(--color-primary)] hover:underline">Details</button>
@@ -124,9 +128,9 @@ export default function Dashboard() {
             </div>
 
             {/* Revenue & Recent Orders */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Weekly Revenue */}
-              <div className="lg:col-span-2 bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm border border-[var(--border)]">
+              <div className="lg:col-span-2 bg-[var(--bg-card)] p-8 rounded-3xl shadow-lg border border-[var(--border)]">
                 <h3 className="text-lg font-semibold mb-6">Weekly Revenue</h3>
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={revenueData}>
@@ -146,26 +150,27 @@ export default function Dashboard() {
               </div>
 
               {/* Recent Activity */}
-              <div className="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm border border-[var(--border)]">
+              <div className="bg-[var(--bg-card)] p-8 rounded-3xl shadow-lg border border-[var(--border)]">
                 <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
                 <div className="space-y-4">
-                  {orders.slice(0, 5).map(order => (
-                    <div key={order.id} className="flex items-start gap-3 pb-3 border-b border-[var(--border)] last:border-0">
+                  {recentOrders.length === 0 ? (
+                    <p className="text-sm text-[var(--text-secondary)]">No recent orders found.</p>
+                  ) : recentOrders.map((order) => (
+                    <div key={order._id} className="flex items-start gap-3 pb-3 border-b border-[var(--border)] last:border-0 last:pb-0">
                       <div className="p-2 bg-[var(--bg-muted)] rounded-lg">
                         <ShoppingBag size={16} className="text-[var(--color-primary)]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">Order #{order.id}</p>
-                        <p className="text-xs text-[var(--text-secondary)]">{order.customer}</p>
+                        <p className="text-sm font-medium truncate">Order #{order._id.slice(-6).toUpperCase()}</p>
+                        <p className="text-xs text-[var(--text-secondary)]">{order.user?.name || "Unknown Customer"}</p>
                       </div>
-                      <span className="text-sm font-semibold">${order.amount}</span>
+                      <span className="text-sm font-semibold">${order.total}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-          </div>
-      </main>
-    </div>
+      </div>
+    </section>
   );
 }

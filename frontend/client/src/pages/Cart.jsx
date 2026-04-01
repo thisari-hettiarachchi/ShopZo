@@ -108,6 +108,24 @@ export default function Cart() {
     0
   );
 
+  // Group cart items by Vendor
+  const groupedCart = cartItems.reduce((acc, item) => {
+    if (!item.product) return acc;
+    
+    // Fallback if vendor is missing or unpopulated
+    const vendorId = item.product.vendor?._id || "unknown";
+    const vendorName = item.product.vendor?.name || "Official Shop";
+
+    if (!acc[vendorId]) {
+      acc[vendorId] = {
+        name: vendorName,
+        items: []
+      };
+    }
+    acc[vendorId].items.push(item);
+    return acc;
+  }, {});
+
   if (loading) {
     return <p className="text-center py-10">Loading your cart...</p>;
   }
@@ -128,60 +146,81 @@ export default function Cart() {
         ) : (
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
-            <div className="lg:col-span-2 space-y-4">
-              {cartItems.map((item) =>
-                item.product ? (  // <-- check if product exists
-                  <div
-                    key={item._id}
-                    className="flex gap-4 p-4 rounded-2xl bg-[var(--bg-card)] shadow"
-                  >
-                    <img
-                      src={item.product.image || "/placeholder.png"} // fallback image
-                      alt={item.product.name || "Product"}
-                      className="w-24 h-24 object-contain rounded-lg bg-[var(--bg-muted)]"
-                    />
-
-                    <div className="flex-1 space-y-2">
-                      <h3 className="font-semibold text-[var(--text-primary)]">
-                        {item.product.name}
-                      </h3>
-
-                      <p className="font-bold text-[var(--color-primary)]">
-                        Rs. {item.price}
-                      </p>
-
-                      {/* Quantity */}
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => decreaseQty(item._id)}
-                          className="p-2 rounded-lg border hover:bg-[var(--bg-muted)]"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-
-                        <span className="min-w-[24px] text-center">
-                          {item.quantity || 1}
-                        </span>
-
-                        <button
-                          onClick={() => increaseQty(item._id)}
-                          className="p-2 rounded-lg border hover:bg-[var(--bg-muted)]"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Remove */}
-                    <button
-                      onClick={() => removeItem(item._id)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+            <div className="lg:col-span-2 space-y-6">
+              {Object.entries(groupedCart).map(([vendorId, vendor]) => (
+                <div key={vendorId} className="bg-[var(--bg-card)] rounded-2xl shadow overflow-hidden">
+                  {/* Vendor Header */}
+                  <div className="bg-gray-50 px-5 py-3 border-b flex items-center gap-2">
+                    <input type="checkbox" className="w-4 h-4 rounded text-[var(--color-primary)] cursor-pointer" defaultChecked />
+                    <ShoppingBag className="w-5 h-5 text-[var(--color-primary)]" />
+                    <span className="font-bold text-gray-800 uppercase tracking-wide text-sm">
+                      {vendor.name}
+                    </span>
                   </div>
-                ) : null
-              )}
+
+                  {/* Vendor Items */}
+                  <div className="p-5 space-y-4">
+                    {vendor.items.map((item) => (
+                      <div
+                        key={item._id}
+                        className="flex gap-4 pb-4 border-b last:pb-0 last:border-0"
+                      >
+                        <img
+                          src={item.product.images?.[0] || item.product.image || "/placeholder.png"} 
+                          alt={item.product.name || "Product"}
+                          className="w-24 h-24 object-contain rounded-lg bg-[var(--bg-muted)] border border-gray-100"
+                        />
+
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <h3 className="font-semibold text-[var(--text-primary)] leading-tight">
+                              {item.product.name}
+                            </h3>
+                            <p className="text-xs text-gray-400 mt-1 line-clamp-1">{item.product.description}</p>
+                          </div>
+
+                          <div className="flex items-end justify-between mt-3">
+                            <p className="font-bold text-lg text-[var(--color-primary)]">
+                              Rs. {item.price}
+                            </p>
+
+                            {/* Actions */}
+                            <div className="flex items-center gap-4">
+                              {/* Remove */}
+                              <button
+                                onClick={() => removeItem(item._id)}
+                                className="text-gray-400 hover:text-red-500 transition tooltip"
+                                title="Remove Item"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+
+                              {/* Quantity */}
+                              <div className="flex items-center border border-gray-200 rounded-lg bg-white">
+                                <button
+                                  onClick={() => decreaseQty(item._id)}
+                                  className="p-1 px-3 hover:bg-[var(--bg-muted)] text-gray-600 transition tracking-wider"
+                                >
+                                  −
+                                </button>
+                                <span className="w-10 text-center font-medium font-mono text-sm">
+                                  {item.quantity || 1}
+                                </span>
+                                <button
+                                  onClick={() => increaseQty(item._id)}
+                                  className="p-1 px-3 hover:bg-[var(--bg-muted)] text-gray-600 transition tracking-wider"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Order Summary */}

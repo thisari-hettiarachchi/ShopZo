@@ -1,15 +1,13 @@
 import express from "express";
-import { protect } from "../middleware/authMiddleware.js";
-import {
-  getVendorProfile,
-  updateVendorProfile,
-  getDashboardSummary,
-} from "../controllers/vendorController.js";
+import { getVendors, getVendorProfile, updateVendorProfile } from "../controllers/vendorController.js";
+import { getUsers } from "../controllers/userController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/profile", protect, getVendorProfile);
-router.put("/profile", protect, updateVendorProfile);
-router.get("/dashboard", protect, getDashboardSummary);
+router.get("/", getVendors);
+router.get("/users", getUsers); // Get all registered users (customers)
+router.get("/profile", authMiddleware, getVendorProfile);
+router.put("/profile", authMiddleware, updateVendorProfile);
 
 export default router;

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5002/api/vendor",
+  baseURL: "http://localhost:5001/api/vendor",
 });
 
 const authHeaders = () => {
@@ -18,3 +18,5 @@ export const updateVendorProfile = (data) =>
   API.put("/profile", data, {
     headers: authHeaders(),
   });
+
+export const getVendors = () => API.get("/");
