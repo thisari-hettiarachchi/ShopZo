@@ -37,3 +37,50 @@ export const loginAdmin = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getAdminProfile = async (req, res) => {
+  try {
+    res.json({
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateAdminProfile = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const admin = await AdminUser.findById(req.user._id);
+
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    if (typeof name === "string" && name.trim()) {
+      admin.name = name.trim();
+    }
+
+    if (typeof email === "string" && email.trim()) {
+      admin.email = email.trim().toLowerCase();
+    }
+
+    await admin.save();
+
+    res.json({
+      id: admin._id,
+      name: admin.name,
+      email: admin.email,
+      role: admin.role,
+    });
+  } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(409).json({ message: "Email already in use" });
+    }
+
+    res.status(500).json({ message: error.message });
+  }
+};
