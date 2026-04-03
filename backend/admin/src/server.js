@@ -5,6 +5,7 @@ import express from "express";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -34,6 +35,7 @@ app.get("/", (_req, res) => {
 
 app.use("/api/admin/auth", authRoutes);
 app.use("/api/admin/dashboard", dashboardRoutes);
+app.use("/api/admin/products", productRoutes);
 
 app.listen(PORT, () => {
 	console.log(`Admin backend server running on port ${PORT}`);
