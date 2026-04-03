@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { fetchOrders, requestReturn } from "../../../api/ordersApi";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -14,9 +14,7 @@ export default function OrdersPage() {
       }
 
       try {
-        const res = await axios.get("http://localhost:5000/api/user/orders", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetchOrders();
         setOrders(res.data);
       } catch (err) {
         console.error(err);
@@ -29,6 +27,17 @@ export default function OrdersPage() {
   }, []);
 
   if (loading) return <p>Loading orders...</p>;
+
+  const handleRequestReturn = async (orderId) => {
+    const reason = prompt("Reason for return:");
+    if (!reason) return;
+    try {
+      await requestReturn(orderId, { reason, details: "Requested from profile" });
+      alert("Return request submitted");
+    } catch (error) {
+      alert(error?.response?.data?.message || "Failed to request return");
+    }
+  };
 
   return (
     <div className="p-6 rounded-2xl shadow-2xl bg-[var(--bg-card)]">
@@ -67,6 +76,23 @@ export default function OrdersPage() {
                 <p className="font-semibold text-[var(--text-primary)]">
                   ₹{order.total}
                 </p>
+                <button
+                  onClick={() => handleRequestReturn(order._id)}
+                  className="mt-2 rounded-md border border-[var(--color-primary)] px-2 py-1 text-xs text-[var(--color-primary)]"
+                >
+                  Request Return
+                </button>
+              </div>
+
+              <div className="w-full mt-3">
+                <div className="grid grid-cols-4 gap-2">
+                  {(order.trackingTimeline || []).map((step) => (
+                    <div key={step.status} className="text-center">
+                      <div className={`mx-auto h-2.5 w-2.5 rounded-full ${step.completed ? "bg-[var(--color-primary)]" : "bg-[var(--border)]"}`} />
+                      <p className="mt-1 text-[10px] text-[var(--text-secondary)]">{step.status}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ))}

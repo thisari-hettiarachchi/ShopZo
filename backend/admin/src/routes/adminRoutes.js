@@ -4,8 +4,10 @@ import {
 	getAdminAnalytics,
 	getAdminCustomers,
 	getAdminOrders,
+	getAdminInsights,
 	getAdminReviews,
 	getAdminVendors,
+	streamAdminInsights,
 	updateAdminOrderStatus,
 } from "../controllers/adminController.js";
 
@@ -19,5 +21,7 @@ router.get("/customers", getAdminCustomers);
 router.get("/analytics", getAdminAnalytics);
 router.get("/reviews", getAdminReviews);
 router.get("/vendors", getAdminVendors);
+router.get("/insights", getAdminInsights);
+router.get("/notifications/stream", streamAdminInsights);
 
 export default router;

@@ -1,14 +1,29 @@
-import React, { useState } from "react";
-import { User, Home, MapPin, CreditCard, Gift, Box, XCircle, Star, Heart } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { User, MapPin, CreditCard, Box, XCircle, Bell } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import MyProfile from "../../components/sections/Profile/Profile";
 import AddressBook from "../../components/sections/Profile/AddressBook";
 import PaymentOptions from "../../components/sections/Profile/PaymentOptions";
 import MyOrders from "../../components/sections/Profile/OrdersPage";
 import MyReturns from "../../components/sections/Profile/ReturnsPage";
 import MyCancellations from "../../components/sections/Profile/MyCancellations";
+import ProfileNotifications from "../../components/sections/Profile/ProfileNotifications";
 
 export default function ProfileDashboard() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState("My Profile");
+
+  useEffect(() => {
+    const sectionFromQuery = searchParams.get("section");
+    if (sectionFromQuery) {
+      setActiveSection(sectionFromQuery);
+    }
+  }, [searchParams]);
+
+  const selectSection = (sectionName) => {
+    setActiveSection(sectionName);
+    setSearchParams({ section: sectionName });
+  };
 
   const menu = [
     {
@@ -27,6 +42,10 @@ export default function ProfileDashboard() {
         { name: "My Cancellations", icon: <XCircle size={18} /> },
       ],
     },
+    {
+      title: "My Communication",
+      items: [{ name: "My Notifications", icon: <Bell size={18} /> }],
+    },
   ];
 
   const renderContent = () => {
@@ -43,6 +62,8 @@ export default function ProfileDashboard() {
         return <MyReturns />;
       case "My Cancellations":
         return <MyCancellations />;
+      case "My Notifications":
+        return <ProfileNotifications />;
       default:
         return <MyProfile />;
     }
@@ -60,7 +81,7 @@ export default function ProfileDashboard() {
               {section.items.map((item) => (
                 <li
                   key={item.name}
-                  onClick={() => setActiveSection(item.name)}
+                  onClick={() => selectSection(item.name)}
                   className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-300 ${
                     activeSection === item.name
                       ? "bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white shadow-md"

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getOrders, updateOrderStatus } from "../services/adminService";
+import { downloadInvoicePdf } from "../utils/pdf";
 
 const STATUS_OPTIONS = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
 
@@ -65,20 +66,29 @@ function OrderCard({ order, onStatusChange }) {
             <p className="text-lg font-bold text-[var(--text-primary)] tabular-nums">
               ${Number(order.total || 0).toFixed(2)}
             </p>
-            <div className="relative">
-              <select
-                value={localStatus}
-                onChange={handleChange}
-                disabled={updating}
-                className="appearance-none cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--bg-main)] pl-3 pr-8 py-1.5 text-xs font-medium text-[var(--text-primary)] transition-opacity focus:outline-none focus:ring-2 focus:ring-[var(--border)] disabled:opacity-50"
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => downloadInvoicePdf(order)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
               >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+                Invoice PDF
+              </button>
+              <div className="relative">
+                <select
+                  value={localStatus}
+                  onChange={handleChange}
+                  disabled={updating}
+                  className="appearance-none cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--bg-main)] pl-3 pr-8 py-1.5 text-xs font-medium text-[var(--text-primary)] transition-opacity focus:outline-none focus:ring-2 focus:ring-[var(--border)] disabled:opacity-50"
+                >
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>

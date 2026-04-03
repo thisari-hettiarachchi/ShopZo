@@ -13,9 +13,10 @@ import userRoutes from "./routes/userRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
 import cardRoutes from "./routes/cardRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 dotenv.config();
-connectDB();
 connectCloudinary();
 
 const app = express();
@@ -38,8 +39,21 @@ app.use("/api/user", userRoutes);
 app.use("/api/user/addresses", addressRoutes);
 app.use("/api/user/cards", cardRoutes);
 app.use("/api/user", orderRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/user/notifications", notificationRoutes);
 
 app.get("/", (req, res) => res.send("ShopZo API running 🚀"));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (error) {
+    console.error("Failed to start client backend", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();

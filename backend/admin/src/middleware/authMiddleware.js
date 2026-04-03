@@ -3,12 +3,13 @@ import AdminUser from "../models/AdminUser.js";
 
 export const protectAdmin = async (req, res, next) => {
   const authHeader = req.headers.authorization;
+  const queryToken = req.query?.token;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if ((!authHeader || !authHeader.startsWith("Bearer ")) && !queryToken) {
     return res.status(401).json({ message: "Not authorized, no token" });
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = queryToken || authHeader.split(" ")[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

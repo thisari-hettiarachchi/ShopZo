@@ -9,9 +9,6 @@ export default function FeaturedVendorsSection({ vendors }) {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-end justify-between mb-12">
           <div className="mb-12">
-            <span className="block text-[4rem] font-black text-[var(--border)] leading-none select-none mono-font opacity-50 mb-[-1rem]">
-              03
-            </span>
             <span className="section-eyebrow block mb-3">Trusted Sellers</span>
             <h2 className="display-font text-[2.6rem] md:text-[3.4rem] lg:text-[4rem] font-black text-[var(--text-primary)] leading-[1.0] tracking-tight">
               Featured <span className="italic text-[var(--color-primary)]">Vendors</span>

@@ -25,6 +25,12 @@ export const updateAddress = async (id, data) => {
   });
 };
 
+export const deleteAddress = async (id) => {
+  return await axios.delete(`${API_URL}/addresses/${id}`, {
+    headers: authHeaders(),
+  });
+};
+
 export const setDefaultAddress = async (id, type) => {
   return await axios.patch(`${API_URL}/addresses/${id}/default`, { type }, {
     headers: authHeaders(),

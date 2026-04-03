@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { ShoppingCart, MapPin, User, Tag, Edit, X } from "lucide-react";
 import { fetchCart } from "../../api/cartApi";
 import { getAddresses, addAddress } from "../../services/addressService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const token = localStorage.getItem("token");
 
   const [promoCode, setPromoCode] = useState("");
@@ -29,15 +30,31 @@ export default function CheckoutPage() {
   useEffect(() => {
     const loadCheckoutData = async () => {
       try {
-        const cart = await fetchCart(token);
+        // Check if products were passed via Buy Now button
+        if (location.state?.products && location.state.products.length > 0) {
+          const buyNowProducts = location.state.products.map((product) => ({
+            _id: product._id,
+            product: {
+              _id: product._id,
+              name: product.name,
+              image: product.image,
+            },
+            price: product.price,
+            qty: product.quantity || 1,
+            vendor: product.vendor,
+          }));
+          setCartItems(buyNowProducts);
+        } else {
+          // Otherwise, fetch from cart API
+          const cart = await fetchCart(token);
+          setCartItems(cart.items || []);
+        }
+
         const addressRes = await getAddresses();
-
         const addresses = addressRes.data || [];
-
         const defaultShipping =
           addresses.find((a) => a.isDefaultShipping) || addresses[0] || null;
 
-        setCartItems(cart.items || []);
         setAddress(defaultShipping);
         setAllAddresses(addresses);
         setSelectedAddressId(defaultShipping?.id || null);
@@ -47,7 +64,7 @@ export default function CheckoutPage() {
     };
 
     loadCheckoutData();
-  }, [token]);
+  }, [token, location.state]);
 
   const itemsTotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.qty,
@@ -164,24 +181,29 @@ export default function CheckoutPage() {
                     className="flex gap-4 p-4 mb-4 bg-[var(--bg-muted)] rounded-xl"
                   >
                     <img
-                      src={item.product.image}
-                      alt={item.product.name}
+                      src={item.product?.image || item.product?.images?.[0]}
+                      alt={item.product?.name}
                       className="w-20 h-20 object-contain bg-white rounded"
                     />
 
                     <div className="flex-1">
                       <h3 className="font-semibold">
-                        {item.product.name}
+                        {item.product?.name}
                       </h3>
-                      <p className="text-sm">
-                        {item.vendor?.name}
+                      <p className="text-sm text-[var(--text-secondary)]">
+                        {item.vendor?.name || "Seller"}
                       </p>
-                      <p className="font-bold text-[var(--color-primary)]">
+                      <p className="font-bold text-[var(--color-primary)] mt-1">
                         Rs. {item.price}
                       </p>
-                      <p className="text-sm">
-                        Qty: {item.qty}
-                      </p>
+                      <div className="flex justify-between items-center mt-2">
+                        <p className="text-sm text-[var(--text-secondary)]">
+                          Qty: <span className="font-semibold">{item.qty}</span>
+                        </p>
+                        <p className="text-sm font-semibold">
+                          Subtotal: <span className="text-[var(--color-primary)]">Rs. {item.price * item.qty}</span>
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))

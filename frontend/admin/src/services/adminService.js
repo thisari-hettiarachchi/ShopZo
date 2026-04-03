@@ -25,6 +25,11 @@ export const getAnalytics = async () => {
 	return data;
 };
 
+export const getDashboardInsights = async () => {
+	const { data } = await api.get("/api/admin/insights");
+	return data;
+};
+
 export const getReviews = async () => {
 	const { data } = await api.get("/api/admin/reviews");
 	return data;

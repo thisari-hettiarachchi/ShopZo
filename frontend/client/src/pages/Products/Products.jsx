@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import ProductGrid from "../../components/sections/product/ProductGrid";
 import { fetchProducts } from "../../api/productApi";
 
 export default function Products() {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [filtersOpen, setFiltersOpen] = useState({
     brand: false,
@@ -23,9 +25,21 @@ export default function Products() {
     price: { min: "", max: "" },
   });
 
+  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "latest");
+  const searchText = searchParams.get("q") || "";
+
   useEffect(() => {
-    fetchProducts().then(setProducts);
-  }, []);
+    const params = {
+      q: searchText,
+      minPrice: filters.price.min || searchParams.get("minPrice") || "",
+      maxPrice: filters.price.max || searchParams.get("maxPrice") || "",
+      rating: filters.rating || searchParams.get("rating") || "",
+      location: filters.shippedFrom[0] || "",
+      sort: sortBy,
+    };
+
+    fetchProducts(params).then(setProducts);
+  }, [filters, searchText, searchParams, sortBy]);
 
   const toggleFilter = (filter) => {
     setFiltersOpen((prev) => ({ ...prev, [filter]: !prev[filter] }));
@@ -75,19 +89,7 @@ export default function Products() {
     });
   };
 
-  // ✅ FILTER LOGIC
-  const filteredProducts = products.filter((p) => {
-    if (filters.brand.length && !filters.brand.includes(p.brand)) return false;
-    if (
-      filters.shippedFrom.length &&
-      !filters.shippedFrom.includes(p.shippedFrom)
-    )
-      return false;
-    if (filters.rating && p.rating < filters.rating) return false;
-    if (filters.price.min && p.price < filters.price.min) return false;
-    if (filters.price.max && p.price > filters.price.max) return false;
-    return true;
-  });
+  const filteredProducts = products;
     
   return (
     <div className="min-h-screen bg-[var(--bg-main)] mt-10 px-3 pb-10  md:px-4">
@@ -109,6 +111,11 @@ export default function Products() {
               <p className="mt-1 text-xs text-[var(--text-secondary)] md:text-sm">
                 Filter by brand, location, rating, and budget to find your perfect match.
               </p>
+              {searchText && (
+                <p className="mt-1 text-xs text-[var(--color-primary)]">
+                  Showing results for "{searchText}"
+                </p>
+              )}
             </div>
             <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] px-3 py-2 text-xs text-[var(--text-secondary)]">
               {filteredProducts.length} items available
@@ -126,6 +133,18 @@ export default function Products() {
             >
               Filters
             </h2>
+
+            <select
+              className="mb-3 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-2 py-1.5 text-xs"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="latest">Newest</option>
+              <option value="popularity">Popular</option>
+              <option value="priceAsc">Price: Low to High</option>
+              <option value="priceDesc">Price: High to Low</option>
+              <option value="rating">Top Rated</option>
+            </select>
 
             {/* Brand */}
             <div className="mb-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">

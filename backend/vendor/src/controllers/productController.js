@@ -30,6 +30,34 @@ export const getVendorProducts = async (req, res) => {
   }
 };
 
+export const getLowStockProducts = async (req, res) => {
+  try {
+    const vendorId = req.user?.id;
+    const threshold = Number(req.query.threshold || 10);
+    if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
+
+    const products = await Product.find({
+      vendor: vendorId,
+      stock: { $lte: threshold },
+    })
+      .sort({ stock: 1, updatedAt: -1 })
+      .lean();
+
+    const alerts = products.map((product) => ({
+      ...product,
+      severity: product.stock <= 3 ? "critical" : "warning",
+    }));
+
+    res.json({
+      threshold,
+      count: alerts.length,
+      alerts,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch low stock alerts" });
+  }
+};
+
 // Add a new product
 export const addVendorProduct = async (req, res) => {
   try {
