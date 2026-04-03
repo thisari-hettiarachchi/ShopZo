@@ -1,12 +1,12 @@
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { addToCartApi } from "../../api/cartApi";
+import { addToCartApi } from "../../../api/cartApi";
 import {
   addToWishlistApi,
   removeFromWishlistApi,
   fetchWishlistApi,
-} from "../../api/wishlistApi";
+} from "../../../api/wishlistApi";
 
 export default function ProductCard({ product, token: propToken, onCartUpdate }) {
   const navigate = useNavigate();

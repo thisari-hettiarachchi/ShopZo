@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { User, Mail, Lock, LogOut } from "lucide-react";
-import { getUserProfile, updateUserProfile } from "../../services/userService";
+import { getUserProfile, updateUserProfile } from "../../../services/userService";
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState({

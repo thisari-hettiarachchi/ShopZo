@@ -4,10 +4,10 @@ import {
   getCards,
   addCard,
   setDefaultCardApi,
-} from "../services/paymentService";
-import { createOrder } from "../services/orderService";
-import { clearCartApi } from "../api/cartApi";
-import { fetchCart } from "../api/cartApi";
+} from "../../services/paymentService";
+import { createOrder } from "../../services/orderService";
+import { clearCartApi } from "../../api/cartApi";
+import { fetchCart } from "../../api/cartApi";
 import { useNavigate } from "react-router-dom";
 
 

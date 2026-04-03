@@ -1,13 +1,13 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ShoppingCart, Heart, Star, Truck, MapPin, Shield, Store, RefreshCcw } from "lucide-react";
-import { fetchProductById } from "../api/productApi";
-import { addToCartApi } from "../api/cartApi";
+import { fetchProductById } from "../../api/productApi";
+import { addToCartApi } from "../../api/cartApi";
 import {
   addToWishlistApi,
   removeFromWishlistApi,
   fetchWishlistApi,
-} from "../api/wishlistApi";
+} from "../../api/wishlistApi";
 
 export default function ProductDetails() {
   const { id } = useParams();

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import ProductGrid from "../components/product/ProductGrid";
-import { fetchProducts } from "../api/productApi";
+import ProductGrid from "../../components/sections/product/ProductGrid";
+import { fetchProducts } from "../../api/productApi";
 
 export default function Products() {
   const [products, setProducts] = useState([]);

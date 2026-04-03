@@ -4,7 +4,7 @@ import {
   getAddresses,
   addAddress,
   setDefaultAddress,
-} from "../../services/addressService";
+} from "../../../services/addressService";
 
 export default function AddressBook() {
   const [addresses, setAddresses] = useState([]);

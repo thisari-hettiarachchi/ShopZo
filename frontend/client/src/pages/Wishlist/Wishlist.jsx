@@ -3,7 +3,7 @@ import { Trash2, ShoppingBag } from "lucide-react";
 import {
   fetchWishlistApi,
   removeFromWishlistApi,
-} from "../api/wishlistApi";
+} from "../../api/wishlistApi";
 
 export default function Wishlist() {
   const token = localStorage.getItem("token");

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, MapPin, User, Tag, Edit, X } from "lucide-react";
-import { fetchCart } from "../api/cartApi";
-import { getAddresses, addAddress } from "../services/addressService";
+import { fetchCart } from "../../api/cartApi";
+import { getAddresses, addAddress } from "../../services/addressService";
 import { useNavigate } from "react-router-dom";
 
 export default function CheckoutPage() {

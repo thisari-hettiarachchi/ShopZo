@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, Store, ArrowRight, Check } from 'lucide-react';
-import { registerUser, loginUser } from "../services/authService";
+import { registerUser, loginUser } from "../../services/authService";
 
 export default function AuthPages() {
   const navigate = useNavigate(); 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CreditCard, Edit2, Plus, X } from "lucide-react";
-import { getCards, addCard, setDefaultCardApi, updateCardApi } from "../../services/paymentService";
+import { getCards, addCard, setDefaultCardApi, updateCardApi } from "../../../services/paymentService";
 
 export default function PaymentOptions() {
   const [cards, setCards] = useState([]);

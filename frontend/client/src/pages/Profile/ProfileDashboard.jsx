@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { User, Home, MapPin, CreditCard, Gift, Box, XCircle, Star, Heart } from "lucide-react";
-import MyProfile from "../pages/Profile/Profile";
-import AddressBook from "../pages/Profile/AddressBook";
-import PaymentOptions from "../pages/Profile/PaymentOptions";
-import MyOrders from "./Profile/OrdersPage";
-import MyReturns from "./Profile/ReturnsPage";
-import MyCancellations from "./Profile/MyCancellations";
+import MyProfile from "../../components/sections/Profile/Profile";
+import AddressBook from "../../components/sections/Profile/AddressBook";
+import PaymentOptions from "../../components/sections/Profile/PaymentOptions";
+import MyOrders from "../../components/sections/Profile/OrdersPage";
+import MyReturns from "../../components/sections/Profile/ReturnsPage";
+import MyCancellations from "../../components/sections/Profile/MyCancellations";
 
 export default function ProfileDashboard() {
   const [activeSection, setActiveSection] = useState("My Profile");

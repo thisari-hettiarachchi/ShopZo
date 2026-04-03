@@ -4,7 +4,7 @@ import {
   fetchCart,
   updateCartItemApi,
   removeCartItemApi,
-} from "../api/cartApi";
+} from "../../api/cartApi";
 import { useNavigate } from "react-router-dom";
 
 export default function Cart() {
