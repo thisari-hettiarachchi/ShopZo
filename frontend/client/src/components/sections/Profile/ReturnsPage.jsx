@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { fetchReturns } from "../../../api/ordersApi";
 
 export default function ReturnsPage() {
   const [returns, setReturns] = useState([]);
@@ -14,9 +14,7 @@ export default function ReturnsPage() {
       }
 
       try {
-        const res = await axios.get("http://localhost:5000/api/user/returns", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetchReturns();
         setReturns(res.data);
       } catch (err) {
         console.error(err);
@@ -47,7 +45,10 @@ export default function ReturnsPage() {
             className="p-4 mb-4 rounded-xl border border-[var(--border)]"
           >
             <p className="font-semibold text-[var(--text-primary)]">
-              {ret.items[0]?.product?.name}
+              {ret.order?.products?.[0]?.product?.name || "Product"}
+            </p>
+            <p className="text-sm text-[var(--text-secondary)]">
+              Reason: {ret.reason}
             </p>
             <p className="text-sm text-[var(--text-secondary)]">
               Status: {ret.status}

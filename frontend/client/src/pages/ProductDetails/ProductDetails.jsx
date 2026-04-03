@@ -1,7 +1,8 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
 import { ShoppingCart, Heart, Star, Truck, MapPin, Shield, Store, RefreshCcw } from "lucide-react";
-import { fetchProductById } from "../../api/productApi";
+import { fetchProductById, fetchProductReviews, postProductReview } from "../../api/productApi";
+import { API_BASE_URL, authHeaders } from "../../api/base";
 import { addToCartApi } from "../../api/cartApi";
 import {
   addToWishlistApi,
@@ -11,12 +12,18 @@ import {
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState("");
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, title: "", comment: "" });
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState([]);
+  const chatInputRef = useRef(null);
 
   /* ---------------- Fetch Product ---------------- */
   useEffect(() => {
@@ -24,7 +31,25 @@ export default function ProductDetails() {
       setProduct(data);
       setMainImage(data.images?.[0]);
     });
+    fetchProductReviews(id).then((data) => setReviews(Array.isArray(data) ? data : []));
   }, [id]);
+
+  useEffect(() => {
+    const loadChat = async () => {
+      if (!token || !product?.vendor?._id) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/chat/messages?vendorId=${product.vendor._id}&productId=${product._id}`, {
+          headers: authHeaders(),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setChatMessages(Array.isArray(data) ? data : []);
+      } catch {
+        setChatMessages([]);
+      }
+    };
+    loadChat();
+  }, [product, token]);
 
   /* ---------------- Check Wishlist Status ---------------- */
   useEffect(() => {
@@ -70,6 +95,69 @@ export default function ProductDetails() {
     } catch (err) {
       console.error(err);
       alert("Failed to add to cart");
+    }
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!token) return alert("Login to submit a review");
+
+    const created = await postProductReview(product._id, reviewForm);
+    if (created?.message) return alert(created.message);
+
+    const latest = await fetchProductReviews(product._id);
+    setReviews(Array.isArray(latest) ? latest : []);
+    setReviewForm({ rating: 5, title: "", comment: "" });
+  };
+
+  const handleSendChat = async () => {
+    if (!token) return alert("Login to chat with vendor");
+    if (!product?.vendor?._id || !chatInput.trim()) return;
+
+    const res = await fetch(`${API_BASE_URL}/chat/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders(),
+      },
+      body: JSON.stringify({
+        vendorId: product.vendor._id,
+        productId: product._id,
+        message: chatInput,
+      }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      setChatMessages((prev) => [...prev, data]);
+      setChatInput("");
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (!token) return alert("You must be logged in to checkout");
+    navigate("/checkout", {
+      state: {
+        products: [
+          {
+            _id: product._id,
+            name: product.name,
+            price: product.price,
+            image: mainImage,
+            quantity: quantity,
+            vendor: product.vendor,
+          },
+        ],
+        quantity: quantity,
+      },
+    });
+  };
+
+  const handleChatNow = () => {
+    if (!token) return alert("Login to chat with vendor");
+    if (chatInputRef.current) {
+      chatInputRef.current.focus();
+      chatInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
@@ -180,7 +268,7 @@ export default function ProductDetails() {
           {/* -------- Actions -------- */}
           <div className="flex gap-4">
             <button
-              onClick={handleWishlistClick}
+              onClick={handleBuyNow}
               className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-orange-100 text-[var(--color-primary)] font-semibold hover:bg-orange-200 transition"
             >
               Buy Now
@@ -199,6 +287,51 @@ export default function ProductDetails() {
             <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
               {product.description}
             </p>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-[var(--border)]">
+            <h3 className="font-semibold mb-3">Ratings & Reviews</h3>
+            <form onSubmit={handleSubmitReview} className="mb-5 grid grid-cols-1 md:grid-cols-4 gap-2">
+              <select
+                value={reviewForm.rating}
+                onChange={(e) => setReviewForm((prev) => ({ ...prev, rating: Number(e.target.value) }))}
+                className="rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm"
+              >
+                {[5, 4, 3, 2, 1].map((r) => (
+                  <option key={r} value={r}>{r} Stars</option>
+                ))}
+              </select>
+              <input
+                value={reviewForm.title}
+                onChange={(e) => setReviewForm((prev) => ({ ...prev, title: e.target.value }))}
+                placeholder="Review title"
+                className="rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm"
+              />
+              <input
+                value={reviewForm.comment}
+                onChange={(e) => setReviewForm((prev) => ({ ...prev, comment: e.target.value }))}
+                placeholder="Your feedback"
+                className="rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm md:col-span-2"
+              />
+              <button className="md:col-span-4 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white">
+                Submit Review
+              </button>
+            </form>
+
+            <div className="space-y-3">
+              {reviews.map((review) => (
+                <div key={review._id} className="rounded-xl border border-[var(--border)] p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold">{review.user?.name || "Customer"}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">{review.verifiedBuyer ? "Verified Buyer" : "Unverified"}</p>
+                  </div>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">{"★".repeat(review.rating)}{"☆".repeat(Math.max(0, 5 - review.rating))}</p>
+                  {review.title && <p className="text-sm font-semibold mt-1">{review.title}</p>}
+                  {review.comment && <p className="text-sm text-[var(--text-secondary)] mt-1">{review.comment}</p>}
+                </div>
+              ))}
+              {reviews.length === 0 && <p className="text-sm text-[var(--text-secondary)]">No reviews yet.</p>}
+            </div>
           </div>
         </div>
 
@@ -253,7 +386,7 @@ export default function ProductDetails() {
               <Store className="text-[var(--color-primary)]" size={32} />
               <div>
                 <p className="font-bold text-[var(--text-primary)]">
-                  {product.vendor?.name || "Official Shop"}
+                  {product.vendor?.name }
                 </p>
                 <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
                   <Star size={12} className="fill-amber-400 text-amber-400" />
@@ -263,13 +396,25 @@ export default function ProductDetails() {
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <button className="flex-1 py-2 text-[var(--color-primary)] text-sm font-medium border border-[var(--color-primary)] rounded-lg hover:bg-orange-50 transition">
-                Chat Now
-              </button>
-              <button className="flex-1 py-2 text-white bg-[var(--text-primary)] text-sm font-medium rounded-lg hover:bg-gray-800 transition">
-                Visit Store
-              </button>
+            <div className="mt-3 rounded-xl border border-[var(--border)] p-2">
+              <div className="max-h-36 overflow-auto space-y-1 mb-2">
+                {chatMessages.map((msg) => (
+                  <p key={msg._id} className="text-xs rounded bg-[var(--bg-muted)] px-2 py-1">{msg.message}</p>
+                ))}
+                {chatMessages.length === 0 && <p className="text-xs text-[var(--text-secondary)]">Start a pre-purchase chat with this vendor.</p>}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  ref={chatInputRef}
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-2 py-1 text-xs"
+                  placeholder="Ask about delivery, color, warranty..."
+                />
+                <button onClick={handleSendChat} className="rounded-lg bg-[var(--color-primary)] px-3 py-1 text-xs font-semibold text-white">
+                  Send
+                </button>
+              </div>
             </div>
           </div>
 

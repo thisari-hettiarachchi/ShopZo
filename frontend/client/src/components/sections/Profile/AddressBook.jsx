@@ -4,6 +4,7 @@ import {
   getAddresses,
   addAddress,
   setDefaultAddress,
+  deleteAddress,
 } from "../../../services/addressService";
 
 export default function AddressBook() {
@@ -115,6 +116,19 @@ export default function AddressBook() {
     }
   };
 
+  const handleDeleteAddress = async (id) => {
+    const confirmed = window.confirm("Are you sure you want to delete this address?");
+    if (!confirmed) return;
+
+    try {
+      await deleteAddress(id);
+      setAddresses((prev) => prev.filter((addr) => addr.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete address");
+    }
+  };
+
   return (
     <div
       className="p-6 rounded-2xl shadow-2xl"
@@ -193,6 +207,13 @@ export default function AddressBook() {
                 className="flex items-center gap-1 px-3 py-1 rounded-lg border-2 text-sm font-medium border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-300"
               >
                 <Edit2 size={16} /> EDIT
+              </button>
+
+              <button
+                onClick={() => handleDeleteAddress(addr.id)}
+                className="px-3 py-1 rounded-lg border-2 text-sm font-medium border-red-300 text-red-600 hover:bg-red-50 transition-all duration-300"
+              >
+                Delete
               </button>
             </div>
           </div>

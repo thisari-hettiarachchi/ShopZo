@@ -1,5 +1,7 @@
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
+import Coupon from "../models/Coupon.js";
+import Review from "../models/Review.js";
 
 // Utility to get start of day
 const getStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -10,9 +12,21 @@ export const getDashboardAnalytics = async (req, res) => {
     if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
 
     // 1. Fetch all orders and products for this vendor
-    const [orders, productsCount] = await Promise.all([
+    const [orders, productsCount, lowStock, activeCoupons, reviewOverview] = await Promise.all([
       Order.find({ vendor: vendorId }).populate("user", "name email").populate("products.product", "name price").sort({ createdAt: -1 }),
-      Product.countDocuments({ vendor: vendorId })
+      Product.countDocuments({ vendor: vendorId }),
+      Product.countDocuments({ vendor: vendorId, stock: { $lte: 10 } }),
+      Coupon.countDocuments({ vendor: vendorId, isActive: true }),
+      (async () => {
+        const vendorProducts = await Product.find({ vendor: vendorId }, { _id: 1 }).lean();
+        const productIds = vendorProducts.map((item) => item._id);
+        if (!productIds.length) return { averageRating: 0, totalReviews: 0 };
+        const [grouped] = await Review.aggregate([
+          { $match: { product: { $in: productIds } } },
+          { $group: { _id: null, averageRating: { $avg: "$rating" }, totalReviews: { $sum: 1 } } },
+        ]);
+        return grouped || { averageRating: 0, totalReviews: 0 };
+      })(),
     ]);
 
     // 2. Compute Dashboard KPIs
@@ -48,7 +62,11 @@ export const getDashboardAnalytics = async (req, res) => {
       sales: totalSales,
       orders: totalOrders,
       customers: uniqueCustomers.size,
-      products: productsCount
+      products: productsCount,
+      lowStock,
+      activeCoupons,
+      averageRating: Number((reviewOverview.averageRating || 0).toFixed(2)),
+      totalReviews: reviewOverview.totalReviews || 0,
     };
 
     // Extract unique customers data array for CustomersPage
@@ -66,7 +84,7 @@ export const getDashboardAnalytics = async (req, res) => {
       revenueData,
       recentOrders,
       categoryData,
-      customers: customersArray
+      customers: customersArray,
     });
 
   } catch (error) {

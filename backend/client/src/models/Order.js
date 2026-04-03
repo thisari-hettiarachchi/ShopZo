@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
 
+const statusHistorySchema = new mongoose.Schema(
+  {
+    status: { type: String, required: true },
+    at: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema({
   products: [
     {
@@ -12,6 +20,10 @@ const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   total: { type: Number, required: true },
   status: { type: String, default: "Pending" },
+  statusHistory: {
+    type: [statusHistorySchema],
+    default: [{ status: "Placed" }],
+  },
 }, { timestamps: true });
 
 export default mongoose.model("Order", orderSchema);

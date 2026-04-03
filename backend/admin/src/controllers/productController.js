@@ -3,6 +3,16 @@ import "../models/Vendor.js";
 
 const populateVendor = (query) => query.populate("vendor", "storeName");
 
+export const createProduct = async (req, res) => {
+  try {
+    const createdProduct = await Product.create(req.body);
+    const product = await populateVendor(Product.findById(createdProduct._id));
+    res.status(201).json(product);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const getProducts = async (_req, res) => {
   try {
     const products = await populateVendor(Product.find({}).sort({ createdAt: -1 }).limit(500));

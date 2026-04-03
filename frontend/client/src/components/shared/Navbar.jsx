@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Search,
   ShoppingCart,
@@ -16,8 +16,11 @@ import {
   Sun
 } from 'lucide-react'
 import Assets from '../../assets/assets'
+import { fetchProductSuggestions } from '../../api/productApi'
+import { API_BASE_URL, authHeaders } from '../../api/base'
 
 export default function Navbar() {
+  const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,6 +37,8 @@ export default function Navbar() {
   const [sortBy, setSortBy] = useState("popularity");
   const searchDropdownRef = useRef(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [notifications, setNotifications] = useState([]);
     // Example: categories, vendors, colors, sizes for dropdowns (replace with real data or fetch from API)
     const categories = ["Electronics", "Clothing", "Books", "Home"];
     const vendors = ["Vendor A", "Vendor B", "Vendor C"];
@@ -69,6 +74,23 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
 
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      if (!searchTerm?.trim()) {
+        setSuggestions([]);
+        return;
+      }
+      try {
+        const result = await fetchProductSuggestions(searchTerm);
+        setSuggestions(result || []);
+      } catch {
+        setSuggestions([]);
+      }
+    }, 220);
+
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
+
   const updateCartCount = () => {
     const cart = JSON.parse(localStorage.getItem('cart')) || []
     setCartCount(cart.length)
@@ -84,6 +106,40 @@ export default function Navbar() {
     updateWishlistCount()
     setIsLoggedIn(!!localStorage.getItem('token'))
   }, [])
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const loadNotifications = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/user/notifications`, {
+          headers: authHeaders(),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setNotifications(Array.isArray(data) ? data : []);
+      } catch {
+        setNotifications([]);
+      }
+    };
+
+    loadNotifications();
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const handleSearch = () => {
+    const query = new URLSearchParams();
+    if (searchTerm) query.set("q", searchTerm);
+    if (filters.category) query.set("category", filters.category);
+    if (filters.priceMin) query.set("minPrice", filters.priceMin);
+    if (filters.priceMax) query.set("maxPrice", filters.priceMax);
+    if (filters.rating) query.set("rating", filters.rating);
+    query.set("sort", sortBy === "newest" ? "latest" : sortBy === "price-asc" ? "priceAsc" : sortBy === "price-desc" ? "priceDesc" : "popularity");
+    setIsSearchOpen(false);
+    navigate(`/products?${query.toString()}`);
+  };
 
   useEffect(() => {
     const handleStorage = () => {
@@ -228,6 +284,20 @@ export default function Navbar() {
               )}
             </NavLink>
 
+            <div className="relative">
+              <button
+                className="relative p-2 rounded-full btn-icon"
+                onClick={() => navigate("/profile?section=My%20Notifications")}
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="badge absolute -top-1 -right-1 h-4 w-4 text-[10px] flex items-center justify-center rounded-full">
+                    {Math.min(unreadCount, 9)}
+                  </span>
+                )}
+              </button>
+            </div>
+
             {/* CART */}
             <NavLink to="/cart" className="relative p-2 rounded-full btn-icon">
               <ShoppingCart size={20} />
@@ -273,8 +343,25 @@ export default function Navbar() {
                   <option value="price-desc">Price: High to Low</option>
                   <option value="discount">Discount</option>
                 </select>
-                <button className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white" onClick={() => {/* TODO: trigger search/filter action */}}>Search</button>
+                <button className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white" onClick={handleSearch}>Search</button>
               </div>
+              {suggestions.length > 0 && (
+                <div className="rounded-xl border border-[var(--border)] p-2 max-h-56 overflow-auto">
+                  {suggestions.map((item) => (
+                    <button
+                      key={item._id}
+                      className="w-full text-left px-2 py-2 rounded-lg hover:bg-[var(--bg-muted)]"
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        navigate(`/products/${item._id}`);
+                      }}
+                    >
+                      <p className="text-sm font-semibold">{item.name}</p>
+                      <p className="text-xs text-[var(--text-secondary)]">Rs. {item.price} • {item.category}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
               {showFilters && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   <select className="border rounded-lg px-2 py-1" value={filters.category} onChange={e => setFilters(f => ({...f, category: e.target.value}))}>

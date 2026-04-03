@@ -9,6 +9,8 @@ import {
   Users,
   TrendingUp,
   Star,
+  TicketPercent,
+  MessageCircle,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -63,6 +65,8 @@ export default function Sidebar({ active }) {
           { id: "orders", label: "Orders", icon: ShoppingBag, path: "/orders" },
           { id: "customers", label: "Customers", icon: Users, path: "/customers" },
           { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/analytics" },
+          { id: "coupons", label: "Coupons", icon: TicketPercent, path: "/coupons" },
+          { id: "chat", label: "Chat", icon: MessageCircle, path: "/chat" },
           { id: "reviews", label: "Reviews", icon: Star, path: "/reviews" },
           { id: "profile", label: "Profile", icon: Settings, path: "/profile" },
         ].map((item) => (
