@@ -27,6 +27,7 @@ const userSchema = new mongoose.Schema(
     name: String,
     email: String,
     password: String,
+    followingVendors: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vendor" }],
 
     addresses: {
       type: [addressSchema],

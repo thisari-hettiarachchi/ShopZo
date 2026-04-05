@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getVendorToken } from "../utils/authStorage";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api/vendor";
 
@@ -7,7 +8,7 @@ const API = axios.create({
 });
 
 const authHeaders = () => {
-  const token = localStorage.getItem("token");
+  const token = getVendorToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 

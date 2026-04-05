@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Flame, Star } from "lucide-react";
+import { Flame } from "lucide-react";
 import { Link } from "react-router-dom";
+import ProductCard from "../product/ProductCard";
 
 const stagger = (index, base = 0.06) => ({ delay: index * base });
 
@@ -65,7 +66,7 @@ export default function FlashSaleSection({ products }) {
           </div>
 
           <Link
-            to="/products?sale=flash"
+            to="/flashsale"
             className="text-sm font-bold text-[var(--color-primary)] hover:opacity-75 px-5 py-2 rounded-full border-2 border-[var(--color-primary)] transition-all hover:bg-[var(--color-primary)] hover:text-white"
           >
             View All
@@ -80,31 +81,9 @@ export default function FlashSaleSection({ products }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ ...stagger(index, 0.06), duration: 0.4 }}
-              className="group bg-[var(--bg-main)] rounded-2xl overflow-hidden border border-[var(--border)] hover:border-[var(--color-primary)] hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 cursor-pointer"
+              className="h-full"
             >
-              <div className="relative w-full aspect-square bg-[var(--bg-muted)] overflow-hidden">
-                <img
-                  src={product.images?.[0]}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-2.5 left-2.5 bg-red-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow mono-font">
-                  -{product.discount}%
-                </div>
-              </div>
-              <div className="p-4">
-                <h3 className="display-font text-[0.82rem] font-bold text-[var(--text-primary)] line-clamp-2 mb-2 group-hover:text-[var(--color-primary)] transition-colors leading-snug">
-                  {product.name}
-                </h3>
-                <div className="flex items-center gap-1 mb-3">
-                  <Star size={12} className="fill-amber-400 text-amber-400" />
-                  <span className="text-[11px] text-[var(--text-muted)] font-medium">{product.rating}</span>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="font-extrabold text-base text-[var(--color-primary)] mono-font">Rs.{product.price}</span>
-                  <span className="text-[11px] text-[var(--text-muted)] line-through">Rs.{product.oldPrice}</span>
-                </div>
-              </div>
+              <ProductCard product={product} />
             </motion.div>
           ))}
         </div>

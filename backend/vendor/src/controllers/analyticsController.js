@@ -11,10 +11,10 @@ export const getDashboardAnalytics = async (req, res) => {
     const vendorId = req.user?.id;
     if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
 
-    // 1. Fetch all orders and products for this vendor
-    const [orders, productsCount, lowStock, activeCoupons, reviewOverview] = await Promise.all([
+    // 1. Fetch vendor orders, products, coupons, and review stats from DB
+    const [orders, products, lowStock, activeCoupons, reviewOverview] = await Promise.all([
       Order.find({ vendor: vendorId }).populate("user", "name email").populate("products.product", "name price").sort({ createdAt: -1 }),
-      Product.countDocuments({ vendor: vendorId }),
+      Product.find({ vendor: vendorId }).select("category").lean(),
       Product.countDocuments({ vendor: vendorId, stock: { $lte: 10 } }),
       Coupon.countDocuments({ vendor: vendorId, isActive: true }),
       (async () => {
@@ -33,10 +33,11 @@ export const getDashboardAnalytics = async (req, res) => {
     const totalOrders = orders.length;
     let totalSales = 0;
     const uniqueCustomers = new Set();
+    const productsCount = products.length;
     
-    // Group weekly revenue. For simplicity, just last 5 days
+    // Group weekly revenue by weekday
     const revenueMap = {};
-    const recentOrders = orders.slice(0, 5); // Latest 5 orders
+    const recentOrders = orders.slice(0, 5);
 
     orders.forEach(order => {
       totalSales += order.total;
@@ -46,17 +47,27 @@ export const getDashboardAnalytics = async (req, res) => {
       revenueMap[orderDay] = (revenueMap[orderDay] || 0) + order.total;
     });
 
-    const revenueData = Object.keys(revenueMap).map(day => ({
-      day,
-      revenue: revenueMap[day]
-    }));
+    const weekdayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const revenueData = weekdayOrder
+      .filter((day) => revenueMap[day] !== undefined)
+      .map((day) => ({ day, revenue: revenueMap[day] }));
 
-    // Generate basic category distribution
-    const categoryData = [
-      { name: "General", value: 45, color: "#F59E0B" },
-      { name: "Electronics", value: 30, color: "#3B82F6" },
-      { name: "Accessories", value: 25, color: "#10B981" }
-    ]; // Can aggregate from products in a real app, placeholder for now.
+    // Build category distribution from product categories in DB
+    const categoryCounts = products.reduce((acc, item) => {
+      const key = String(item.category || "Uncategorized").trim() || "Uncategorized";
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+
+    const palette = ["#F59E0B", "#3B82F6", "#10B981", "#8B5CF6", "#EF4444", "#06B6D4", "#F97316"];
+    const categoryTotal = Object.values(categoryCounts).reduce((sum, count) => sum + count, 0) || 1;
+    const categoryData = Object.entries(categoryCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count], index) => ({
+        name,
+        value: Number(((count / categoryTotal) * 100).toFixed(1)),
+        color: palette[index % palette.length],
+      }));
 
     const stats = {
       sales: totalSales,

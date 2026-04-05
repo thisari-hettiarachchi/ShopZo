@@ -4,28 +4,6 @@ import { ArrowRight, Search, SlidersHorizontal, Grid3X3, LayoutList, X } from "l
 import { Link } from "react-router-dom";
 import { fetchCategories } from "../../api/categoryApi";
 
-/* ─────────────────────────────────────────────
-   MOCK DATA  –  replace with your real categories
-───────────────────────────────────────────── */
-const MOCK_CATEGORIES = [
-  { _id: "1",  name: "Electronics",     icon: "⚡", gradient: "from-blue-500 to-cyan-400",    count: 420, tag: "popular" },
-  { _id: "2",  name: "Fashion",         icon: "👗", gradient: "from-pink-500 to-rose-400",    count: 310, tag: "trending" },
-  { _id: "3",  name: "Home & Living",   icon: "🏠", gradient: "from-amber-500 to-orange-400", count: 280, tag: "popular" },
-  { _id: "4",  name: "Sports",          icon: "🏋️", gradient: "from-green-500 to-emerald-400",count: 190, tag: "new" },
-  { _id: "5",  name: "Books",           icon: "📚", gradient: "from-violet-500 to-purple-400",count: 540, tag: "popular" },
-  { _id: "6",  name: "Beauty",          icon: "💄", gradient: "from-fuchsia-500 to-pink-400", count: 220, tag: "trending" },
-  { _id: "7",  name: "Toys & Kids",     icon: "🧸", gradient: "from-yellow-400 to-amber-300", count: 160, tag: "new" },
-  { _id: "8",  name: "Automotive",      icon: "🚗", gradient: "from-slate-500 to-gray-400",   count: 130, tag: "" },
-  { _id: "9",  name: "Food & Grocery",  icon: "🥑", gradient: "from-lime-500 to-green-400",   count: 370, tag: "popular" },
-  { _id: "10", name: "Music",           icon: "🎸", gradient: "from-red-500 to-orange-400",   count: 95,  tag: "" },
-  { _id: "11", name: "Pet Supplies",    icon: "🐾", gradient: "from-teal-500 to-cyan-400",    count: 140, tag: "trending" },
-  { _id: "12", name: "Art & Crafts",    icon: "🎨", gradient: "from-orange-400 to-amber-300", count: 200, tag: "new" },
-  { _id: "13", name: "Fitness",         icon: "🏃", gradient: "from-emerald-500 to-teal-400", count: 175, tag: "" },
-  { _id: "14", name: "Photography",     icon: "📷", gradient: "from-indigo-500 to-blue-400",  count: 88,  tag: "" },
-  { _id: "15", name: "Garden",          icon: "🌿", gradient: "from-green-600 to-lime-400",   count: 112, tag: "new" },
-  { _id: "16", name: "Jewelry",         icon: "💎", gradient: "from-blue-400 to-violet-400",  count: 260, tag: "trending" },
-];
-
 const FILTERS = ["All", "Popular", "Trending", "New"];
 
 /* ─────────────────────────────────────────────
@@ -50,6 +28,7 @@ function TagBadge({ tag }) {
    GRID CARD
 ───────────────────────────────────────────── */
 function GridCard({ cat, index }) {
+  const categoryValue = encodeURIComponent(cat.name || cat._id || "");
   return (
     <motion.div
       layout
@@ -60,7 +39,7 @@ function GridCard({ cat, index }) {
       className="group relative overflow-hidden rounded-2xl cursor-pointer border border-[var(--border)] bg-[var(--bg-card)]"
       style={{ minHeight: 220 }}
     >
-      <Link to={`/products?category=${cat._id}`} className="block h-full">
+      <Link to={`/products?category=${categoryValue}`} className="block h-full">
         {/* Background */}
         {cat.image ? (
           <img
@@ -109,6 +88,7 @@ function GridCard({ cat, index }) {
    LIST ROW
 ───────────────────────────────────────────── */
 function ListRow({ cat, index }) {
+  const categoryValue = encodeURIComponent(cat.name || cat._id || "");
   return (
     <motion.div
       layout
@@ -118,7 +98,7 @@ function ListRow({ cat, index }) {
       transition={{ duration: 0.35, delay: index * 0.035 }}
       className="group relative overflow-hidden rounded-2xl cursor-pointer border border-[var(--border)] bg-[var(--bg-card)] hover:border-[var(--color-primary)]/40 transition-colors duration-300"
     >
-      <Link to={`/products?category=${cat._id}`} className="flex items-center gap-5 p-4 h-full">
+      <Link to={`/products?category=${categoryValue}`} className="flex items-center gap-5 p-4 h-full">
         {/* Icon */}
         <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-2xl shrink-0 shadow-md transition-transform duration-300 group-hover:scale-110`}>
           {cat.icon}

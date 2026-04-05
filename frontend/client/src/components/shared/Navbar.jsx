@@ -141,6 +141,17 @@ export default function Navbar() {
     navigate(`/products?${query.toString()}`);
   };
 
+  const handleNotificationsClick = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login to continue");
+      navigate("/auth");
+      return;
+    }
+
+    navigate("/profile?section=My%20Notifications");
+  };
+
   useEffect(() => {
     const handleStorage = () => {
       updateCartCount()
@@ -287,7 +298,7 @@ export default function Navbar() {
             <div className="relative">
               <button
                 className="relative p-2 rounded-full btn-icon"
-                onClick={() => navigate("/profile?section=My%20Notifications")}
+                onClick={handleNotificationsClick}
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (

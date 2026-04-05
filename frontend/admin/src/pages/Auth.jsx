@@ -16,7 +16,7 @@ export default function AdminAuthPage() {
   });
 
   useEffect(() => {
-    if (localStorage.getItem("adminToken")) {
+    if (sessionStorage.getItem("adminToken")) {
       navigate("/", { replace: true });
     }
   }, [navigate]);
@@ -40,8 +40,8 @@ export default function AdminAuthPage() {
         password: formData.password,
       });
 
-      localStorage.setItem("adminToken", data.token);
-      localStorage.setItem("admin", JSON.stringify(data.admin));
+      sessionStorage.setItem("adminToken", data.token);
+      sessionStorage.setItem("admin", JSON.stringify(data.admin));
 
       alert("Admin login successful");
       navigate("/");

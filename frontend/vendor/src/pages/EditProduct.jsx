@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getProducts, updateProduct } from "../services/productService";
 import { Save, ArrowLeft } from "lucide-react";
+import { getCategories } from "../services/categoryService";
 
 export default function EditProductPage() {
   const { id } = useParams();
@@ -18,8 +19,29 @@ export default function EditProductPage() {
   });
   const [images, setImages] = useState([""]);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const categoryOptions = Array.from(
+    new Set([
+      "General",
+      ...categories.map((cat) => cat?.name).filter(Boolean),
+    ])
+  );
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await getCategories();
+        setCategories(Array.isArray(res.data) ? res.data : []);
+      } catch {
+        setCategories([]);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -161,13 +183,18 @@ export default function EditProductPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">Category</label>
-                      <input
+                      <select
                         value={form.category}
                         onChange={onChange("category")}
                         className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                        placeholder="Category"
                         required
-                      />
+                      >
+                        {categoryOptions.map((categoryName) => (
+                          <option key={categoryName} value={categoryName}>
+                            {categoryName}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Rating</label>

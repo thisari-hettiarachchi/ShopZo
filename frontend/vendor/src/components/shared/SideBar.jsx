@@ -15,6 +15,7 @@ import {
   LogOut,
 } from "lucide-react";
 import Assets from '../../assets/assets'
+import { clearVendorSession, readVendorSession } from "../../utils/authStorage";
 
 export default function Sidebar({ active }) {
   const [theme, setTheme] = useState(() => {
@@ -37,14 +38,7 @@ export default function Sidebar({ active }) {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // Get vendor info from localStorage
-  const vendor = (() => {
-    try {
-      return JSON.parse(localStorage.getItem("vendor"));
-    } catch {
-      return null;
-    }
-  })();
+  const vendor = readVendorSession();
   const initials = vendor?.storeName
     ? vendor.storeName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0,2)
     : "V";
@@ -107,8 +101,7 @@ export default function Sidebar({ active }) {
         <button
           type="button"
           onClick={() => {
-            localStorage.removeItem("token");
-            localStorage.removeItem("vendor");
+            clearVendorSession();
             navigate("/auth");
           }}
           className="w-full flex items-center gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-4 py-2 rounded-lg transition"

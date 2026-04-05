@@ -101,7 +101,7 @@ export default function Dashboard() {
 	}, []);
 
 	useEffect(() => {
-		const token = localStorage.getItem("adminToken");
+		const token = sessionStorage.getItem("adminToken");
 		if (!token) return undefined;
 
 		const streamUrl = API_BASE_URL

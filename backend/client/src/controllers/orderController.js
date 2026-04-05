@@ -3,6 +3,9 @@ import ReturnRequest from "../models/ReturnRequest.js";
 import Notification from "../models/Notification.js";
 
 const TRACKING_FLOW = ["Placed", "Processing", "Shipped", "Delivered"];
+const RETURN_WINDOW_DAYS = 7;
+const CANCEL_WINDOW_HOURS = 24;
+const CANCELLABLE_STATUSES = new Set(["Placed", "Pending", "Processing"]);
 
 const normalizeStatus = (status) => {
   if (!status) return "Placed";
@@ -15,6 +18,7 @@ const normalizeStatus = (status) => {
 export const getOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
       .populate("products.product", "name images") 
       .populate("vendor", "name storeName");
 
@@ -147,6 +151,21 @@ export const requestReturn = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    const deliveredAt = Array.isArray(order.statusHistory)
+      ? order.statusHistory.find((entry) => entry.status === "Delivered")?.at
+      : null;
+    const baseDate = deliveredAt || order.createdAt;
+    const daysSinceBaseDate = Math.floor((Date.now() - new Date(baseDate).getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysSinceBaseDate > RETURN_WINDOW_DAYS) {
+      return res.status(400).json({ message: `Return window closed. Returns are allowed within ${RETURN_WINDOW_DAYS} days.` });
+    }
+
+    const existing = await ReturnRequest.findOne({ order: order._id, user: req.user._id });
+    if (existing) {
+      return res.status(400).json({ message: "Return request already submitted for this order" });
+    }
+
     const request = await ReturnRequest.create({
       order: order._id,
       user: req.user._id,
@@ -166,5 +185,41 @@ export const requestReturn = async (req, res) => {
     res.status(201).json(request);
   } catch (error) {
     res.status(500).json({ message: "Failed to request return" });
+  }
+};
+
+export const cancelOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findOne({ _id: id, user: req.user._id });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const currentStatus = normalizeStatus(order.status);
+    if (!CANCELLABLE_STATUSES.has(currentStatus)) {
+      return res.status(400).json({ message: "Order cannot be cancelled at this stage" });
+    }
+
+    const orderAgeHours = (Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60);
+    if (orderAgeHours > CANCEL_WINDOW_HOURS) {
+      return res.status(400).json({ message: `Cancel window closed. Orders can be cancelled within ${CANCEL_WINDOW_HOURS} hours.` });
+    }
+
+    order.status = "Cancelled";
+    order.statusHistory = [...(order.statusHistory || []), { status: "Cancelled", at: new Date() }];
+    await order.save();
+
+    await Notification.create({
+      user: req.user._id,
+      type: "order",
+      title: "Order cancelled",
+      message: `Your order ${String(order._id).slice(-6).toUpperCase()} has been cancelled.`,
+      metadata: { orderId: order._id },
+    });
+
+    res.json({ message: "Order cancelled", order });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to cancel order" });
   }
 };

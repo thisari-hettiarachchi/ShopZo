@@ -40,6 +40,14 @@ export const getVendorChatThreads = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "products",
+          localField: "product",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+      {
         $project: {
           _id: 0,
           userId: "$_id",
@@ -47,7 +55,7 @@ export const getVendorChatThreads = async (req, res) => {
           lastAt: 1,
           unread: 1,
           user: { $arrayElemAt: ["$user", 0] },
-          product: 1,
+          product: { $arrayElemAt: ["$product", 0] },
         },
       },
       { $sort: { lastAt: -1 } },

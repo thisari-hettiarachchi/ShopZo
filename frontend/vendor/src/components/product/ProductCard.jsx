@@ -7,12 +7,13 @@ import {
   removeFromWishlistApi,
   fetchWishlistApi,
 } from "../../api/wishlistApi";
+import { getVendorToken } from "../../utils/authStorage";
 
 export default function ProductCard({ product, token: propToken, onCartUpdate }) {
   const navigate = useNavigate();
 
   // fallback to localStorage if parent didn't pass token
-  const token = propToken || localStorage.getItem("token");
+  const token = propToken || getVendorToken();
 
   const [isWishlisted, setIsWishlisted] = useState(false);
 
