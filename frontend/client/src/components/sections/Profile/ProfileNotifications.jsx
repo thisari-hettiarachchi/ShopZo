@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Bell, CheckCircle2 } from "lucide-react";
 import { API_BASE_URL, authHeaders } from "../../../api/base";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfileNotifications() {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
@@ -13,6 +15,13 @@ export default function ProfileNotifications() {
   );
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login to continue");
+      navigate("/auth");
+      return;
+    }
+
     const loadNotifications = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/user/notifications`, {
@@ -34,7 +43,7 @@ export default function ProfileNotifications() {
     };
 
     loadNotifications();
-  }, []);
+  }, [navigate]);
 
   const markOneRead = async (notificationId) => {
     if (String(notificationId).startsWith("discount-")) return;

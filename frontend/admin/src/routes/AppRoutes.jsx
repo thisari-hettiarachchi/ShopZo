@@ -34,7 +34,7 @@ const getActiveFromPath = (pathname) => {
 };
 
 function RequireAuth({ children }) {
-	const token = localStorage.getItem("adminToken") || localStorage.getItem("token");
+	const token = sessionStorage.getItem("adminToken") || sessionStorage.getItem("token");
 	if (!token) return <Navigate to="/auth" replace />;
 	return children;
 }

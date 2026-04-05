@@ -14,6 +14,7 @@ import EditProfilePage from "../pages/EditProfile";
 import AuthPages from "../pages/Auth";
 import CouponsPage from "../pages/CouponsPage";
 import ChatPage from "../pages/ChatPage";
+import { isVendorAuthenticated } from "../utils/authStorage";
 
 const getActiveFromPath = (pathname) => {
   if (pathname.startsWith("/products")) return "products";
@@ -40,8 +41,7 @@ const getActiveFromPath = (pathname) => {
 };
 
 function RequireAuth({ children }) {
-  const token = localStorage.getItem("token");
-  if (!token) return <Navigate to="/auth" replace />;
+  if (!isVendorAuthenticated()) return <Navigate to="/auth" replace />;
   return children;
 }
 

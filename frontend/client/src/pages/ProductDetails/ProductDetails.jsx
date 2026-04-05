@@ -386,7 +386,7 @@ export default function ProductDetails() {
               <Store className="text-[var(--color-primary)]" size={32} />
               <div>
                 <p className="font-bold text-[var(--text-primary)]">
-                  {product.vendor?.name }
+                  {product.vendor?.storeName || product.vendor?.name || "Vendor"}
                 </p>
                 <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
                   <Star size={12} className="fill-amber-400 text-amber-400" />
@@ -397,12 +397,9 @@ export default function ProductDetails() {
             </div>
 
             <div className="mt-3 rounded-xl border border-[var(--border)] p-2">
-              <div className="max-h-36 overflow-auto space-y-1 mb-2">
-                {chatMessages.map((msg) => (
-                  <p key={msg._id} className="text-xs rounded bg-[var(--bg-muted)] px-2 py-1">{msg.message}</p>
-                ))}
-                {chatMessages.length === 0 && <p className="text-xs text-[var(--text-secondary)]">Start a pre-purchase chat with this vendor.</p>}
-              </div>
+              <p className="text-xs text-[var(--text-secondary)] mb-2">
+                Ask this vendor about delivery, color, warranty, and availability.
+              </p>
               <div className="flex gap-2">
                 <input
                   ref={chatInputRef}

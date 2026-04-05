@@ -1,9 +1,14 @@
 import { motion } from "framer-motion";
 import { Award, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const stagger = (index, base = 0.06) => ({ delay: index * base });
 
+
+
 export default function FeaturedVendorsSection({ vendors }) {
+  const navigate = useNavigate();
+
   return (
     <section className="py-20 px-4 bg-[var(--bg-card)]">
       <div className="max-w-7xl mx-auto">
@@ -28,6 +33,11 @@ export default function FeaturedVendorsSection({ vendors }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ ...stagger(index, 0.06), duration: 0.4 }}
+              onClick={() => {
+                const vendorId = vendor?._id || vendor?.id;
+                if (!vendorId) return;
+                navigate(`/vendors/${vendorId}`);
+              }}
               className="group flex flex-col items-center bg-[var(--bg-main)] rounded-2xl border border-[var(--border)] hover:border-[var(--color-primary)] p-6 cursor-pointer hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300"
             >
               <div className="relative mb-4">
@@ -36,15 +46,14 @@ export default function FeaturedVendorsSection({ vendors }) {
                 </div>
                 <div className="absolute -bottom-1 -right-1 bg-emerald-500 w-4 h-4 rounded-full border-2 border-[var(--bg-main)]" />
               </div>
-              <span className="display-font text-[var(--text-primary)] font-bold text-sm text-center group-hover:text-[var(--color-primary)] transition-colors mb-1.5">
-                {vendor.name}
+              <span className="display-font text-[var(--text-primary)] font-bold text-base text-center group-hover:text-[var(--color-primary)] transition-colors mb-2">
+                {vendor.name || "Vendor"}
               </span>
-              <div className="flex items-center gap-1 mb-1">
-                <Star size={11} className="fill-amber-400 text-amber-400" />
-                <span className="text-[11px] font-bold text-[var(--text-secondary)] mono-font">{vendor.rating}</span>
+              <div className="flex items-center gap-1.5 mb-3 justify-center">
+                <Star size={14} className="fill-amber-400 text-amber-400" />
+                <span className="text-sm font-bold text-amber-400">{vendor.rating || "4.5"}</span>
               </div>
-              <span className="text-[10px] text-[var(--text-muted)] font-medium">{vendor.products} products</span>
-            </motion.div>
+              </motion.div>
           ))}
         </div>
       </div>

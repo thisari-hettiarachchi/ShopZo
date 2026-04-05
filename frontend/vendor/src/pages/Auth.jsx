@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, Store, ArrowRight, Check } from 'lucide-react';
 import { registerUser, loginUser } from "../services/authService";
+import { isVendorAuthenticated, saveVendorSession } from "../utils/authStorage";
 
 export default function AuthPages() {
   const navigate = useNavigate(); 
@@ -10,7 +11,7 @@ export default function AuthPages() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem("token")) {
+    if (isVendorAuthenticated()) {
       navigate("/", { replace: true });
     }
   }, [navigate]);
@@ -42,10 +43,7 @@ export default function AuthPages() {
 
         console.log(res.data);
 
-        localStorage.setItem("token", res.data.token);
-        if (res.data?.vendor) {
-          localStorage.setItem("vendor", JSON.stringify(res.data.vendor));
-        }
+        saveVendorSession({ token: res.data.token, vendor: res.data?.vendor || null });
         alert("Login successful");
 
         navigate("/"); 

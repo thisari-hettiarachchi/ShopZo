@@ -35,3 +35,9 @@ export const requestReturn = async (orderId, payload) => {
     headers: authHeaders(),
   });
 };
+
+export const cancelOrder = async (orderId) => {
+  return axios.post(`${USER_URL}/orders/${orderId}/cancel`, {}, {
+    headers: authHeaders(),
+  });
+};

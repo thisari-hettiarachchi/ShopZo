@@ -3,6 +3,7 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 function CatHero({ cat, index }) {
+  const categoryValue = encodeURIComponent(cat.name || cat._id || "");
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -12,7 +13,7 @@ function CatHero({ cat, index }) {
       className="col-span-2 row-span-2 relative overflow-hidden rounded-3xl cursor-pointer group"
       style={{ minHeight: 340 }}
     >
-      <Link to={`/products?category=${cat._id}`} className="block h-full">
+      <Link to={`/products?category=${categoryValue}`} className="block h-full">
         {cat.image ? (
           <img
             src={cat.image}
@@ -48,6 +49,7 @@ function CatHero({ cat, index }) {
 }
 
 function CatPortrait({ cat, index }) {
+  const categoryValue = encodeURIComponent(cat.name || cat._id || "");
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -57,7 +59,7 @@ function CatPortrait({ cat, index }) {
       className="col-span-1 row-span-2 relative overflow-hidden rounded-2xl cursor-pointer group"
       style={{ minHeight: 280 }}
     >
-      <Link to={`/products?category=${cat._id}`} className="block h-full">
+      <Link to={`/products?category=${categoryValue}`} className="block h-full">
         {cat.image ? (
           <img
             src={cat.image}
@@ -85,6 +87,7 @@ function CatPortrait({ cat, index }) {
 }
 
 function CatFlat({ cat, index }) {
+  const categoryValue = encodeURIComponent(cat.name || cat._id || "");
   return (
     <motion.div
       initial={{ opacity: 0, x: 16 }}
@@ -94,7 +97,7 @@ function CatFlat({ cat, index }) {
       className="col-span-1 relative overflow-hidden rounded-2xl cursor-pointer group border border-[var(--border)] bg-[var(--bg-card)]"
       style={{ minHeight: 130 }}
     >
-      <Link to={`/products?category=${cat._id}`} className="flex h-full items-center gap-4 p-4">
+      <Link to={`/products?category=${categoryValue}`} className="flex h-full items-center gap-4 p-4">
         <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
           {cat.image ? (
             <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-400" />

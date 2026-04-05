@@ -7,7 +7,9 @@ const vendorSchema = new mongoose.Schema({
   description: String,
   phone: String,
   address: String,
+  profileImage: String,
   isApproved: { type: Boolean, default: false },
+  followersCount: { type: Number, default: 0 },
 }, { timestamps: true });
 
 export default mongoose.model("Vendor", vendorSchema);

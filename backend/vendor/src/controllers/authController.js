@@ -33,7 +33,10 @@ export const login = async (req, res) => {
       email: vendor.email,
       phone: vendor.phone || '',
       address: vendor.address || '',
-      description: vendor.description || ''
+      description: vendor.description || '',
+      profileImage: vendor.profileImage || '',
+      isApproved: Boolean(vendor.isApproved),
+      joined: vendor.createdAt,
     } });
   } catch (error) {
     res.status(500).json({ message: "Login failed" });

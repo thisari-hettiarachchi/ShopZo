@@ -27,10 +27,12 @@ export default function Products() {
 
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "latest");
   const searchText = searchParams.get("q") || "";
+  const selectedCategory = searchParams.get("category") || "";
 
   useEffect(() => {
     const params = {
       q: searchText,
+      category: selectedCategory,
       minPrice: filters.price.min || searchParams.get("minPrice") || "",
       maxPrice: filters.price.max || searchParams.get("maxPrice") || "",
       rating: filters.rating || searchParams.get("rating") || "",
@@ -39,7 +41,7 @@ export default function Products() {
     };
 
     fetchProducts(params).then(setProducts);
-  }, [filters, searchText, searchParams, sortBy]);
+  }, [filters, searchText, searchParams, selectedCategory, sortBy]);
 
   const toggleFilter = (filter) => {
     setFiltersOpen((prev) => ({ ...prev, [filter]: !prev[filter] }));
@@ -114,6 +116,11 @@ export default function Products() {
               {searchText && (
                 <p className="mt-1 text-xs text-[var(--color-primary)]">
                   Showing results for "{searchText}"
+                </p>
+              )}
+              {selectedCategory && (
+                <p className="mt-1 text-xs text-[var(--color-primary)]">
+                  Category: "{selectedCategory}"
                 </p>
               )}
             </div>

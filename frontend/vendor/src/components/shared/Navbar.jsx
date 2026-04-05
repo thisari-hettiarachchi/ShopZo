@@ -12,6 +12,7 @@ import {
   Sun
 } from 'lucide-react'
 import Assets from '../../assets/assets'
+import { clearVendorSession, isVendorAuthenticated } from '../../utils/authStorage'
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -23,7 +24,7 @@ export default function Navbar() {
   });
   const navigate = useNavigate();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
+  const [isLoggedIn, setIsLoggedIn] = useState(() => isVendorAuthenticated());
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -98,8 +99,7 @@ export default function Navbar() {
                       <button
                         className="w-full text-left px-4 py-2 hover:bg-[var(--bg-muted)]"
                         onClick={() => {
-                          localStorage.removeItem('token')
-                          localStorage.removeItem('vendor')
+                          clearVendorSession()
                           setIsLoggedIn(false)
                           navigate('/auth')
                         }}

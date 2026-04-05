@@ -18,7 +18,7 @@ export default function EditProfilePage() {
         setEmail(data?.email || "admin@shopzo.com");
       } catch {
         try {
-          const existing = JSON.parse(localStorage.getItem("admin")) || {};
+          const existing = JSON.parse(sessionStorage.getItem("admin")) || {};
           setName(existing.name || "Admin User");
           setEmail(existing.email || "admin@shopzo.com");
         } catch {
@@ -40,7 +40,7 @@ export default function EditProfilePage() {
 
     try {
       const updated = await updateAdminProfile({ name, email });
-      localStorage.setItem("admin", JSON.stringify(updated));
+      sessionStorage.setItem("admin", JSON.stringify(updated));
       navigate("/profile");
     } catch (requestError) {
       setError(requestError?.response?.data?.message || "Failed to update profile");

@@ -39,7 +39,7 @@ export default function Sidebar({ active }) {
 
   const admin = (() => {
     try {
-      return JSON.parse(localStorage.getItem("admin"));
+      return JSON.parse(sessionStorage.getItem("admin"));
     } catch {
       return null;
     }
@@ -119,9 +119,9 @@ export default function Sidebar({ active }) {
         <button
           type="button"
           onClick={() => {
-            localStorage.removeItem("adminToken");
-            localStorage.removeItem("admin");
-            localStorage.removeItem("token");
+            sessionStorage.removeItem("adminToken");
+            sessionStorage.removeItem("admin");
+            sessionStorage.removeItem("token");
             navigate("/auth");
           }}
           className="w-full flex items-center gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-4 py-2 rounded-lg transition"

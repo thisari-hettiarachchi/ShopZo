@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Store, Mail, Phone, MapPin, FileText, Save, ArrowLeft } from "lucide-react";
+import { Store, Mail, Phone, MapPin, FileText, Save, ArrowLeft, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getVendorProfile, updateVendorProfile } from "../services/vendorService";
+import { getVendorToken, readVendorSession, saveVendorSession } from "../utils/authStorage";
 
 const STORAGE_KEY = "vendorProfile";
 
@@ -21,7 +22,7 @@ export default function EditProfilePage() {
 
   const initialProfile = useMemo(() => {
     const stored = safeParseJson(localStorage.getItem(STORAGE_KEY));
-    const vendor = safeParseJson(localStorage.getItem("vendor"));
+    const vendor = readVendorSession();
 
     return {
       storeName: stored?.storeName || vendor?.storeName || "",
@@ -29,13 +30,14 @@ export default function EditProfilePage() {
       phone: stored?.phone || "",
       address: stored?.address || "",
       description: stored?.description || "",
+      profileImage: stored?.profileImage || vendor?.profileImage || "",
     };
   }, []);
 
   const [profile, setProfile] = useState(initialProfile);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = getVendorToken();
     if (!token) return;
 
     let cancelled = false;
@@ -50,8 +52,9 @@ export default function EditProfilePage() {
           phone: vendor.phone || "",
           address: vendor.address || "",
           description: vendor.description || "",
+          profileImage: vendor.profileImage || "",
         });
-        localStorage.setItem("vendor", JSON.stringify(vendor));
+        saveVendorSession({ token, vendor });
       })
       .catch(() => {
         // Fallback to local
@@ -75,9 +78,22 @@ export default function EditProfilePage() {
     setProfile((prev) => ({ ...prev, [key]: e.target.value }));
   };
 
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setProfile((prev) => ({ ...prev, profileImage: reader.result }));
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const onSave = async () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-    const token = localStorage.getItem("token");
+    const token = getVendorToken();
     
     if (!token) {
       setSaved(true);
@@ -92,9 +108,10 @@ export default function EditProfilePage() {
         phone: profile.phone,
         address: profile.address,
         description: profile.description,
+        profileImage: profile.profileImage,
       });
       if (res.data?.vendor) {
-        localStorage.setItem("vendor", JSON.stringify(res.data.vendor));
+        saveVendorSession({ token, vendor: res.data.vendor });
       }
       setSaved(true);
     } catch (error) {
@@ -120,6 +137,33 @@ export default function EditProfilePage() {
       </div>
 
       <div className="bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border)] p-6">
+        <div className="mb-6 flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
+          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border border-[var(--border)] bg-[var(--bg-card)]">
+            {profile.profileImage ? (
+              <img src={profile.profileImage} alt={profile.storeName || "Vendor"} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] text-xl font-bold text-white">
+                {(profile.storeName || "V")
+                  .split(" ")
+                  .map((word) => word[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">Profile Picture</p>
+            <p className="text-xs text-[var(--text-secondary)]">Upload a square image for best results.</p>
+            <label className="mt-2 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-3 py-1.5 text-sm">
+              <Camera size={16} />
+              Change Photo
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+            </label>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">Store Name</label>

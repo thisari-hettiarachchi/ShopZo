@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Phone, MapPin, Edit } from "lucide-react";
 import { getVendorProfile } from "../services/vendorService";
 import { useNavigate } from "react-router-dom";
+import { getVendorToken, readVendorSession, saveVendorSession } from "../utils/authStorage";
 
 const STORAGE_KEY = "vendorProfile";
 
@@ -19,7 +20,7 @@ export default function VendorProfilePage() {
 
   const initialProfile = useMemo(() => {
     const stored = safeParseJson(localStorage.getItem(STORAGE_KEY));
-    const vendor = safeParseJson(localStorage.getItem("vendor"));
+    const vendor = readVendorSession();
 
     return {
       storeName: stored?.storeName || vendor?.storeName || "John's Store",
@@ -27,13 +28,17 @@ export default function VendorProfilePage() {
       phone: stored?.phone || "",
       address: stored?.address || "",
       description: stored?.description || "",
+      profileImage: stored?.profileImage || vendor?.profileImage || "",
+      isApproved: Boolean(stored?.isApproved ?? vendor?.isApproved),
+      joined: stored?.joined || vendor?.joined || "",
+      stats: stored?.stats || vendor?.stats || { products: 0, rating: 0, reviews: 0, followers: 0, status: "Pending" },
     };
   }, []);
 
   const [profile, setProfile] = useState(initialProfile);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = getVendorToken();
     if (!token) return;
 
     let cancelled = false;
@@ -48,8 +53,12 @@ export default function VendorProfilePage() {
           phone: vendor.phone || "",
           address: vendor.address || "",
           description: vendor.description || "",
+          profileImage: vendor.profileImage || "",
+          isApproved: Boolean(vendor.isApproved),
+          joined: vendor.joined || "",
+          stats: vendor.stats || { products: 0, rating: 0, reviews: 0, followers: 0, status: "Pending" },
         });
-        localStorage.setItem("vendor", JSON.stringify(vendor));
+        saveVendorSession({ token, vendor });
       })
       .catch(() => {
       });
@@ -85,13 +94,50 @@ export default function VendorProfilePage() {
         <div className="relative px-6 pb-8 md:px-8">
           <div className="mb-7 flex flex-col items-start gap-4 sm:-mt-12 sm:flex-row sm:items-end">
             <div className="h-24 w-24 rounded-full border border-[var(--border)] bg-[var(--bg-card)] p-1.5 shadow-lg">
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] text-3xl font-bold text-white">
-                {initials}
-              </div>
+              {profile.profileImage ? (
+                <img
+                  src={profile.profileImage}
+                  alt={profile.storeName || "Vendor"}
+                  className="h-full w-full rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] text-3xl font-bold text-white">
+                  {initials}
+                </div>
+              )}
             </div>
             <div className="pb-2">
               <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{profile.storeName || "Vendor"}</h1>
               <p className="text-[var(--text-secondary)]">{profile.email || ""}</p>
+              <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                {profile.joined ? `Member since ${new Date(profile.joined).toLocaleDateString("en-US", { year: "numeric", month: "long" })}` : "Member since -"}
+              </p>
+              <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${profile.isApproved ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                {profile.isApproved ? "Approved" : "Pending Approval"}
+              </span>
+            </div>
+          </div>
+
+          <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3 text-center">
+              <p className="text-xs text-[var(--text-secondary)]">Products</p>
+              <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{Number(profile.stats?.products || 0)}</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3 text-center">
+              <p className="text-xs text-[var(--text-secondary)]">Rating</p>
+              <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{Number(profile.stats?.rating || 0).toFixed(1)}★</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3 text-center">
+              <p className="text-xs text-[var(--text-secondary)]">Reviews</p>
+              <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{Number(profile.stats?.reviews || 0)}</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3 text-center">
+              <p className="text-xs text-[var(--text-secondary)]">Followers</p>
+              <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{Number(profile.stats?.followers || 0)}</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3 text-center">
+              <p className="text-xs text-[var(--text-secondary)]">Status</p>
+              <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{profile.stats?.status || "Pending"}</p>
             </div>
           </div>
 
