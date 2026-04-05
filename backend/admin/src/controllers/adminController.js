@@ -3,6 +3,7 @@ import Product from "../models/Product.js";
 import AdminUser from "../models/AdminUser.js";
 import User from "../models/User.js";
 import Vendor from "../models/Vendor.js";
+import VendorNotification from "../models/VendorNotification.js";
 
 const populateOrderRelations = (query) =>
 	query
@@ -15,6 +16,36 @@ const populateOrderRelations = (query) =>
 		});
 
 const toNumber = (value) => Number(value || 0);
+const allowedVendorStatuses = ["pending", "approved", "rejected", "suspended", "banned"];
+
+const createVendorNotification = async ({ vendorId, type, title, message, action = "", metadata = {} }) => {
+	await VendorNotification.create({
+		vendor: vendorId,
+		type,
+		title,
+		message,
+		action,
+		metadata,
+	});
+};
+
+const getVendorAccountStatus = (vendor) => {
+	if (vendor?.accountStatus) return vendor.accountStatus;
+	return vendor?.isApproved ? "approved" : "pending";
+};
+
+const formatVendorForAdmin = (vendor) => {
+	const status = getVendorAccountStatus(vendor);
+	return {
+		...vendor.toObject(),
+		accountStatus: status,
+		isApproved: status === "approved",
+		approvalRequest: {
+			...(vendor.approvalRequest || {}),
+			status: vendor.approvalRequest?.status || (status === "approved" ? "approved" : status === "rejected" ? "rejected" : "pending"),
+		},
+	};
+};
 
 const buildOrderFlags = (order, userOrderTotals = new Map()) => {
 	const flags = [];
@@ -98,7 +129,7 @@ const buildAdminInsights = async () => {
 		.sort((a, b) => b.quantity - a.quantity)
 		.slice(0, 8);
 	const newOrders = orders.slice(0, 8);
-	const vendorRequests = vendors.filter((vendor) => !vendor.isApproved).slice(0, 8);
+	const vendorRequests = vendors.filter((vendor) => getVendorAccountStatus(vendor) === "pending").slice(0, 8);
 
 	const notifications = [
 		...newOrders.map((order) => ({
@@ -329,12 +360,139 @@ export const getAdminReviews = async (_req, res) => {
 
 export const getAdminVendors = async (_req, res) => {
 	try {
-		const vendors = await Vendor.find({}).sort({ createdAt: -1 }).limit(200);
-		res.json(vendors);
+		const vendors = await Vendor.find({}).sort({ createdAt: -1 }).limit(300).select("-password");
+		res.json(vendors.map(formatVendorForAdmin));
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}
 };
+
+export const updateVendorApproval = async (req, res) => {
+	try {
+		const { decision, reason = "", note = "" } = req.body;
+		if (!["approve", "reject"].includes(decision)) {
+			return res.status(400).json({ message: "decision must be either 'approve' or 'reject'" });
+		}
+
+		const vendor = await Vendor.findById(req.params.id);
+		if (!vendor) {
+			return res.status(404).json({ message: "Vendor not found" });
+		}
+
+		vendor.accountStatus = decision === "approve" ? "approved" : "rejected";
+		vendor.isApproved = decision === "approve";
+		vendor.approvalRequest = {
+			...(vendor.approvalRequest || {}),
+			status: decision === "approve" ? "approved" : "rejected",
+			requestedAt: vendor.approvalRequest?.requestedAt || new Date(),
+			reviewedAt: new Date(),
+			message: vendor.approvalRequest?.message || "",
+		};
+		vendor.moderation = {
+			...(vendor.moderation || {}),
+			reviewedBy: req.user?._id || null,
+			reviewedAt: new Date(),
+			rejectionReason: decision === "reject" ? String(reason || "Rejected by admin") : "",
+			note: String(note || vendor.moderation?.note || ""),
+		};
+
+		if (decision === "approve") {
+			vendor.moderation.suspensionReason = "";
+			vendor.moderation.banReason = "";
+		}
+
+		await vendor.save();
+		await createVendorNotification({
+			vendorId: vendor._id,
+			type: decision === "approve" ? "approval" : "rejection",
+			title: decision === "approve" ? "Vendor approved" : "Vendor request rejected",
+			message:
+				decision === "approve"
+					? "Your vendor account has been approved. You can now add products."
+					: `Your vendor request was rejected${reason ? `: ${reason}` : "."}`,
+			action: decision,
+			metadata: { reason: reason || "", note: note || "" },
+		});
+		res.json({ message: `Vendor ${decision}d successfully`, vendor: formatVendorForAdmin(vendor) });
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+export const updateVendorStatus = async (req, res) => {
+	try {
+		const { status, reason = "", note = "" } = req.body;
+		if (!allowedVendorStatuses.includes(status)) {
+			return res.status(400).json({ message: "Invalid vendor status" });
+		}
+
+		const vendor = await Vendor.findById(req.params.id);
+		if (!vendor) {
+			return res.status(404).json({ message: "Vendor not found" });
+		}
+
+		vendor.accountStatus = status;
+		vendor.isApproved = status === "approved";
+		vendor.approvalRequest = {
+			...(vendor.approvalRequest || {}),
+			status,
+			requestedAt: vendor.approvalRequest?.requestedAt || new Date(),
+			reviewedAt: new Date(),
+			message: vendor.approvalRequest?.message || "",
+		};
+		vendor.moderation = {
+			...(vendor.moderation || {}),
+			reviewedBy: req.user?._id || null,
+			reviewedAt: new Date(),
+			note: String(note || vendor.moderation?.note || ""),
+		};
+
+		if (status === "suspended") {
+			vendor.moderation.suspensionReason = String(reason || "Suspended by admin");
+		}
+		if (status === "banned") {
+			vendor.moderation.banReason = String(reason || "Banned by admin");
+		}
+		if (status === "approved") {
+			vendor.moderation.rejectionReason = "";
+			vendor.moderation.suspensionReason = "";
+			vendor.moderation.banReason = "";
+		}
+
+		await vendor.save();
+		const notificationType = status === "approved" ? "approval" : status === "rejected" ? "rejection" : status === "suspended" ? "suspension" : status === "banned" ? "ban" : "system";
+		await createVendorNotification({
+			vendorId: vendor._id,
+			type: notificationType,
+			title:
+				status === "approved"
+					? "Vendor approved"
+					: status === "rejected"
+						? "Vendor request rejected"
+						: status === "suspended"
+							? "Vendor account suspended"
+							: status === "banned"
+								? "Vendor account banned"
+								: "Vendor status updated",
+			message:
+				status === "approved"
+					? "Your vendor account is approved. Product creation is now enabled."
+					: status === "rejected"
+						? `Your vendor request was rejected${reason ? `: ${reason}` : "."}`
+						: status === "suspended"
+							? `Your vendor account was suspended${reason ? `: ${reason}` : "."}`
+							: status === "banned"
+								? `Your vendor account was banned${reason ? `: ${reason}` : "."}`
+								: "Your vendor status was updated.",
+			action: status,
+			metadata: { reason: reason || "", note: note || "" },
+		});
+		res.json({ message: "Vendor status updated", vendor: formatVendorForAdmin(vendor) });
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
 
 export const getAdminInsights = async (_req, res) => {
 	try {

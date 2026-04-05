@@ -27,3 +27,6 @@ export const sendChatMessage = (userId, payload) =>
 
 export const getVendorReviews = () => API.get("/reviews", { headers: authHeaders() });
 export const getVendorReviewInsights = () => API.get("/reviews/insights", { headers: authHeaders() });
+export const sendApprovalRequest = (payload = {}) => API.post("/approval-request", payload, { headers: authHeaders() });
+export const getVendorNotifications = () => API.get("/notifications", { headers: authHeaders() });
+export const markVendorNotificationRead = (id) => API.patch(`/notifications/${id}/read`, {}, { headers: authHeaders() });

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
 	AlertTriangle,
 	ArrowDownRight,
@@ -79,6 +80,7 @@ function SectionTitle({ eyebrow, title, subtitle, action }) {
 }
 
 export default function Dashboard() {
+	const navigate = useNavigate();
 	const [insights, setInsights] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
@@ -205,11 +207,14 @@ export default function Dashboard() {
 				</div>
 
 				<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-					{overviewCards.map((card, index) => (
-						<motion.div key={card.key} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
-							<StatCard {...card} delta={index === 0 ? 12 : 4} />
-						</motion.div>
-					))}
+					{overviewCards.map((card, index) => {
+						const { key, ...statCardProps } = card;
+						return (
+							<motion.div key={key} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
+								<StatCard {...statCardProps} delta={index === 0 ? 12 : 4} />
+							</motion.div>
+						);
+					})}
 				</div>
 
 				<div className="grid gap-6 xl:grid-cols-2">
@@ -294,7 +299,20 @@ export default function Dashboard() {
 					</div>
 
 					<div className="rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_80px_-45px_var(--shadow)] backdrop-blur-xl">
-						<SectionTitle eyebrow="Controls" title="Vendor requests" subtitle="Pending approvals waiting in the queue." />
+						<SectionTitle
+							eyebrow="Controls"
+							title="Vendor requests"
+							subtitle="Pending approvals waiting in the queue."
+							action={
+								<button
+									type="button"
+									onClick={() => navigate("/vendors")}
+									className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition hover:-translate-y-0.5"
+								>
+									Manage vendors
+								</button>
+							}
+						/>
 						<div className="space-y-3">
 							{vendorRequests.length === 0 ? (
 								<p className="text-sm text-[var(--text-secondary)]">No pending vendor requests.</p>

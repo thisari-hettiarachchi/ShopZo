@@ -40,6 +40,16 @@ export const getVendors = async () => {
 	return data;
 };
 
+export const approveVendor = async (id, payload) => {
+	const { data } = await api.patch(`/api/admin/vendors/${id}/approval`, payload);
+	return data;
+};
+
+export const updateVendorStatus = async (id, payload) => {
+	const { data } = await api.patch(`/api/admin/vendors/${id}/status`, payload);
+	return data;
+};
+
 export const getAdminProfile = async () => {
 	const { data } = await api.get("/api/admin/auth/me");
 	return data;
