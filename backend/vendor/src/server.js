@@ -22,14 +22,14 @@ const configuredOrigins = (process.env.CORS_ORIGIN || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const allowedOrigins = configuredOrigins.length > 0
-  ? configuredOrigins
-  : [
-      process.env.VENDOR_FRONTEND_URL || "https://shop-zo-vendor.vercel.app",
-      "http://localhost:5175",
-      "http://localhost:5174",
-      "http://localhost:5173",
-    ].filter(Boolean);
+const defaultOrigins = [
+  process.env.VENDOR_FRONTEND_URL || "https://shop-zo-vendor.vercel.app",
+  "http://localhost:5175",
+  "http://localhost:5174",
+  "http://localhost:5173",
+].filter(Boolean);
+
+const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -39,6 +39,16 @@ app.use(cors({
     return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true
+}));
+
+app.options('*', cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
 }));
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
@@ -68,7 +78,9 @@ const startServer = async () => {
     }
   } catch (error) {
     console.error('Failed to start vendor backend', error.message);
-    process.exit(1);
+    if (process.env.VERCEL !== '1') {
+      process.exit(1);
+    }
   }
 };
 
