@@ -13,17 +13,23 @@ import chatRoutes from './routes/chatRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 
 dotenv.config();
-connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-const allowedOrigins = [
-  process.env.VENDOR_FRONTEND_URL,
-  "http://localhost:5175",
-  "http://localhost:5174",
-  "http://localhost:5173",
-].filter(Boolean);
+const configuredOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const allowedOrigins = configuredOrigins.length > 0
+  ? configuredOrigins
+  : [
+      process.env.VENDOR_FRONTEND_URL || "https://shop-zo-vendor.vercel.app",
+      "http://localhost:5175",
+      "http://localhost:5174",
+      "http://localhost:5173",
+    ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -48,6 +54,22 @@ app.use('/api/vendor/reviews', reviewRoutes);
 app.use('/api/auth', authRoutes);
 
 
-app.listen(PORT, () => {
-	console.log(`Vendor backend server running on port ${PORT}`);
-});
+app.get('/', (req, res) => res.send('ShopZo vendor API running 🚀'));
+
+export default app;
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    if (process.env.VERCEL !== '1') {
+      app.listen(PORT, () => {
+        console.log(`Vendor backend server running on port ${PORT}`);
+      });
+    }
+  } catch (error) {
+    console.error('Failed to start vendor backend', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
