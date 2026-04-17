@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../../../api/base";
 
 export default function MyCancellations() {
   const [cancellations, setCancellations] = useState([]);
@@ -15,7 +16,7 @@ export default function MyCancellations() {
 
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/user/cancellations",
+          `${API_BASE_URL}/user/cancellations`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCancellations(res.data);

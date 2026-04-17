@@ -26,7 +26,6 @@ const CARD_META = [
 	{ key: "customers", title: "Customers", icon: Users, tone: "from-emerald-500 to-teal-400" },
 	{ key: "vendors", title: "Vendors", icon: Store, tone: "from-blue-500 to-indigo-500" },
 	{ key: "vendorRequests", title: "Vendor Requests", icon: Bell, tone: "from-amber-500 to-orange-500" },
-	{ key: "suspiciousOrders", title: "Fraud Flags", icon: ShieldAlert, tone: "from-rose-500 to-red-500" },
 ];
 
 const SEVERITY_STYLES = {
@@ -178,7 +177,7 @@ export default function Dashboard() {
 								Command center for orders, risk, and vendor activity.
 							</h1>
 							<p className="mt-4 max-w-2xl text-base leading-7 text-[var(--text-secondary)] md:text-lg">
-								Monitor new orders, approval requests, revenue per vendor, fraud flags, and top-selling products in one live dashboard. Export a PDF report or invoice with one click.
+								Monitor new orders, approval requests, revenue per vendor, and top-selling products in one live dashboard. Export a PDF report or invoice with one click.
 							</p>
 						</div>
 
@@ -332,31 +331,7 @@ export default function Dashboard() {
 				</div>
 
 				<div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-					<div className="rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_80px_-45px_var(--shadow)] backdrop-blur-xl">
-						<SectionTitle eyebrow="Risk" title="Fraud detection flags" subtitle="Orders with anomalies, mismatched totals, or suspicious volume." />
-						<div className="space-y-3">
-							{suspiciousOrders.length === 0 ? (
-								<p className="text-sm text-[var(--text-secondary)]">No suspicious orders detected.</p>
-							) : (
-								suspiciousOrders.slice(0, 6).map(({ order, flags }) => (
-									<div key={order._id} className="rounded-2xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-400/30 dark:bg-rose-500/10">
-										<div className="flex items-center justify-between gap-3">
-											<p className="font-semibold text-[var(--text-primary)]">Order #{String(order._id).slice(-6).toUpperCase()}</p>
-											<span className="text-sm font-bold text-rose-700 dark:text-rose-200">{currency(order.total)}</span>
-										</div>
-										<div className="mt-3 flex flex-wrap gap-2">
-											{flags.map((flag) => (
-												<span key={flag} className="rounded-full bg-[var(--bg-elevated)] px-2.5 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-200 dark:text-rose-200">
-													{flag}
-												</span>
-											))}
-										</div>
-									</div>
-								))
-							)}
-						</div>
-					</div>
-
+					
 					<div className="rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_80px_-45px_var(--shadow)] backdrop-blur-xl">
 						<SectionTitle eyebrow="Operations" title="New orders" subtitle="Most recent orders currently entering the pipeline." />
 						<div className="space-y-3">
@@ -379,26 +354,26 @@ export default function Dashboard() {
 							)}
 						</div>
 					</div>
-				</div>
 
-				<div className="rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_80px_-45px_var(--shadow)] backdrop-blur-xl">
-					<SectionTitle eyebrow="Trend" title="Revenue over time" subtitle="Simple trend view for the current order stream." />
-					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-						{revenueData.length === 0 ? (
-							<p className="text-sm text-[var(--text-secondary)]">No revenue trend available yet.</p>
-						) : (
-							revenueData.map((point) => (
-								<div key={point.day} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
-									<div className="mb-2 flex items-center justify-between">
-										<p className="font-semibold text-[var(--text-primary)]">{point.day}</p>
-										<span className="text-sm text-[var(--text-secondary)]">{currency(point.revenue)}</span>
+					<div className="rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_80px_-45px_var(--shadow)] backdrop-blur-xl">
+						<SectionTitle eyebrow="Trend" title="Revenue over time" subtitle="Simple trend view for the current order stream." />
+						<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+							{revenueData.length === 0 ? (
+								<p className="text-sm text-[var(--text-secondary)]">No revenue trend available yet.</p>
+							) : (
+								revenueData.map((point) => (
+									<div key={point.day} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
+										<div className="mb-2 flex items-center justify-between">
+											<p className="font-semibold text-[var(--text-primary)]">{point.day}</p>
+											<span className="text-sm text-[var(--text-secondary)]">{currency(point.revenue)}</span>
+										</div>
+										<div className="h-2 rounded-full bg-[var(--bg-elevated)]">
+											<div className="h-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-400" style={{ width: `${Math.min(100, Math.max(8, (point.revenue / maxTrendRevenue) * 100))}%` }} />
+										</div>
 									</div>
-									<div className="h-2 rounded-full bg-[var(--bg-elevated)]">
-										<div className="h-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-400" style={{ width: `${Math.min(100, Math.max(8, (point.revenue / maxTrendRevenue) * 100))}%` }} />
-									</div>
-								</div>
-							))
-						)}
+								))
+							)}
+						</div>
 					</div>
 				</div>
 			</div>

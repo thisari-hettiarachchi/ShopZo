@@ -1,4 +1,6 @@
-const BASE_URL = "http://localhost:5000/api/cart";
+import { API_BASE_URL } from "./base";
+
+const BASE_URL = `${API_BASE_URL}/cart`;
 
 export const fetchCart = async (token) => {
   const res = await fetch(BASE_URL, {
@@ -32,7 +34,7 @@ export const updateCartItemApi = async (itemId, qty, token) => {
 };
 
 export const removeCartItemApi = async (itemId, token) => {
-  const res = await fetch(`http://localhost:5000/api/cart/${itemId}`, {
+  const res = await fetch(`${BASE_URL}/${itemId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,

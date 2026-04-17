@@ -134,74 +134,121 @@ export default function Dashboard() {
     { title: "Products", value: stats.products, change: "--", up: true, bg: "bg-blue-100", icon: Star, iconColor: "text-blue-500" },
     { title: "Active Coupons", value: stats.activeCoupons || 0, change: "--", up: true, bg: "bg-purple-100", icon: TicketPercent, iconColor: "text-purple-500" },
     { title: "Low Stock Alerts", value: stats.lowStock || 0, change: "--", up: false, bg: "bg-rose-100", icon: AlertTriangle, iconColor: "text-rose-500" },
-    { title: "Avg Rating", value: stats.averageRating || 0, change: `${stats.totalReviews || 0} reviews`, up: true, bg: "bg-amber-100", icon: Star, iconColor: "text-amber-500" },
   ];
 
   return (
     <section className="bg-[var(--bg-main)] text-[var(--text-primary)] px-6 mt-10 pb-8 md:px-10 md:pt-1 md:pb-10">
       <div className="space-y-8">
-        <div className={`rounded-3xl border px-5 py-5 shadow-lg ${canAddProducts ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+        <div className={`rounded-3xl border px-5 py-5 shadow-lg ${
+          canAddProducts
+            ? "border-emerald-500/40 bg-emerald-500/10"
+            : "border-amber-500/40 bg-amber-500/10"
+        }`}>
+
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">Vendor approval</p>
-              <h2 className="mt-1 text-2xl font-extrabold">{canAddProducts ? "Your store is approved" : "Your store is waiting for approval"}</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+                Vendor approval
+              </p>
+              <h2 className="mt-1 text-2xl font-extrabold">
+                {canAddProducts
+                  ? "Your store is approved"
+                  : "Your store is waiting for approval"}
+              </h2>
               <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 {canAddProducts
                   ? "You can add and manage products now."
                   : "Product creation is disabled until an admin approves your request. You can send a reminder from here."}
               </p>
             </div>
+
             <div className="flex items-center gap-3">
-              <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${canAddProducts ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                  canAddProducts
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
                 {accountStatus}
               </span>
+
               <button
                 type="button"
                 onClick={handleSendRequest}
                 disabled={requesting}
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Send size={16} />
                 {requesting ? "Sending..." : "Send approval request"}
               </button>
             </div>
           </div>
+
+          <div className="my-5 border-t border-[var(--border)]" />
+
+          <div>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+                  Vendor request
+                </p>
+                <h3 className="mt-1 text-xl font-bold text-[var(--text-primary)]">
+                  Approval request status
+                </h3>
+              </div>
+
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                  String(approvalRequest.status || accountStatus).toLowerCase() === "approved"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : String(approvalRequest.status || accountStatus).toLowerCase() === "rejected"
+                    ? "bg-rose-100 text-rose-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {String(approvalRequest.status || accountStatus || "pending").toLowerCase()}
+              </span>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-secondary)]">
+                  Requested at
+                </p>
+                <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
+                  {formatRequestDate(approvalRequest.requestedAt)}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-secondary)]">
+                  Reviewed at
+                </p>
+                <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
+                  {formatRequestDate(approvalRequest.reviewedAt)}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-secondary)]">
+                  Message
+                </p>
+                <p className="mt-1 text-sm font-semibold text-[var(--text-primary)] line-clamp-2">
+                  {approvalRequest.message || "No request message yet."}
+                </p>
+              </div>
+            </div>
+
+            {approvalRequest.status === "pending" && (
+              <p className="mt-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-[var(--text-primary)]">
+                Your request is waiting for admin review. You can resend it from the button above if needed.
+              </p>
+            )}
+          </div>
         </div>
 
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-lg">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">Vendor request</p>
-              <h3 className="mt-1 text-xl font-bold text-[var(--text-primary)]">Approval request status</h3>
-            </div>
-            <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${String(approvalRequest.status || accountStatus).toLowerCase() === "approved" ? "bg-emerald-100 text-emerald-700" : String(approvalRequest.status || accountStatus).toLowerCase() === "rejected" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700"}`}>
-              {String(approvalRequest.status || accountStatus || "pending").toLowerCase()}
-            </span>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-secondary)]">Requested at</p>
-              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">{formatRequestDate(approvalRequest.requestedAt)}</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-secondary)]">Reviewed at</p>
-              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">{formatRequestDate(approvalRequest.reviewedAt)}</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-secondary)]">Message</p>
-              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)] line-clamp-2">{approvalRequest.message || "No request message yet."}</p>
-            </div>
-          </div>
-
-          {approvalRequest.status === "pending" && (
-            <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Your request is waiting for admin review. You can resend it from the button above if needed.
-            </p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
           {displayStats.map((stat, i) => (
             <div
               key={i}
