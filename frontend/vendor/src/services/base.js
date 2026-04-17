@@ -11,7 +11,7 @@ const runtimeFallback = (() => {
   if (typeof window === "undefined") {
     return {
       vendor: "https://shop-zo-vendor-backend.vercel.app/api",
-      client: "https://shop-zo-9o9c.vercel.app/api",
+      client: "https://shop-zo-client-backend.vercel.app/api",
     };
   }
 
@@ -19,7 +19,7 @@ const runtimeFallback = (() => {
 
   return {
     vendor: isLocalhost ? "http://localhost:5001/api" : "https://shop-zo-vendor-backend.vercel.app/api",
-    client: isLocalhost ? "http://localhost:5000/api" : "https://shop-zo-9o9c.vercel.app/api",
+    client: isLocalhost ? "http://localhost:5000/api" : "https://shop-zo-client-backend.vercel.app/api",
   };
 })();
 
