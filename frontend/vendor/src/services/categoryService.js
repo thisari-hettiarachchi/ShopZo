@@ -1,8 +1,9 @@
 import axios from "axios";
+import { CLIENT_API_BASE_URL } from "./base";
 
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api/categories",
+  baseURL: `${CLIENT_API_BASE_URL}/categories`,
 });
 
 export const getCategories = () => API.get("/");

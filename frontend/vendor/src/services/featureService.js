@@ -1,7 +1,8 @@
 import axios from "axios";
 import { getVendorToken } from "../utils/authStorage";
+import { VENDOR_API_BASE_URL } from "./base";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api/vendor";
+const API_BASE = `${VENDOR_API_BASE_URL}/vendor`;
 
 const API = axios.create({
   baseURL: API_BASE,

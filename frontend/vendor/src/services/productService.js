@@ -1,8 +1,9 @@
 import axios from "axios";
 import { getVendorToken } from "../utils/authStorage";
+import { VENDOR_API_BASE_URL } from "./base";
 
 const API = axios.create({
-  baseURL: "http://localhost:5001/api/vendor/products",
+  baseURL: `${VENDOR_API_BASE_URL}/vendor/products`,
 });
 
 const authHeaders = () => {
