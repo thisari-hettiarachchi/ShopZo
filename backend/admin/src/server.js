@@ -27,30 +27,22 @@ const defaultOrigins = [
 
 const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
 
-app.use(
-	cors({
-		origin: (origin, callback) => {
-			if (!origin || allowedOrigins.includes(origin)) {
-				return callback(null, true);
-			}
-			return callback(new Error(`CORS blocked for origin: ${origin}`));
-		},
-		credentials: true,
-	})
-);
+const corsOptions = {
+	origin: (origin, callback) => {
+		if (!origin || allowedOrigins.includes(origin)) {
+			return callback(null, true);
+		}
+		return callback(new Error(`CORS blocked for origin: ${origin}`));
+	},
+	credentials: true,
+	methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+	allowedHeaders: ["Content-Type", "Authorization"],
+	maxAge: 86400,
+};
 
-app.options(
-	"*",
-	cors({
-		origin: (origin, callback) => {
-			if (!origin || allowedOrigins.includes(origin)) {
-				return callback(null, true);
-			}
-			return callback(new Error(`CORS blocked for origin: ${origin}`));
-		},
-		credentials: true,
-	})
-);
+app.use(cors(corsOptions));
+
+app.options("*", cors(corsOptions));
 
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
