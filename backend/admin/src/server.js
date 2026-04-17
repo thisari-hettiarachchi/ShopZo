@@ -13,14 +13,34 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5002;
 
-const allowedOrigins = [
-	process.env.ADMIN_FRONTEND_URL,
+const configuredOrigins = (process.env.CORS_ORIGIN || "")
+	.split(",")
+	.map((origin) => origin.trim())
+	.filter(Boolean);
+
+const defaultOrigins = [
+	process.env.ADMIN_FRONTEND_URL || "https://shop-zo-admin.vercel.app",
 	"http://localhost:5175",
 	"http://localhost:5173",
 	"http://localhost:5174",
 ].filter(Boolean);
 
+const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
+
 app.use(
+	cors({
+		origin: (origin, callback) => {
+			if (!origin || allowedOrigins.includes(origin)) {
+				return callback(null, true);
+			}
+			return callback(new Error(`CORS blocked for origin: ${origin}`));
+		},
+		credentials: true,
+	})
+);
+
+app.options(
+	"*",
 	cors({
 		origin: (origin, callback) => {
 			if (!origin || allowedOrigins.includes(origin)) {
@@ -49,13 +69,19 @@ app.use("/api/admin/products", productRoutes);
 const startServer = async () => {
 	try {
 		await connectDB();
-		app.listen(PORT, () => {
-			console.log(`Admin backend server running on port ${PORT}`);
-		});
+		if (process.env.VERCEL !== "1") {
+			app.listen(PORT, () => {
+				console.log(`Admin backend server running on port ${PORT}`);
+			});
+		}
 	} catch (error) {
 		console.error("Failed to start admin backend", error.message);
-		process.exit(1);
+		if (process.env.VERCEL !== "1") {
+			process.exit(1);
+		}
 	}
 };
 
 startServer();
+
+export default app;
