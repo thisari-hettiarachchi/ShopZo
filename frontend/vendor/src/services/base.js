@@ -10,16 +10,16 @@ const clientApiBaseUrl =
 const runtimeFallback = (() => {
   if (typeof window === "undefined") {
     return {
-      vendor: "http://localhost:5001/api",
-      client: "http://localhost:5000/api",
+      vendor: "https://shop-zo-t1f8.vercel.app/api",
+      client: "https://shop-zo-9o9c.vercel.app/api",
     };
   }
 
   const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
   return {
-    vendor: isLocalhost ? "http://localhost:5001/api" : `${window.location.origin}/api`,
-    client: isLocalhost ? "http://localhost:5000/api" : `${window.location.origin}/api`,
+    vendor: isLocalhost ? "http://localhost:5001/api" : "https://shop-zo-t1f8.vercel.app/api",
+    client: isLocalhost ? "http://localhost:5000/api" : "https://shop-zo-9o9c.vercel.app/api",
   };
 })();
 
