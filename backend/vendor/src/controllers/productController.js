@@ -16,6 +16,16 @@ export const getVendorProductById = async (req, res) => {
 };
 import Product from "../models/Product.js";
 
+const requireApprovedVendor = (req, res) => {
+  const accountStatus = req.user?.accountStatus || "pending";
+  if (accountStatus !== "approved") {
+    res.status(403).json({ message: "Your vendor account must be approved before you can add or manage products." });
+    return false;
+  }
+
+  return true;
+};
+
 // Get all products for the logged-in vendor
 export const getVendorProducts = async (req, res) => {
   try {
@@ -63,6 +73,7 @@ export const addVendorProduct = async (req, res) => {
   try {
     const vendorId = req.user?.id;
     if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
+    if (!requireApprovedVendor(req, res)) return;
 
     const { name, price, description, stock, category, images, sizes, rating, oldPrice, discount } = req.body;
 
@@ -95,6 +106,7 @@ export const updateVendorProduct = async (req, res) => {
     const { id } = req.params;
 
     if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
+    if (!requireApprovedVendor(req, res)) return;
 
     const product = await Product.findOne({ _id: id, vendor: vendorId });
     if (!product) return res.status(404).json({ message: "Product not found or unauthorized" });
@@ -141,6 +153,7 @@ export const deleteVendorProduct = async (req, res) => {
     const { id } = req.params;
 
     if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
+    if (!requireApprovedVendor(req, res)) return;
 
     const product = await Product.findOneAndDelete({ _id: id, vendor: vendorId });
     if (!product) return res.status(404).json({ message: "Product not found or unauthorized" });

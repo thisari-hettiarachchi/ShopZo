@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Star, Edit, Eye, Trash2, Plus, Loader } from "lucide-react";
 import { getProducts, deleteProduct } from "../services/productService";
+import { readVendorSession } from "../utils/authStorage";
 
 const getStockStatus = (stock) => {
   if (stock <= 0) return "Out of Stock";
@@ -30,6 +31,8 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const vendor = readVendorSession();
+  const canAddProducts = String(vendor?.accountStatus || (vendor?.isApproved ? "approved" : "pending")).toLowerCase() === "approved";
 
   const fetchProducts = async () => {
     try {
@@ -99,14 +102,21 @@ export default function ProductsPage() {
         </div>
         <button
           type="button"
-          onClick={() => navigate("/products/new")}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90"
+          onClick={() => (canAddProducts ? navigate("/products/new") : navigate("/"))}
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!canAddProducts}
         >
           <Plus size={18} />
           Add
         </button>
         </div>
       </div>
+
+      {!canAddProducts && (
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Product creation is locked until your vendor account is approved. Use the dashboard request button to notify admin.
+        </div>
+      )}
 
       {/* Products Grid */}
       {loading ? (
@@ -118,7 +128,8 @@ export default function ProductsPage() {
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-16 text-center shadow-[0_20px_50px_-34px_var(--shadow)]">
           <p className="text-[var(--text-secondary)] mb-4">No products found.</p>
           <button
-            onClick={() => navigate("/products/new")}
+            onClick={() => (canAddProducts ? navigate("/products/new") : navigate("/"))}
+            disabled={!canAddProducts}
             className="rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-6 py-3 text-white shadow-md transition hover:opacity-90"
           >
             Add Your First Product

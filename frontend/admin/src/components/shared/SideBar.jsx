@@ -78,6 +78,7 @@ export default function Sidebar({ active }) {
           { id: "products", label: "Products", icon: Package, path: "/products" },
           { id: "orders", label: "Orders", icon: ShoppingBag, path: "/orders" },
           { id: "customers", label: "Customers", icon: Users, path: "/customers" },
+          { id: "vendors", label: "Vendors", icon: Package, path: "/vendors" },
           { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/analytics" },
           { id: "reviews", label: "Reviews", icon: Star, path: "/reviews" },
           { id: "profile", label: "Profile", icon: Settings, path: "/profile" },

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, PackagePlus, Save } from "lucide-react";
 import { addProduct } from "../services/productService";
 import { getCategories } from "../services/categoryService";
+import { getVendorProfile } from "../services/vendorService";
+import { readVendorSession } from "../utils/authStorage";
 
 export default function AddProductPage() {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ export default function AddProductPage() {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [vendorStatus, setVendorStatus] = useState(() => readVendorSession()?.accountStatus || (readVendorSession()?.isApproved ? "approved" : "pending"));
 
   const categoryOptions = Array.from(
     new Set([
@@ -31,6 +34,20 @@ export default function AddProductPage() {
   );
 
   useEffect(() => {
+    const fetchProfileStatus = async () => {
+      try {
+        const res = await getVendorProfile();
+        const vendor = res.data?.vendor;
+        if (vendor) {
+          setVendorStatus(String(vendor.accountStatus || (vendor.isApproved ? "approved" : "pending")).toLowerCase());
+        }
+      } catch {
+        // keep session fallback
+      }
+    };
+
+    fetchProfileStatus();
+
     const fetchCategories = async () => {
       try {
         const res = await getCategories();
@@ -46,6 +63,8 @@ export default function AddProductPage() {
     fetchCategories();
     // eslint-disable-next-line
   }, []);
+
+  const canAddProducts = vendorStatus === "approved";
 
   const onChange = (key) => (e) => {
     let value = e.target.value;
@@ -90,6 +109,10 @@ export default function AddProductPage() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (!canAddProducts) {
+      alert("Your vendor account must be approved before you can add products.");
+      return;
+    }
     setLoading(true);
     try {
       let base64Images = [];
@@ -139,12 +162,19 @@ export default function AddProductPage() {
         <button
           type="submit"
           form="add-product-form"
+          disabled={!canAddProducts}
           className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 flex items-center gap-2"
         >
           <Save size={18} />
           Save
         </button>
       </div>
+
+      {!canAddProducts && (
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Product creation is disabled until an admin approves your vendor account. Use the dashboard request button to notify them.
+        </div>
+      )}
 
       <form
         id="add-product-form"
@@ -159,6 +189,7 @@ export default function AddProductPage() {
               <input
                 value={form.name}
                 onChange={onChange("name")}
+                disabled={!canAddProducts}
                 className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                 placeholder="e.g. Wireless Headphones"
                 required
@@ -171,6 +202,7 @@ export default function AddProductPage() {
             <input
               value={form.price}
               onChange={onChange("price")}
+              disabled={!canAddProducts}
               className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               placeholder="29.99"
               inputMode="decimal"
@@ -183,6 +215,7 @@ export default function AddProductPage() {
             <input
               value={form.stock}
               onChange={onChange("stock")}
+              disabled={!canAddProducts}
               className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               placeholder="50"
               inputMode="numeric"
@@ -198,6 +231,7 @@ export default function AddProductPage() {
               accept="image/*"
               multiple
               onChange={onFileChange}
+              disabled={!canAddProducts}
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--color-primary)] file:text-white hover:file:opacity-90"
             />
             {selectedFiles.length > 0 && (
@@ -219,6 +253,7 @@ export default function AddProductPage() {
             <select
               value={form.category}
               onChange={onChange("category")}
+              disabled={!canAddProducts}
               className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               required
             >
@@ -234,6 +269,7 @@ export default function AddProductPage() {
             <input
               value={form.sizes.join(", ")}
               onChange={onChange("sizes")}
+              disabled={!canAddProducts}
               className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               placeholder="e.g. S, M, L, XL"
               required
@@ -245,6 +281,7 @@ export default function AddProductPage() {
               rows={5}
               value={form.description}
               onChange={onChange("description")}
+              disabled={!canAddProducts}
               className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               placeholder="Short description about the product..."
             />
@@ -261,7 +298,7 @@ export default function AddProductPage() {
           </button>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !canAddProducts}
             className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 disabled:opacity-50"
           >
             {loading ? "Saving..." : "Save Product"}

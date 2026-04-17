@@ -1,11 +1,16 @@
 // src/services/orderService.js
 import axios from "axios";
+import { API_BASE_URL } from "../api/base";
+
+const USER_ORDERS_URL = `${API_BASE_URL}/user/orders`;
+const USER_RETURNS_URL = `${API_BASE_URL}/user/returns`;
+const USER_CANCELLATIONS_URL = `${API_BASE_URL}/user/cancellations`;
 
 // Place a new order
 export const createOrder = async (orderData, token) => {
   try {
     const response = await axios.post(
-      "http://localhost:5000/api/user/orders", // backend endpoint
+      USER_ORDERS_URL,
       orderData,
       {
         headers: {
@@ -24,7 +29,7 @@ export const createOrder = async (orderData, token) => {
 // Fetch orders for logged-in user
 export const fetchOrders = async (token) => {
   try {
-    const response = await axios.get("http://localhost:5000/api/user/orders", {
+    const response = await axios.get(USER_ORDERS_URL, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -37,7 +42,7 @@ export const fetchOrders = async (token) => {
 // Fetch returned orders
 export const fetchReturns = async (token) => {
   try {
-    const response = await axios.get("http://localhost:5000/api/user/returns", {
+    const response = await axios.get(USER_RETURNS_URL, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -50,7 +55,7 @@ export const fetchReturns = async (token) => {
 // Fetch cancelled orders
 export const fetchCancellations = async (token) => {
   try {
-    const response = await axios.get("http://localhost:5000/api/user/cancellations", {
+    const response = await axios.get(USER_CANCELLATIONS_URL, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;

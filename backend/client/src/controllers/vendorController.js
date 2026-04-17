@@ -2,7 +2,12 @@ import Vendor from "../models/Vendor.js";
 
 export const getVendors = async (req, res) => {
   try {
-    const vendors = await Vendor.find().sort({ followersCount: -1, createdAt: -1 }).limit(20);
+    const vendors = await Vendor.find({
+      isApproved: true,
+      accountStatus: { $in: ["approved", null] },
+    })
+      .sort({ followersCount: -1, createdAt: -1 })
+      .limit(20);
     res.json(vendors);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch vendors" });
@@ -12,8 +17,13 @@ export const getVendors = async (req, res) => {
 export const getVendorFollowStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const vendor = await Vendor.findById(id).select("followersCount");
+    const vendor = await Vendor.findById(id).select("followersCount isApproved accountStatus");
     if (!vendor) return res.status(404).json({ message: "Vendor not found" });
+
+    const status = vendor.accountStatus || (vendor.isApproved ? "approved" : "pending");
+    if (status !== "approved") {
+      return res.status(404).json({ message: "Vendor not available" });
+    }
 
     const followed = (req.user?.followingVendors || []).some(
       (vendorId) => String(vendorId) === String(id)
@@ -30,6 +40,11 @@ export const followVendor = async (req, res) => {
     const { id } = req.params;
     const vendor = await Vendor.findById(id);
     if (!vendor) return res.status(404).json({ message: "Vendor not found" });
+
+    const status = vendor.accountStatus || (vendor.isApproved ? "approved" : "pending");
+    if (status !== "approved") {
+      return res.status(400).json({ message: "Vendor cannot be followed right now" });
+    }
 
     const alreadyFollowing = (req.user.followingVendors || []).some(
       (vendorId) => String(vendorId) === String(id)

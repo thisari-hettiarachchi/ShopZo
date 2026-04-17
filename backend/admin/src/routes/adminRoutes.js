@@ -8,6 +8,8 @@ import {
 	getAdminReviews,
 	getAdminVendors,
 	streamAdminInsights,
+	updateVendorApproval,
+	updateVendorStatus,
 	updateAdminOrderStatus,
 } from "../controllers/adminController.js";
 
@@ -21,6 +23,8 @@ router.get("/customers", getAdminCustomers);
 router.get("/analytics", getAdminAnalytics);
 router.get("/reviews", getAdminReviews);
 router.get("/vendors", getAdminVendors);
+router.patch("/vendors/:id/approval", updateVendorApproval);
+router.patch("/vendors/:id/status", updateVendorStatus);
 router.get("/insights", getAdminInsights);
 router.get("/notifications/stream", streamAdminInsights);
 

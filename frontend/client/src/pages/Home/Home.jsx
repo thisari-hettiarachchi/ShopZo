@@ -6,6 +6,7 @@ import FlashSaleSection from "../../components/sections/home/FlashSaleSection";
 import PromoSection from "../../components/sections/home/PromoSection";
 import FeaturedVendorsSection from "../../components/sections/home/FeaturedVendorsSection";
 import JustForYouSection from "../../components/sections/home/JustForYouSection";
+import { API_BASE_URL } from "../../api/base";
 
 if (typeof document !== "undefined" && !document.getElementById("shopzo-fonts")) {
   const link = document.createElement("link");
@@ -36,19 +37,19 @@ export default function Home() {
   const [justForYou, setJustForYou] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/categories").then((response) => setCategories(response.data)).catch(console.error);
+    axios.get(`${API_BASE_URL}/categories`).then((response) => setCategories(response.data)).catch(console.error);
   }, []);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/products/flash-sale").then((response) => setFlashSaleProducts(response.data)).catch(console.error);
+    axios.get(`${API_BASE_URL}/products/flash-sale`).then((response) => setFlashSaleProducts(response.data)).catch(console.error);
   }, []);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/vendors").then((response) => setVendors(response.data)).catch(console.error);
+    axios.get(`${API_BASE_URL}/vendors`).then((response) => setVendors(response.data)).catch(console.error);
   }, []);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/products").then((response) => setJustForYou(response.data)).catch(console.error);
+    axios.get(`${API_BASE_URL}/products`).then((response) => setJustForYou(response.data)).catch(console.error);
   }, []);
 
   return (
