@@ -35,6 +35,11 @@ export default function FlashSaleSection({ products }) {
 
   const format = (value) => value.toString().padStart(2, "0");
 
+  // Only worth its own homepage section once there's a decent number of deals.
+  if (!products || products.length <= 10) {
+    return null;
+  }
+
   return (
     <section className="py-20 px-4 bg-[var(--bg-card)]">
       <div className="max-w-7xl mx-auto">

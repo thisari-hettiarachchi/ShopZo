@@ -59,7 +59,7 @@ function GridCard({ cat, index }) {
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.4, delay: index * 0.04 }}
       className="group relative overflow-hidden rounded-2xl cursor-pointer border border-[var(--border)] bg-[var(--bg-card)]"
-      style={{ minHeight: 220 }}
+      style={{ minHeight: 250 }}
     >
       <Link to={`/products?category=${categoryValue}`} className="block h-full">
         {/* Background */}

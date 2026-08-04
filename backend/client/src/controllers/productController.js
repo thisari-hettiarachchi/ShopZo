@@ -1,6 +1,7 @@
 import Product from "../models/Product.js";
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
+import Settings from "../models/Settings.js";
 
 // GET all products
 export const getProducts = async (req, res) => {
@@ -156,9 +157,14 @@ export const addProductReview = async (req, res) => {
 
 export const getFlashSaleProducts = async (req, res) => {
   try {
+    const settings = await Settings.findOne({ key: "global" });
+    if (!settings?.flashSaleEnabled) {
+      return res.status(200).json([]);
+    }
+
     const products = await Product.find({
-      discount: { $gt: 0 }
-    }).limit(10);
+      isFlashSale: true,
+    }).limit(50);
 
     res.status(200).json(products);
   } catch (error) {

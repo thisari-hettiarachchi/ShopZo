@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getProductById, updateProduct } from "../services/productService";
-import { Save, ArrowLeft } from "lucide-react";
+import { Save, ArrowLeft, Zap } from "lucide-react";
 import { getCategories } from "../services/categoryService";
+import { getFlashSaleStatus } from "../services/settingsService";
 
 export default function EditProductPage() {
   const { id } = useParams();
@@ -16,10 +17,12 @@ export default function EditProductPage() {
     category: "",
     rating: 0,
     sizes: ["S", "M", "L"],
+    isFlashSale: false,
   });
   const [images, setImages] = useState([""]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [flashSaleEnabled, setFlashSaleEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -41,6 +44,16 @@ export default function EditProductPage() {
     };
 
     fetchCategories();
+
+    const fetchFlashSaleStatus = async () => {
+      try {
+        const res = await getFlashSaleStatus();
+        setFlashSaleEnabled(Boolean(res.data?.flashSaleEnabled));
+      } catch {
+        setFlashSaleEnabled(false);
+      }
+    };
+    fetchFlashSaleStatus();
   }, []);
 
   useEffect(() => {
@@ -61,6 +74,7 @@ export default function EditProductPage() {
           category: product.category || "",
           rating: product.rating || 0,
           sizes: product.sizes && product.sizes.length > 0 ? product.sizes : ["S", "M", "L"],
+          isFlashSale: Boolean(product.isFlashSale),
         });
         setImages(product.images && product.images.length > 0 ? product.images : [""]);
       } catch (err) {
@@ -133,6 +147,7 @@ export default function EditProductPage() {
         category: form.category,
         rating: Number(form.rating),
         sizes: (form.sizes && form.sizes.length > 0) ? form.sizes : ["S", "M", "L"],
+        isFlashSale: flashSaleEnabled ? Boolean(form.isFlashSale) : false,
         description: form.description || "No description provided.",
       };
       await updateProduct(id, payload);
@@ -225,6 +240,30 @@ export default function EditProductPage() {
                         required
                       />
                     </div>
+                    {flashSaleEnabled && (
+                      <div className="md:col-span-2">
+                        <label
+                          htmlFor="isFlashSale"
+                          className={`flex items-center gap-3 rounded-lg border px-4 py-3 cursor-pointer transition ${
+                            form.isFlashSale
+                              ? "border-orange-400 bg-orange-50"
+                              : "border-[var(--border)] bg-[var(--bg-main)]"
+                          }`}
+                        >
+                          <input
+                            id="isFlashSale"
+                            type="checkbox"
+                            checked={form.isFlashSale}
+                            onChange={(e) => setForm((prev) => ({ ...prev, isFlashSale: e.target.checked }))}
+                            className="h-4 w-4 accent-orange-500"
+                          />
+                          <span className="flex items-center gap-2 text-sm font-medium">
+                            <Zap size={16} className="text-orange-500" />
+                            Add this product to Flash Sale
+                          </span>
+                        </label>
+                      </div>
+                    )}
           <div>
             <label className="block text-sm font-medium mb-2">Product Name</label>
             <input

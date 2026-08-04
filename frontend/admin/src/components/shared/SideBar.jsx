@@ -13,6 +13,7 @@ import {
   LogOut,
   Wallet,
   Tag,
+  Zap,
 } from "lucide-react";
 import Assets from '../../assets/assets'
 
@@ -83,6 +84,7 @@ export default function Sidebar({ active }) {
           { id: "customers", label: "Customers", icon: Users, path: "/customers" },
           { id: "vendors", label: "Vendors", icon: Package, path: "/vendors" },
           { id: "categories", label: "Categories", icon: Tag, path: "/categories" },
+          { id: "flash-sale", label: "Flash Sale", icon: Zap, path: "/flash-sale" },
           { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/analytics" },
           { id: "reviews", label: "Reviews", icon: Star, path: "/reviews" },
           { id: "profile", label: "Profile", icon: Settings, path: "/profile" },

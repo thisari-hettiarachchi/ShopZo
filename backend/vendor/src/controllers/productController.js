@@ -15,6 +15,7 @@ export const getVendorProductById = async (req, res) => {
   }
 };
 import Product from "../models/Product.js";
+import Settings from "../models/Settings.js";
 
 const requireApprovedVendor = (req, res) => {
   const accountStatus = req.user?.accountStatus || "pending";
@@ -24,6 +25,12 @@ const requireApprovedVendor = (req, res) => {
   }
 
   return true;
+};
+
+const resolveFlashSaleFlag = async (requestedFlag) => {
+  if (!requestedFlag) return false;
+  const settings = await Settings.findOne({ key: "global" });
+  return Boolean(settings?.flashSaleEnabled);
 };
 
 // Get all products for the logged-in vendor
@@ -75,7 +82,7 @@ export const addVendorProduct = async (req, res) => {
     if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
     if (!requireApprovedVendor(req, res)) return;
 
-    const { name, price, description, stock, category, images, sizes, rating, oldPrice, discount } = req.body;
+    const { name, price, description, stock, category, images, sizes, rating, oldPrice, discount, isFlashSale } = req.body;
 
     const newProduct = new Product({
       name,
@@ -88,6 +95,7 @@ export const addVendorProduct = async (req, res) => {
       rating: rating || 0,
       oldPrice: oldPrice || null,
       discount: discount || 0,
+      isFlashSale: await resolveFlashSaleFlag(isFlashSale),
       vendor: vendorId,
     });
 
@@ -111,7 +119,7 @@ export const updateVendorProduct = async (req, res) => {
     const product = await Product.findOne({ _id: id, vendor: vendorId });
     if (!product) return res.status(404).json({ message: "Product not found or unauthorized" });
 
-    const { name, price, description, stock, category, images, sizes, rating, oldPrice, discount } = req.body;
+    const { name, price, description, stock, category, images, sizes, rating, oldPrice, discount, isFlashSale } = req.body;
 
     // Validate required fields
     if (!images || !Array.isArray(images) || images.length === 0) {
@@ -137,6 +145,9 @@ export const updateVendorProduct = async (req, res) => {
     product.rating = rating !== undefined ? rating : product.rating;
     product.oldPrice = oldPrice !== undefined ? oldPrice : product.oldPrice;
     product.discount = discount !== undefined ? discount : product.discount;
+    if (isFlashSale !== undefined) {
+      product.isFlashSale = await resolveFlashSaleFlag(isFlashSale);
+    }
 
     await product.save();
     res.json(product);

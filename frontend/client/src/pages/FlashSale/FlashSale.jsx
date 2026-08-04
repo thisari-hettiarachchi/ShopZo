@@ -136,7 +136,7 @@ export default function FlashSalePage({ products = [], token }) {
 
   /* filter + sort */
   const filtered = useMemo(() => {
-    let list = flashProducts.filter((p) => p.oldPrice); // only sale items
+    let list = flashProducts;
     if (activeCategory !== "All") list = list.filter((p) => p.category === activeCategory);
     list = list.filter((p) => p.price <= maxPrice);
     if (sort === "price_asc") list = [...list].sort((a, b) => a.price - b.price);

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { ArrowLeft, PackagePlus, Save } from "lucide-react";
+import { ArrowLeft, PackagePlus, Save, Zap } from "lucide-react";
 import { addProduct } from "../services/productService";
 import { getCategories } from "../services/categoryService";
 import { getVendorProfile } from "../services/vendorService";
+import { getFlashSaleStatus } from "../services/settingsService";
 import { readVendorSession } from "../utils/authStorage";
 
 export default function AddProductPage() {
@@ -20,10 +21,12 @@ export default function AddProductPage() {
     rating: 0,
     oldPrice: 0,
     discount: 0,
+    isFlashSale: false,
   });
   const [images, setImages] = useState([""]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [flashSaleEnabled, setFlashSaleEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [vendorStatus, setVendorStatus] = useState(() => readVendorSession()?.accountStatus || (readVendorSession()?.isApproved ? "approved" : "pending"));
 
@@ -61,6 +64,16 @@ export default function AddProductPage() {
       }
     };
     fetchCategories();
+
+    const fetchFlashSaleStatus = async () => {
+      try {
+        const res = await getFlashSaleStatus();
+        setFlashSaleEnabled(Boolean(res.data?.flashSaleEnabled));
+      } catch {
+        setFlashSaleEnabled(false);
+      }
+    };
+    fetchFlashSaleStatus();
     // eslint-disable-next-line
   }, []);
 
@@ -133,6 +146,7 @@ export default function AddProductPage() {
         rating: Number(form.rating),
         oldPrice: Number(form.oldPrice),
         discount: Number(form.discount),
+        isFlashSale: flashSaleEnabled ? Boolean(form.isFlashSale) : false,
         description: form.description || "No description provided.",
       };
       await addProduct(payload);
@@ -284,6 +298,31 @@ export default function AddProductPage() {
               required
             />
           </div>
+          {flashSaleEnabled && (
+            <div className="md:col-span-2">
+              <label
+                htmlFor="isFlashSale"
+                className={`flex items-center gap-3 rounded-lg border px-4 py-3 cursor-pointer transition ${
+                  form.isFlashSale
+                    ? "border-orange-400 bg-orange-50"
+                    : "border-[var(--border)] bg-[var(--bg-main)]"
+                }`}
+              >
+                <input
+                  id="isFlashSale"
+                  type="checkbox"
+                  checked={form.isFlashSale}
+                  onChange={(e) => setForm((prev) => ({ ...prev, isFlashSale: e.target.checked }))}
+                  disabled={!canAddProducts}
+                  className="h-4 w-4 accent-orange-500"
+                />
+                <span className="flex items-center gap-2 text-sm font-medium">
+                  <Zap size={16} className="text-orange-500" />
+                  Add this product to Flash Sale
+                </span>
+              </label>
+            </div>
+          )}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-2">Description</label>
             <textarea

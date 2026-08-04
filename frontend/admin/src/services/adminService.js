@@ -100,6 +100,21 @@ export const deleteCategory = async (id) => {
 	return data;
 };
 
+export const getSettings = async () => {
+	const { data } = await api.get("/api/admin/settings");
+	return data;
+};
+
+export const updateFlashSaleStatus = async (enabled) => {
+	const { data } = await api.patch("/api/admin/settings/flash-sale", { enabled });
+	return data;
+};
+
+export const getFlashSaleProducts = async () => {
+	const { data } = await api.get("/api/admin/settings/flash-sale/products");
+	return data;
+};
+
 export const getAdminProfile = async () => {
 	const { data } = await api.get("/api/admin/auth/me");
 	return data;
