@@ -8,6 +8,7 @@ import {
   removeFromWishlistApi,
   fetchWishlistApi,
 } from "../../../api/wishlistApi";
+import { isNewArrival } from "../../../utils/productHelpers";
 
 export default function ProductCard({ product, token: propToken, onCartUpdate }) {
   const navigate = useNavigate();
@@ -50,6 +51,7 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
    const discount = product.oldPrice
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : null;
+  const showNewTag = isNewArrival(product);
 
   return (
     <div
@@ -58,11 +60,18 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
     >
       {/* Image area */}
       <div className="relative flex h-[168px] flex-shrink-0 items-center justify-center overflow-hidden bg-[linear-gradient(150deg,var(--bg-muted),var(--bg-card))] p-5">
-        {product.oldPrice && (
-          <span className="absolute left-3 top-3 z-10 rounded-full bg-[var(--text-primary)] px-2.5 py-1 text-[10px] font-bold text-[var(--bg-main)]">
-            Save Rs. {Math.max(product.oldPrice - product.price, 0)}
-          </span>
-        )}
+        <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+          {showNewTag && (
+            <span className="w-fit rounded-full bg-[var(--text-primary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--bg-main)]">
+              New
+            </span>
+          )}
+          {product.oldPrice && (
+            <span className="w-fit rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-2.5 py-1 text-[10px] font-bold text-white">
+              Save Rs. {Math.max(product.oldPrice - product.price, 0)}
+            </span>
+          )}
+        </div>
         <img
           src={product.images?.[0]}
           alt={product.name}

@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ProductGrid from "../../components/sections/product/ProductGrid";
 import { fetchProducts } from "../../api/productApi";
+import { filterNewArrivals } from "../../utils/productHelpers";
 
 export default function Products() {
   const [searchParams] = useSearchParams();
@@ -22,6 +23,10 @@ export default function Products() {
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "latest");
   const searchText = searchParams.get("q") || "";
   const selectedCategory = searchParams.get("category") || "";
+  const newArrivalsOnly =
+    searchParams.get("new") === "1" ||
+    searchParams.get("new") === "true" ||
+    searchParams.get("filter") === "new";
 
   useEffect(() => {
     const params = {
@@ -84,7 +89,10 @@ export default function Products() {
     });
   };
 
-  const filteredProducts = products;
+  const filteredProducts = useMemo(() => {
+    if (!newArrivalsOnly) return products;
+    return filterNewArrivals(products);
+  }, [products, newArrivalsOnly]);
     
   return (
     <div className="min-h-screen bg-[var(--bg-main)] mt-10 px-3 pb-10  md:px-4">
@@ -95,16 +103,18 @@ export default function Products() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
-                Marketplace Catalog
+                {newArrivalsOnly ? "Fresh Drops" : "Marketplace Catalog"}
               </p>
               <h1
                 className="mt-1 text-2xl font-extrabold text-[var(--text-primary)] md:text-3xl"
                 style={{ fontFamily: "'Sora', sans-serif", letterSpacing: "-0.02em" }}
               >
-                Explore Products
+                {newArrivalsOnly ? "New Arrivals" : "Explore Products"}
               </h1>
               <p className="mt-1 text-xs text-[var(--text-secondary)] md:text-sm">
-                Filter by brand, location, rating, and budget to find your perfect match.
+                {newArrivalsOnly
+                  ? "Products added in the last 5 days."
+                  : "Filter by brand, location, rating, and budget to find your perfect match."}
               </p>
               {searchText && (
                 <p className="mt-1 text-xs text-[var(--color-primary)]">

@@ -1,20 +1,19 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import ProductCard from "../product/ProductCard";
+import NewArrivalCard from "../product/NewArrivalCard";
+import { filterNewArrivals } from "../../../utils/productHelpers";
 
 const stagger = (index, base = 0.05) => ({ delay: index * base });
 
 export default function NewArrivalsSection({ products }) {
-  const items = [...(products || [])]
-    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-    .slice(0, 6);
+  const items = filterNewArrivals(products).slice(0, 6);
 
   if (items.length === 0) return null;
 
   return (
-    <section className="py-16 px-4 bg-[var(--bg-main)]">
-      <div className="max-w-7xl mx-auto">
+    <section className="bg-[var(--bg-main)] px-4 py-16">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-14 flex items-end justify-between gap-4">
           <div className="relative">
             <span className="section-eyebrow relative mb-3 block">Fresh drops</span>
@@ -23,24 +22,24 @@ export default function NewArrivalsSection({ products }) {
             </h2>
           </div>
           <Link
-            to="/products"
+            to="/products?new=1"
             className="hidden items-center gap-2 rounded-full border border-[var(--color-primary)] px-5 py-2.5 text-sm font-bold text-[var(--color-primary)] transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white md:inline-flex"
           >
             View All New Arrivals <ArrowRight size={13} />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {items.map((product, index) => (
             <motion.div
               key={product._id || index}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ ...stagger(index), duration: 0.4 }}
               className="h-full"
             >
-              <ProductCard product={product} />
+              <NewArrivalCard product={product} />
             </motion.div>
           ))}
         </div>
