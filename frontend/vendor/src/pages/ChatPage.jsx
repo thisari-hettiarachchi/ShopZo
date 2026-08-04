@@ -13,6 +13,7 @@ import {
 } from "react-icons/fi";
 import { BsCheck2All, BsFillPatchCheckFill } from "react-icons/bs";
 import { getChatMessages, getChatThreads, sendChatMessage } from "../services/featureService";
+import PageHeader from "../components/shared/PageHeader";
 
 const quickReplies = ["Thanks for reaching out", "Please confirm your order ID", "Shipping update coming soon", "Happy to help"];
 const emojis = ["😊", "🙏", "🚀", "❤️", "✅", "😍", "🎉", "👍", "🔥", "💯", "📦", "⭐"];
@@ -124,13 +125,23 @@ export default function ChatPage() {
     }
   };
 
+  const unreadCount = threads.reduce((sum, thread) => sum + (thread.unread || 0), 0);
+
   return (
-    <div className="relative min-h-screen w-full bg-[var(--bg-main)] px-4 py-6 text-[var(--text-primary)] md:px-8">
+    <div className="relative min-h-screen w-full bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
       <style>{`
         @keyframes msgIn { from { opacity: 0; transform: translateY(8px) scale(0.98);} to { opacity: 1; transform: translateY(0) scale(1);} }
       `}</style>
 
-      <div className="mx-auto flex h-[calc(100vh-120px)] max-w-[1280px] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[var(--shadow)] backdrop-blur-xl">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Messaging"
+        title="Chats"
+        description="Talk with customers, answer product questions, and follow up on orders."
+        meta={`${threads.length} conversations${unreadCount ? ` · ${unreadCount} unread` : ""}`}
+      />
+
+      <div className="relative flex h-[calc(100vh-220px)] min-h-[520px] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_20px_50px_-34px_var(--shadow)] backdrop-blur-xl">
         <aside
           className={`absolute inset-y-0 left-0 z-30 w-[320px] border-r border-[var(--border)] bg-[var(--bg-card)] transition-transform duration-300 lg:static lg:translate-x-0 ${
             showSidebar ? "translate-x-0" : "-translate-x-full"
@@ -139,7 +150,7 @@ export default function ChatPage() {
           <div className="flex h-full flex-col">
             <div className="border-b border-[var(--border)] px-4 py-4">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-['Sora',sans-serif] text-lg font-semibold tracking-tight">Customer Chats</h2>
+                <h2 className="font-['Sora',sans-serif] text-lg font-semibold tracking-tight">Conversations</h2>
                 <button
                   onClick={() => setShowSidebar(false)}
                   className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-2 text-[var(--text-muted)] lg:hidden"
@@ -402,7 +413,6 @@ export default function ChatPage() {
             </button>
           </footer>
         </main>
-      </div>
 
       {showSidebar && (
         <button
@@ -411,6 +421,8 @@ export default function ChatPage() {
           aria-label="Close sidebar overlay"
         />
       )}
+      </div>
+      </div>
     </div>
   );
 }

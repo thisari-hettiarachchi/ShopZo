@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Loader, Wallet, TrendingUp, Clock3, PercentCircle } from "lucide-react";
 import { getVendorEarnings } from "../services/analyticsService";
+import PageHeader from "../components/shared/PageHeader";
 
 const currency = (value) => `$${Number(value || 0).toFixed(2)}`;
 const formatDate = (value) =>
@@ -55,11 +56,14 @@ export default function EarningsPage() {
   const recentOrders = data?.recentSettledOrders || [];
 
   return (
-    <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
-      <h2 className="text-3xl font-extrabold text-[var(--color-primary)]">Earnings</h2>
-      <p className="mt-1 mb-8 text-sm text-[var(--text-secondary)]">
-        Track settled sales, platform commission, and your net payout.
-      </p>
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Payouts & Settlements"
+        title="Earnings"
+        description="Track settled sales, platform commission, and your net payout."
+        meta={`${summary.settledOrderCount || 0} settled orders`}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -153,6 +157,7 @@ export default function EarningsPage() {
             </table>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

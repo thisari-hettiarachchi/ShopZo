@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { MessageSquare, Send, Star } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { getVendorReviewInsights, getVendorReviews, replyToReview } from "../services/featureService";
+import PageHeader from "../components/shared/PageHeader";
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState([]);
@@ -50,11 +51,14 @@ export default function ReviewsPage() {
   const trendRows = useMemo(() => insights?.ratingBreakdown?.map((item) => ({ label: `${item.rating}★`, count: item.count })) || [], [insights]);
 
   return (
-    <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
-      <h2 className="text-3xl font-extrabold text-[var(--color-primary)]">Reviews</h2>
-      <p className="mt-1 mb-10 text-sm text-[var(--text-secondary)]">
-        Monitor feedback, respond to reviews, and improve customer satisfaction.
-      </p>
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Feedback Center"
+        title="Reviews"
+        description="Monitor feedback, respond to reviews, and improve customer satisfaction."
+        meta={`${insights?.totalReviews ?? reviews.length} total reviews`}
+      />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         {[
@@ -146,6 +150,7 @@ export default function ReviewsPage() {
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );

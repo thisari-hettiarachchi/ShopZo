@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import { Loader } from "lucide-react";
 import { getDashboardAnalytics } from "../services/analyticsService";
+import PageHeader from "../components/shared/PageHeader";
 
 export default function AnalyticsPage() {
   const [data, setData] = useState([]);
@@ -21,11 +22,14 @@ export default function AnalyticsPage() {
     fetchAnalytics();
   }, []);
   return (
-    <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
-      <h2 className="text-3xl font-extrabold text-[var(--color-primary)]">Analytics</h2>
-      <p className="mt-1 mb-10 text-sm text-[var(--text-secondary)]">
-        Analyze performance, track sales trends, and gain insights to grow your business.
-      </p>
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Performance Insights"
+        title="Analytics"
+        description="Analyze performance, track sales trends, and gain insights to grow your business."
+        meta={`${data.length} data points`}
+      />
       <div className="bg-[var(--bg-card)] p-6 rounded-xl shadow-sm border border-[var(--border)]">
         <h3 className="text-lg font-semibold mb-4">Monthly Sales</h3>
         {loading ? (
@@ -54,6 +58,7 @@ export default function AnalyticsPage() {
             </AreaChart>
           </ResponsiveContainer>
         )}
+      </div>
       </div>
     </div>
   );

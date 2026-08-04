@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ShoppingBag, Loader } from "lucide-react";
 import { getOrders, updateOrderStatus } from "../services/orderService";
+import PageHeader from "../components/shared/PageHeader";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -34,11 +35,14 @@ export default function OrdersPage() {
     }
   };
   return (
-    <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
-      <h2 className="text-3xl font-extrabold text-[var(--color-primary)]">Orders</h2>
-      <p className="mt-1 mb-10 text-sm text-[var(--text-secondary)]">
-        Track orders, manage deliveries, and handle order status efficiently.
-      </p>
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Order Management"
+        title="Orders"
+        description="Track orders, manage deliveries, and handle order status efficiently."
+        meta={`${orders.length} total orders`}
+      />
       <div className="bg-[var(--bg-card)] rounded-3xl shadow-lg border border-[var(--border)] overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center p-16 text-[var(--text-secondary)]">
@@ -128,6 +132,7 @@ export default function OrdersPage() {
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, TicketPercent, Trash2 } from "lucide-react";
 import { createCoupon, deleteCoupon, getCoupons, updateCoupon } from "../services/featureService";
+import PageHeader from "../components/shared/PageHeader";
 
 const initialForm = {
   code: "",
@@ -76,15 +77,14 @@ export default function CouponsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] px-6 py-8 md:px-10">
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
       <div className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_20px_55px_-38px_var(--shadow)]">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Marketing Tools</p>
-          <h1 className="mt-2 text-3xl font-black text-[var(--text-primary)]">Discounts & Coupons</h1>
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">
-            Create targeted offers and keep conversion high with controlled discount campaigns.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="Marketing Tools"
+          title="Coupons"
+          description="Create targeted offers and keep conversion high with controlled discount campaigns."
+          meta={`${stats.total} total coupons`}
+        />
 
         <div className="grid gap-4 sm:grid-cols-3">
           {[

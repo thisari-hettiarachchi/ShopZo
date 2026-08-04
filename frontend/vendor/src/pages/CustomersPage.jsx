@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Users, Loader } from "lucide-react";
 import { getDashboardAnalytics } from "../services/analyticsService";
+import PageHeader from "../components/shared/PageHeader";
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState([]);
@@ -22,11 +23,14 @@ export default function CustomersPage() {
     fetchCustomers();
   }, []);
   return (
-    <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
-      <h2 className="text-3xl font-extrabold text-[var(--color-primary)]">Customers</h2>
-      <p className="mt-1 mb-10 text-sm text-[var(--text-secondary)]">
-        View customer details, manage interactions, and build lasting relationships.
-      </p>
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Customer CRM"
+        title="Customers"
+        description="View customer details, manage interactions, and build lasting relationships."
+        meta={`${customers.length} total customers`}
+      />
       <div className="bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center p-12 text-[var(--text-secondary)]">
@@ -57,6 +61,7 @@ export default function CustomersPage() {
             );
           })
         )}
+      </div>
       </div>
     </div>
   );
