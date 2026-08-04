@@ -13,6 +13,7 @@ import CheckoutPage from '../pages/Checkout/Checkout';
 import ProceedToPay from '../pages/Checkout/ProceedToPay';
 import OrderSuccess from '../pages/Checkout/OrderSuccess';
 import OrderCancel from '../pages/Checkout/OrderCancel';
+import OrderDetails from '../pages/Orders/OrderDetails';
 import VendorStorePage from '../pages/Vendor/VendorStore';
 import MessagePage from '../pages/Vendor/VendorMessage';
 import FlashSalePage from '../pages/FlashSale/FlashSale';
@@ -31,6 +32,7 @@ export default function AppRoutes() {
       <Route path="/products/:id" element={<ProductDetails />} />
       <Route path="/vendors/:id" element={<VendorStorePage />} />
       <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/orders/:id" element={<OrderDetails />} />
       <Route path='/checkout' element={<CheckoutPage />} />
       <Route path='/proceedtopay' element={<ProceedToPay />} />
       <Route path='/order/success' element={<OrderSuccess />} />

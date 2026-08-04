@@ -15,44 +15,75 @@ const normalizeStatus = (status) => {
   return candidate;
 };
 
+const buildOrderResponse = (order) => {
+  const plain = typeof order.toObject === "function" ? order.toObject() : { ...order };
+  const currentStatus = normalizeStatus(plain.status);
+  const existing = Array.isArray(plain.statusHistory) ? [...plain.statusHistory] : [];
+
+  if (currentStatus !== "Cancelled" && !existing.find((entry) => entry.status === currentStatus)) {
+    existing.push({ status: currentStatus, at: plain.updatedAt || plain.createdAt });
+  }
+
+  const trackingTimeline = TRACKING_FLOW.map((step) => {
+    const hit = existing.find((entry) => entry.status === step);
+    return {
+      status: step,
+      at: hit?.at || null,
+      completed: Boolean(hit),
+      active: step === currentStatus,
+    };
+  });
+
+  const orderAgeHours =
+    (Date.now() - new Date(plain.createdAt).getTime()) / (1000 * 60 * 60);
+  const canCancel =
+    CANCELLABLE_STATUSES.has(currentStatus) && orderAgeHours <= CANCEL_WINDOW_HOURS;
+  const canConfirmReceipt = currentStatus === "Shipped";
+
+  return {
+    ...plain,
+    status: currentStatus,
+    statusHistory: existing,
+    trackingTimeline,
+    canCancel,
+    canConfirmReceipt,
+    cancelWindowHours: CANCEL_WINDOW_HOURS,
+    cancelExpiresAt: canCancel
+      ? new Date(new Date(plain.createdAt).getTime() + CANCEL_WINDOW_HOURS * 60 * 60 * 1000)
+      : null,
+  };
+};
+
 // Get all orders for logged-in user
 export const getOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user._id })
       .sort({ createdAt: -1 })
-      .populate("products.product", "name images") 
+      .populate("products.product", "name images")
       .populate("vendor", "name storeName");
 
-    const normalized = orders.map((order) => {
-      const currentStatus = normalizeStatus(order.status);
-      const existing = Array.isArray(order.statusHistory) ? [...order.statusHistory] : [];
-
-      if (!existing.find((entry) => entry.status === currentStatus)) {
-        existing.push({ status: currentStatus, at: order.updatedAt || order.createdAt });
-      }
-
-      const trackingTimeline = TRACKING_FLOW.map((step) => {
-        const hit = existing.find((entry) => entry.status === step);
-        return {
-          status: step,
-          at: hit?.at || null,
-          completed: Boolean(hit),
-          active: step === currentStatus,
-        };
-      });
-
-      return {
-        ...order.toObject(),
-        status: currentStatus,
-        statusHistory: existing,
-        trackingTimeline,
-      };
-    });
-
-    res.json(normalized);
+    res.json(orders.map((order) => buildOrderResponse(order)));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to fetch orders" });
+  }
+};
+
+// Get a single order for logged-in user
+export const getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.id, user: req.user._id })
+      .populate("products.product", "name images price")
+      .populate("vendor", "name storeName");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(buildOrderResponse(order));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch order" });
   }
 };
 
@@ -253,9 +284,60 @@ export const cancelOrder = async (req, res) => {
     });
 
     console.log(`Order ${id} cancelled by user ${req.user._id}`);
-    res.json({ message: "Order cancelled", order });
+    const populated = await Order.findById(order._id)
+      .populate("products.product", "name images price")
+      .populate("vendor", "name storeName");
+    res.json({ message: "Order cancelled", order: buildOrderResponse(populated) });
   } catch (error) {
     console.error("Error cancelling order:", error);
     res.status(500).json({ message: "Failed to cancel order" });
+  }
+};
+
+// Customer confirms they received a shipped order → Delivered
+export const confirmReceipt = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findOne({ _id: id, user: req.user._id });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const currentStatus = normalizeStatus(order.status);
+    if (currentStatus === "Delivered") {
+      return res.status(400).json({ message: "Order is already marked as delivered" });
+    }
+    if (currentStatus !== "Shipped") {
+      return res.status(400).json({
+        message: "You can confirm receipt only after the order has been shipped",
+      });
+    }
+
+    order.status = "Delivered";
+    order.statusHistory = [
+      ...(order.statusHistory || []),
+      { status: "Delivered", at: new Date() },
+    ];
+    await order.save();
+
+    await Notification.create({
+      user: req.user._id,
+      type: "order",
+      title: "Order delivered",
+      message: `Thanks for confirming. Order ${String(order._id).slice(-6).toUpperCase()} is now delivered.`,
+      metadata: { orderId: order._id },
+    });
+
+    const populated = await Order.findById(order._id)
+      .populate("products.product", "name images price")
+      .populate("vendor", "name storeName");
+
+    res.json({
+      message: "Receipt confirmed. Order marked as delivered.",
+      order: buildOrderResponse(populated),
+    });
+  } catch (error) {
+    console.error("Error confirming receipt:", error);
+    res.status(500).json({ message: "Failed to confirm receipt" });
   }
 };
