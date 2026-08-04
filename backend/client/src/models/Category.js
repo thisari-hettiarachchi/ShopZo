@@ -5,13 +5,9 @@ const categorySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  icon: {
-    type: String, 
-    required: true,
-  },
-  gradient: {
-    type: String, 
-    required: true,
+  image: {
+    type: String,
+    default: "",
   },
 }, { timestamps: true });
 

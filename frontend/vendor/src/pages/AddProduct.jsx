@@ -15,7 +15,7 @@ export default function AddProductPage() {
     price: "",
     stock: "",
     description: "",
-    category: "General",
+    category: "",
     sizes: ["S", "M", "L"],
     rating: 0,
     oldPrice: 0,
@@ -28,11 +28,9 @@ export default function AddProductPage() {
   const [vendorStatus, setVendorStatus] = useState(() => readVendorSession()?.accountStatus || (readVendorSession()?.isApproved ? "approved" : "pending"));
 
   const categoryOptions = Array.from(
-    new Set([
-      "General",
-      ...categories.map((cat) => cat?.name).filter(Boolean),
-    ])
+    new Set(categories.map((cat) => cat?.name).filter(Boolean))
   );
+  const hasCategories = categoryOptions.length > 0;
 
   useEffect(() => {
     const fetchProfileStatus = async () => {
@@ -52,10 +50,11 @@ export default function AddProductPage() {
     const fetchCategories = async () => {
       try {
         const res = await getCategories();
-        setCategories(res.data);
-        // Set default category if not set
-        if (res.data.length > 0 && !form.category) {
-          setForm((prev) => ({ ...prev, category: res.data[0].name }));
+        const list = Array.isArray(res.data) ? res.data : [];
+        setCategories(list);
+        // Default to the first admin-defined category
+        if (list.length > 0) {
+          setForm((prev) => ({ ...prev, category: prev.category || list[0].name }));
         }
       } catch (err) {
         setCategories([]);
@@ -254,16 +253,25 @@ export default function AddProductPage() {
             <select
               value={form.category}
               onChange={onChange("category")}
-              disabled={!canAddProducts}
-              className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              disabled={!canAddProducts || !hasCategories}
+              className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-60"
               required
             >
-              {categoryOptions.map((categoryName) => (
-                <option key={categoryName} value={categoryName}>
-                  {categoryName}
-                </option>
-              ))}
+              {hasCategories ? (
+                categoryOptions.map((categoryName) => (
+                  <option key={categoryName} value={categoryName}>
+                    {categoryName}
+                  </option>
+                ))
+              ) : (
+                <option value="">No categories available</option>
+              )}
             </select>
+            {!hasCategories && (
+              <p className="mt-1.5 text-xs text-amber-600">
+                No categories have been added by the admin yet. Please check back later.
+              </p>
+            )}
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-2">Sizes (comma separated)</label>

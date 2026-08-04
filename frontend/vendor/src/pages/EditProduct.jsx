@@ -13,7 +13,7 @@ export default function EditProductPage() {
     price: "",
     stock: "",
     description: "",
-    category: "General",
+    category: "",
     rating: 0,
     sizes: ["S", "M", "L"],
   });
@@ -24,11 +24,11 @@ export default function EditProductPage() {
   const [error, setError] = useState("");
 
   const categoryOptions = Array.from(
-    new Set([
-      "General",
-      ...categories.map((cat) => cat?.name).filter(Boolean),
-    ])
+    new Set(
+      [form.category, ...categories.map((cat) => cat?.name)].filter(Boolean)
+    )
   );
+  const hasCategories = categoryOptions.length > 0;
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -58,7 +58,7 @@ export default function EditProductPage() {
           price: product.price || "",
           stock: product.stock || "",
           description: product.description || "",
-          category: product.category || "General",
+          category: product.category || "",
           rating: product.rating || 0,
           sizes: product.sizes && product.sizes.length > 0 ? product.sizes : ["S", "M", "L"],
         });
@@ -186,14 +186,19 @@ export default function EditProductPage() {
                       <select
                         value={form.category}
                         onChange={onChange("category")}
-                        className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        disabled={!hasCategories}
+                        className="w-full px-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-60"
                         required
                       >
-                        {categoryOptions.map((categoryName) => (
-                          <option key={categoryName} value={categoryName}>
-                            {categoryName}
-                          </option>
-                        ))}
+                        {hasCategories ? (
+                          categoryOptions.map((categoryName) => (
+                            <option key={categoryName} value={categoryName}>
+                              {categoryName}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="">No categories available</option>
+                        )}
                       </select>
                     </div>
                     <div>

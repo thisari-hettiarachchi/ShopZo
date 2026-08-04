@@ -1,6 +1,25 @@
 import { motion } from "framer-motion";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+
+function CategoryImage({ cat, className }) {
+  if (cat.image) {
+    return (
+      <img
+        src={cat.image}
+        alt={cat.name}
+        className={`absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${className || ""}`}
+      />
+    );
+  }
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)]">
+      <span className="text-5xl font-black text-white/90">
+        {(cat.name || "?").charAt(0).toUpperCase()}
+      </span>
+    </div>
+  );
+}
 
 function CatHero({ cat, index }) {
   const categoryValue = encodeURIComponent(cat.name || cat._id || "");
@@ -10,21 +29,11 @@ function CatHero({ cat, index }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.55, delay: index * 0.07 }}
-      className="col-span-2 row-span-2 relative overflow-hidden rounded-3xl cursor-pointer group"
+      className="col-span-2 row-span-2 relative overflow-hidden rounded-3xl cursor-pointer group border border-[var(--border)]"
       style={{ minHeight: 340 }}
     >
       <Link to={`/products?category=${categoryValue}`} className="block h-full">
-        {cat.image ? (
-          <img
-            src={cat.image}
-            alt={cat.name}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient || "from-orange-500 to-amber-400"} flex items-center justify-center text-8xl`}>
-            {cat.icon}
-          </div>
-        )}
+        <CategoryImage cat={cat} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-7 flex items-end justify-between">
           <div>
@@ -40,9 +49,6 @@ function CatHero({ cat, index }) {
             <ArrowRight size={16} className="text-white" />
           </div>
         </div>
-        <div className="absolute top-4 left-4 w-12 h-12 rounded-xl border-2 border-[var(--color-primary)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center text-2xl">
-          {cat.icon}
-        </div>
       </Link>
     </motion.div>
   );
@@ -56,21 +62,11 @@ function CatPortrait({ cat, index }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.07 }}
-      className="col-span-1 row-span-2 relative overflow-hidden rounded-2xl cursor-pointer group"
+      className="col-span-1 row-span-2 relative overflow-hidden rounded-2xl cursor-pointer group border border-[var(--border)]"
       style={{ minHeight: 280 }}
     >
       <Link to={`/products?category=${categoryValue}`} className="block h-full">
-        {cat.image ? (
-          <img
-            src={cat.image}
-            alt={cat.name}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
-          />
-        ) : (
-          <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient || "from-violet-500 to-purple-700"} flex items-center justify-center text-5xl`}>
-            {cat.icon}
-          </div>
-        )}
+        <CategoryImage cat={cat} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
         <div className="absolute bottom-0 left-0 right-0 p-5">
@@ -86,7 +82,7 @@ function CatPortrait({ cat, index }) {
   );
 }
 
-function CatFlat({ cat, index }) {
+function CatSquare({ cat, index }) {
   const categoryValue = encodeURIComponent(cat.name || cat._id || "");
   return (
     <motion.div
@@ -94,30 +90,21 @@ function CatFlat({ cat, index }) {
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.45, delay: index * 0.07 }}
-      className="col-span-1 relative overflow-hidden rounded-2xl cursor-pointer group border border-[var(--border)] bg-[var(--bg-card)]"
-      style={{ minHeight: 130 }}
+      className="col-span-1 relative overflow-hidden rounded-2xl cursor-pointer group border border-[var(--border)]"
     >
-      <Link to={`/products?category=${categoryValue}`} className="flex h-full items-center gap-4 p-4">
-        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
-          {cat.image ? (
-            <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-400" />
-          ) : (
-            <div className={`w-full h-full bg-gradient-to-br ${cat.gradient || "from-cyan-400 to-blue-500"} flex items-center justify-center text-2xl`}>
-              {cat.icon}
-            </div>
-          )}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <h3 className="text-[var(--text-primary)] font-bold text-sm leading-snug truncate group-hover:text-[var(--color-primary)] transition-colors display-font">
+      <Link to={`/products?category=${categoryValue}`} className="block h-full">
+        <CategoryImage cat={cat} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <h3 className="display-font text-white text-base font-bold leading-snug truncate">
             {cat.name}
           </h3>
-          {cat.count && <p className="text-[var(--text-muted)] text-[11px] mt-0.5">{cat.count}+ items</p>}
+          <div className="mt-1 flex items-center gap-1.5 text-[var(--color-primary)] text-[11px] font-semibold opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+            Shop <ArrowRight size={10} />
+          </div>
         </div>
-
-        <ChevronRight size={14} className="text-[var(--text-muted)] group-hover:text-[var(--color-primary)] shrink-0 transition-colors group-hover:translate-x-1 transition-transform duration-200" />
       </Link>
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-primary)] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
     </motion.div>
   );
 }
@@ -151,7 +138,7 @@ export default function CategoriesSection({ categories }) {
           {hero && <CatHero cat={hero} index={0} />}
           {portrait && <CatPortrait cat={portrait} index={1} />}
           {rest.slice(0, 2).map((cat, index) => (
-            <CatFlat key={cat._id} cat={cat} index={index + 2} />
+            <CatSquare key={cat._id} cat={cat} index={index + 2} />
           ))}
         </div>
 

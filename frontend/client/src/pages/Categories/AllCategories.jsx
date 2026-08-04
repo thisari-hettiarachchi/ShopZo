@@ -25,6 +25,28 @@ function TagBadge({ tag }) {
 }
 
 /* ─────────────────────────────────────────────
+   CATEGORY THUMBNAIL (image or letter fallback)
+───────────────────────────────────────────── */
+function CategoryThumb({ cat, className = "" }) {
+  if (cat.image) {
+    return (
+      <img
+        src={cat.image}
+        alt={cat.name}
+        className={`h-full w-full object-cover ${className}`}
+      />
+    );
+  }
+  return (
+    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] ${className}`}>
+      <span className="text-2xl font-black text-white/90">
+        {(cat.name || "?").charAt(0).toUpperCase()}
+      </span>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
    GRID CARD
 ───────────────────────────────────────────── */
 function GridCard({ cat, index }) {
@@ -41,23 +63,13 @@ function GridCard({ cat, index }) {
     >
       <Link to={`/products?category=${categoryValue}`} className="block h-full">
         {/* Background */}
-        {cat.image ? (
-          <img
-            src={cat.image}
-            alt={cat.name}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-        ) : (
-          <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-20 group-hover:opacity-30 transition-opacity duration-500`} />
-        )}
+        <div className="absolute inset-0">
+          <CategoryThumb cat={cat} className="opacity-90 transition-transform duration-700 group-hover:scale-110" />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
         {/* Hover shimmer line */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-
-        {/* Icon */}
-        <div className={`absolute top-5 left-5 w-14 h-14 rounded-2xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-2xl shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}>
-          {cat.icon}
-        </div>
 
         {/* Tag */}
         <div className="absolute top-5 right-5">
@@ -66,19 +78,19 @@ function GridCard({ cat, index }) {
 
         {/* Bottom content */}
         <div className="absolute bottom-0 left-0 right-0 p-5">
-          <h3 className="display-font text-[var(--text-primary)] font-bold text-lg leading-snug group-hover:text-[var(--color-primary)] transition-colors duration-300">
+          <h3 className="display-font text-white font-bold text-lg leading-snug transition-colors duration-300">
             {cat.name}
           </h3>
           <div className="flex items-center justify-between mt-1">
-            <p className="text-[var(--text-muted)] text-xs">{cat.count}+ items</p>
-            <div className="flex items-center gap-1 text-[var(--color-primary)] text-xs font-semibold opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+            <p className="text-white/70 text-xs">{cat.count}+ items</p>
+            <div className="flex items-center gap-1 text-white text-xs font-semibold opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
               Shop <ArrowRight size={11} />
             </div>
           </div>
         </div>
 
         {/* Bottom accent bar */}
-        <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${cat.gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`} />
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-primary)] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
       </Link>
     </motion.div>
   );
@@ -99,9 +111,9 @@ function ListRow({ cat, index }) {
       className="group relative overflow-hidden rounded-2xl cursor-pointer border border-[var(--border)] bg-[var(--bg-card)] hover:border-[var(--color-primary)]/40 transition-colors duration-300"
     >
       <Link to={`/products?category=${categoryValue}`} className="flex items-center gap-5 p-4 h-full">
-        {/* Icon */}
-        <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-2xl shrink-0 shadow-md transition-transform duration-300 group-hover:scale-110`}>
-          {cat.icon}
+        {/* Thumbnail */}
+        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 shadow-md transition-transform duration-300 group-hover:scale-105">
+          <CategoryThumb cat={cat} />
         </div>
 
         {/* Text */}
@@ -128,7 +140,7 @@ function ListRow({ cat, index }) {
         </div>
       </Link>
 
-      <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${cat.gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`} />
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-primary)] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
     </motion.div>
   );
 }
@@ -136,15 +148,6 @@ function ListRow({ cat, index }) {
 /* ─────────────────────────────────────────────
    MAIN PAGE
 ───────────────────────────────────────────── */
-const DEFAULT_GRADIENTS = [
-  "from-blue-500 to-cyan-400",
-  "from-pink-500 to-rose-400",
-  "from-amber-500 to-orange-400",
-  "from-emerald-500 to-teal-400",
-  "from-violet-500 to-purple-400",
-  "from-lime-500 to-green-400",
-];
-
 export default function AllCategoriesPage({ categories: initialCategoriesProp }) {
   const initialCategories = Array.isArray(initialCategoriesProp) ? initialCategoriesProp : [];
   const [categories, setCategories] = useState(initialCategories);
@@ -185,10 +188,8 @@ export default function AllCategoriesPage({ categories: initialCategoriesProp })
   }, []);
 
   const normalizedCategories = useMemo(() => {
-    return categories.map((cat, index) => ({
+    return categories.map((cat) => ({
       ...cat,
-      icon: cat.icon || "🛍️",
-      gradient: cat.gradient || DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length],
       tag: cat.tag || "",
       count: Number(cat.count) || 0,
     }));
