@@ -8,6 +8,7 @@ import {
   MapPin,
   Package,
   PackageCheck,
+  Star,
   Truck,
   XCircle,
 } from "lucide-react";
@@ -176,6 +177,16 @@ export default function OrderDetails() {
   const itemCount = items.reduce((sum, item) => sum + (item?.quantity || 1), 0);
   const timeline = order.trackingTimeline || [];
   const isCancelled = order.status === "Cancelled";
+  const isDelivered = order.status === "Delivered";
+
+  const goToProductReview = (item) => {
+    const productId = item?.product?._id || item?.product;
+    if (!productId) {
+      toast.error("Product not found for this item");
+      return;
+    }
+    navigate(`/products/${productId}?review=1`);
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[var(--bg-main)]">
@@ -361,11 +372,18 @@ export default function OrderDetails() {
                 !order.canConfirmReceipt &&
                 !canReturn &&
                 !returnRequest &&
-                !isCancelled && (
+                !isCancelled &&
+                !isDelivered && (
                   <p className="text-sm text-[var(--text-muted)]">
                     No actions available for this order right now.
                   </p>
                 )}
+
+              {isDelivered && (
+                <p className="w-full text-sm text-[var(--text-muted)]">
+                  Order delivered — you can add a review for each item below.
+                </p>
+              )}
             </div>
 
             {order.canCancel && order.cancelExpiresAt && (
@@ -392,26 +410,45 @@ export default function OrderDetails() {
                 Items
               </h3>
               <div className="space-y-3">
-                {items.map((item, idx) => (
-                  <div key={`${order._id}-${idx}`} className="flex gap-3">
-                    <img
-                      src={item?.product?.images?.[0] || "https://via.placeholder.com/64"}
-                      alt=""
-                      className="h-14 w-14 rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
-                        {item?.product?.name || "Product"}
-                      </p>
-                      <p className="text-xs text-[var(--text-muted)]">
-                        Qty: {item?.quantity || 1}
-                      </p>
-                      <p className="text-sm font-semibold text-[var(--color-primary)]">
-                        {formatMoney(item?.price || 0)}
-                      </p>
+                {items.map((item, idx) => {
+                  const productId = item?.product?._id || item?.product;
+                  return (
+                    <div
+                      key={`${order._id}-${idx}`}
+                      className="rounded-2xl bg-[var(--bg-main)] p-3"
+                    >
+                      <div className="flex gap-3">
+                        <img
+                          src={item?.product?.images?.[0] || "https://via.placeholder.com/64"}
+                          alt=""
+                          className="h-14 w-14 rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+                            {item?.product?.name || "Product"}
+                          </p>
+                          <p className="text-xs text-[var(--text-muted)]">
+                            Qty: {item?.quantity || 1}
+                          </p>
+                          <p className="text-sm font-semibold text-[var(--color-primary)]">
+                            {formatMoney(item?.price || 0)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {isDelivered && productId && (
+                        <button
+                          type="button"
+                          onClick={() => goToProductReview(item)}
+                          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-[var(--color-primary)] transition hover:bg-[var(--bg-hover)]"
+                        >
+                          <Star size={14} />
+                          Add Review
+                        </button>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {order.coupon?.code && (

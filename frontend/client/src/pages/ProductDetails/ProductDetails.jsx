@@ -1,4 +1,4 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import {
@@ -61,6 +61,7 @@ const ZOOM_STEP = 0.5;
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const token = localStorage.getItem("token");
 
   const [product, setProduct] = useState(null);
@@ -79,6 +80,7 @@ export default function ProductDetails() {
   const chatInputRef = useRef(null);
   const zoomAreaRef = useRef(null);
   const panStartRef = useRef(null);
+  const reviewsSectionRef = useRef(null);
 
   const resetZoom = () => {
     setZoom(MIN_ZOOM);
@@ -114,6 +116,18 @@ export default function ProductDetails() {
       .then((data) => setCanReview(Boolean(data?.canReview)))
       .catch(() => setCanReview(false));
   }, [id, token]);
+
+  useEffect(() => {
+    if (!product || searchParams.get("review") !== "1") return;
+
+    const timer = setTimeout(() => {
+      reviewsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const titleInput = reviewsSectionRef.current?.querySelector('input[placeholder="Review title"]');
+      titleInput?.focus?.();
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [product, searchParams]);
 
   useEffect(() => {
     if (!product?.category) return;
@@ -590,7 +604,11 @@ export default function ProductDetails() {
               </p>
             </div>
 
-            <div className="mt-8 border-t border-[var(--border)] pt-6">
+            <div
+              id="reviews"
+              ref={reviewsSectionRef}
+              className="mt-8 scroll-mt-24 border-t border-[var(--border)] pt-6"
+            >
               <h3 className="mb-3 font-semibold">Ratings & Reviews</h3>
 
               <form
