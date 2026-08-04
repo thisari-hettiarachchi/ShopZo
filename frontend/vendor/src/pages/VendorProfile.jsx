@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Phone, MapPin, Edit } from "lucide-react";
+import {
+  Phone,
+  MapPin,
+  Edit,
+  Package,
+  Star,
+  MessageSquare,
+  Users,
+  ShieldCheck,
+  Mail,
+} from "lucide-react";
 import { getVendorProfile } from "../services/vendorService";
 import { useNavigate } from "react-router-dom";
 import { getVendorToken, readVendorSession, saveVendorSession } from "../utils/authStorage";
@@ -14,6 +24,24 @@ const safeParseJson = (value) => {
     return null;
   }
 };
+
+function StatCard({ title, value, icon: Icon, tone }) {
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
+            {title}
+          </p>
+          <p className="mt-2 text-2xl font-black text-[var(--text-primary)]">{value}</p>
+        </div>
+        <div className={`rounded-xl bg-gradient-to-br ${tone} p-2.5 text-white`}>
+          <Icon size={18} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function VendorProfilePage() {
   const navigate = useNavigate();
@@ -75,118 +103,160 @@ export default function VendorProfilePage() {
     return (first + second).toUpperCase();
   }, [profile.storeName]);
 
-  return (
-    <div className="mx-auto max-w-5xl px-4 pb-10 pt-3 md:px-6">
-      <div className="mb-6 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)]/80 px-5 py-5 shadow-[0_18px_44px_-30px_var(--shadow)] backdrop-blur md:px-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] mb-4 text-[var(--text-secondary)]">Vendor Identity</p>
-        <h2 className="text-3xl font-extrabold mb-4 text-[var(--color-primary)]">Store Profile</h2>
-        <p className="text-sm text-[var(--text-secondary)]">View your store details and public appearance.</p>
-      </div>
+  const memberSince = profile.joined
+    ? new Date(profile.joined).toLocaleDateString("en-US", { year: "numeric", month: "long" })
+    : null;
 
-      <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_22px_56px_-34px_var(--shadow)]">
-        {/* Banner area */}
-        <div className="relative h-36 bg-[linear-gradient(125deg,var(--color-primary),var(--color-secondary))]">
-          <div className="absolute right-8 top-6 h-20 w-20 rounded-full bg-white/20 blur-2xl" />
-          <div className="absolute bottom-3 left-20 h-16 w-16 rounded-full bg-white/15 blur-xl" />
+  return (
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_20px_50px_-34px_var(--shadow)] md:p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+            Vendor Identity
+          </p>
+          <h2 className="mt-2 text-3xl font-extrabold text-[var(--color-primary)]">Store Profile</h2>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            View your store details and public appearance.
+          </p>
         </div>
-        
-        {/* Profile Pic & Main Details */}
-        <div className="relative px-6 pb-8 md:px-8">
-          <div className="mb-7 flex flex-col items-start gap-4 sm:-mt-12 sm:flex-row sm:items-end">
-            <div className="h-24 w-24 rounded-full border border-[var(--border)] bg-[var(--bg-card)] p-1.5 shadow-lg">
+
+        <div className="mb-6 flex flex-col gap-5 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_20px_50px_-34px_var(--shadow)] md:flex-row md:items-center md:justify-between md:p-6">
+          <div className="flex items-center gap-4">
+            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] shadow-sm">
               {profile.profileImage ? (
                 <img
                   src={profile.profileImage}
                   alt={profile.storeName || "Vendor"}
-                  className="h-full w-full rounded-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] text-3xl font-bold text-white">
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] text-2xl font-bold text-white">
                   {initials}
                 </div>
               )}
             </div>
-            <div className="pb-2">
-              <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{profile.storeName || "Vendor"}</h1>
-              <p className="text-[var(--text-secondary)]">{profile.email || ""}</p>
-              <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                {profile.joined ? `Member since ${new Date(profile.joined).toLocaleDateString("en-US", { year: "numeric", month: "long" })}` : "Member since -"}
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-extrabold text-[var(--text-primary)]">
+                  {profile.storeName || "Vendor"}
+                </h1>
+                <span
+                  className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-[11px] font-semibold ${
+                    profile.isApproved
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-amber-50 text-amber-700"
+                  }`}
+                >
+                  <ShieldCheck size={12} />
+                  {profile.isApproved ? "Approved" : "Pending Approval"}
+                </span>
+              </div>
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
+                <Mail size={14} />
+                {profile.email || "No email"}
               </p>
-              <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${profile.isApproved ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-                {profile.isApproved ? "Approved" : "Pending Approval"}
-              </span>
+              <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                {memberSince ? `Member since ${memberSince}` : "Member since —"}
+              </p>
             </div>
           </div>
 
-          <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3 text-center">
-              <p className="text-xs text-[var(--text-secondary)]">Products</p>
-              <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{Number(profile.stats?.products || 0)}</p>
-            </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3 text-center">
-              <p className="text-xs text-[var(--text-secondary)]">Rating</p>
-              <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{Number(profile.stats?.rating || 0).toFixed(1)}★</p>
-            </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3 text-center">
-              <p className="text-xs text-[var(--text-secondary)]">Reviews</p>
-              <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{Number(profile.stats?.reviews || 0)}</p>
-            </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3 text-center">
-              <p className="text-xs text-[var(--text-secondary)]">Followers</p>
-              <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{Number(profile.stats?.followers || 0)}</p>
-            </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3 text-center">
-              <p className="text-xs text-[var(--text-secondary)]">Status</p>
-              <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{profile.stats?.status || "Pending"}</p>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/profile/edit")}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90"
+          >
+            <Edit size={18} />
+            Edit Profile
+          </button>
+        </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-2">
-            <div className="space-y-6">
-              <div>
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Contact Information</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3.5">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-muted)]">
-                      <Phone size={18} className="text-[var(--color-primary)]" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-[var(--text-secondary)]">Phone Number</p>
-                      <p className="font-medium">{profile.phone || "Not provided"}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3.5">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-muted)]">
-                      <MapPin size={18} className="text-[var(--color-primary)]" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-[var(--text-secondary)]">Address</p>
-                      <p className="font-medium">{profile.address || "Not provided"}</p>
-                    </div>
-                  </div>
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <StatCard
+            title="Products"
+            value={Number(profile.stats?.products || 0)}
+            icon={Package}
+            tone="from-orange-500 to-amber-400"
+          />
+          <StatCard
+            title="Rating"
+            value={`${Number(profile.stats?.rating || 0).toFixed(1)}★`}
+            icon={Star}
+            tone="from-amber-500 to-yellow-400"
+          />
+          <StatCard
+            title="Reviews"
+            value={Number(profile.stats?.reviews || 0)}
+            icon={MessageSquare}
+            tone="from-sky-500 to-cyan-400"
+          />
+          <StatCard
+            title="Followers"
+            value={Number(profile.stats?.followers || 0)}
+            icon={Users}
+            tone="from-emerald-500 to-teal-400"
+          />
+          <StatCard
+            title="Status"
+            value={profile.stats?.status || "Pending"}
+            icon={ShieldCheck}
+            tone="from-slate-800 to-slate-600"
+          />
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_16px_44px_-32px_var(--shadow)] md:p-6">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
+              Contact Information
+            </h3>
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--bg-muted)]">
+                  <Phone size={18} className="text-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--text-secondary)]">Phone Number</p>
+                  <p className="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">
+                    {profile.phone || "Not provided"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--bg-muted)]">
+                  <MapPin size={18} className="text-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--text-secondary)]">Address</p>
+                  <p className="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">
+                    {profile.address || "Not provided"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--bg-muted)]">
+                  <Mail size={18} className="text-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--text-secondary)]">Email</p>
+                  <p className="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">
+                    {profile.email || "Not provided"}
+                  </p>
                 </div>
               </div>
             </div>
-
-            <div>
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">About the Store</h3>
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-5">
-                <p className="text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed text-sm min-h-[100px]">
-                  {profile.description || "No description provided."}
-                </p>
-              </div>
-            </div>
           </div>
 
-          <div className="mt-10 flex justify-end border-t border-[var(--border)] pt-6">
-            <button
-              onClick={() => navigate("/profile/edit")}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_16px_32px_-20px_var(--shadow)] transition hover:opacity-90"
-            >
-              <Edit size={18} />
-              Edit Profile
-            </button>
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_16px_44px_-32px_var(--shadow)] md:p-6">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
+              About the Store
+            </h3>
+            <div className="mt-4 min-h-[180px] rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-5">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--text-primary)]">
+                {profile.description || "No description provided."}
+              </p>
+            </div>
           </div>
         </div>
       </div>
