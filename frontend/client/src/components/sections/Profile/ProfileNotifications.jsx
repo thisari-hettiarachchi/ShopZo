@@ -42,7 +42,14 @@ export default function ProfileNotifications() {
       }
     };
 
+    // Load notifications immediately
     loadNotifications();
+
+    // Set up polling to refresh notifications every 30 seconds
+    const pollInterval = setInterval(loadNotifications, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollInterval);
   }, [navigate]);
 
   const markOneRead = async (notificationId) => {

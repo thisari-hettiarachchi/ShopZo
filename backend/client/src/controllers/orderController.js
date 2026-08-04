@@ -158,12 +158,13 @@ export const requestReturn = async (req, res) => {
     const daysSinceBaseDate = Math.floor((Date.now() - new Date(baseDate).getTime()) / (1000 * 60 * 60 * 24));
 
     if (daysSinceBaseDate > RETURN_WINDOW_DAYS) {
-      return res.status(400).json({ message: `Return window closed. Returns are allowed within ${RETURN_WINDOW_DAYS} days.` });
+      console.warn(`Return attempt failed: Order ${id} is ${daysSinceBaseDate} days old (max: ${RETURN_WINDOW_DAYS} days). Delivered at: ${baseDate}`);
+      return res.status(400).json({ message: `Return window closed. Returns are allowed within ${RETURN_WINDOW_DAYS} days of delivery.` });
     }
 
     const existing = await ReturnRequest.findOne({ order: order._id, user: req.user._id });
     if (existing) {
-      return res.status(400).json({ message: "Return request already submitted for this order" });
+      return res.status(409).json({ message: "Return request already submitted for this order" });
     }
 
     const request = await ReturnRequest.create({
@@ -182,8 +183,10 @@ export const requestReturn = async (req, res) => {
       metadata: { orderId: order._id, returnRequestId: request._id },
     });
 
+    console.log(`Return request created for order ${id} by user ${req.user._id}: ${reason}`);
     res.status(201).json(request);
   } catch (error) {
+    console.error("Error requesting return:", error);
     res.status(500).json({ message: "Failed to request return" });
   }
 };
@@ -203,6 +206,7 @@ export const cancelOrder = async (req, res) => {
 
     const orderAgeHours = (Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60);
     if (orderAgeHours > CANCEL_WINDOW_HOURS) {
+      console.warn(`Cancel attempt failed: Order ${id} is ${orderAgeHours.toFixed(1)} hours old (max: ${CANCEL_WINDOW_HOURS}h)`);
       return res.status(400).json({ message: `Cancel window closed. Orders can be cancelled within ${CANCEL_WINDOW_HOURS} hours.` });
     }
 
@@ -218,8 +222,10 @@ export const cancelOrder = async (req, res) => {
       metadata: { orderId: order._id },
     });
 
+    console.log(`Order ${id} cancelled by user ${req.user._id}`);
     res.json({ message: "Order cancelled", order });
   } catch (error) {
+    console.error("Error cancelling order:", error);
     res.status(500).json({ message: "Failed to cancel order" });
   }
 };

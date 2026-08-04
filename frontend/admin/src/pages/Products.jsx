@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getProducts } from "../services/productService";
+import { getProducts, deleteProduct } from "../services/productService";
 
 const getProductImage = (product) =>
   product?.images?.[0] ||
@@ -30,6 +30,8 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -47,6 +49,23 @@ export default function ProductsPage() {
     };
     fetchProducts();
   }, []);
+
+  const handleDelete = async (productId) => {
+    try {
+      setDeleting(true);
+      await deleteProduct(productId);
+      setProducts(products.filter((p) => p._id !== productId));
+      setDeleteModal(null);
+      setError("");
+    } catch (requestError) {
+      const message =
+        requestError?.response?.data?.message ||
+        "Failed to delete product";
+      setError(message);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const filtered = products.filter((p) =>
     (p.name || "").toLowerCase().includes(search.toLowerCase())
@@ -179,7 +198,7 @@ export default function ProductsPage() {
                       to={`/products/${product._id}`}
                       className="flex-1 text-center text-xs font-medium py-2 px-3 rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--color-primary)]/40 transition-colors duration-150"
                     >
-                      View Details
+                      View
                     </Link>
                     <Link
                       to={`/products/edit/${product._id}`}
@@ -187,12 +206,53 @@ export default function ProductsPage() {
                     >
                       Edit
                     </Link>
+                    <button
+                      onClick={() => setDeleteModal(product)}
+                      className="flex-1 text-center text-xs font-medium py-2 px-3 rounded-lg border border-red-400/30 text-red-400 hover:bg-red-500/10 active:scale-95 transition-all duration-150"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               </article>
             ))}
           </div>
         </>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-in">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-500/10 border border-red-400/30 mx-auto mb-4">
+              <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-center text-[var(--text-primary)] mb-2">
+              Delete Product
+            </h3>
+            <p className="text-sm text-[var(--text-secondary)] text-center mb-6">
+              Are you sure you want to delete <strong>{deleteModal.name || "this product"}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteModal(null)}
+                disabled={deleting}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-[var(--border)] text-[var(--text-primary)] font-medium hover:bg-[var(--bg-main)] disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteModal._id)}
+                disabled={deleting}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 disabled:opacity-50 active:scale-95 transition-all"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );
