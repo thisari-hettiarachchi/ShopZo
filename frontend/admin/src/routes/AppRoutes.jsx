@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Sidebar from "../components/shared/SideBar";
 import Dashboard from "../pages/Dashboard";
-import PaymentsPage from "../pages/Payments";
+import CommissionPage from "../pages/Commission";
 import AnalyticsPage from "../pages/AnalyticsPage";
 import VendorsPage from "../pages/VendorsPage";
 import CategoriesPage from "../pages/CategoriesPage";
@@ -14,8 +14,9 @@ import AuthPages from "../pages/Auth";
 
 const getActiveFromPath = (pathname) => {
 	switch (pathname) {
+		case "/commission":
 		case "/payments":
-			return "payments";
+			return "commission";
 		case "/vendors":
 			return "vendors";
 		case "/categories":
@@ -53,7 +54,8 @@ function AdminDashboardShell() {
 			<main className="flex-1 overflow-auto ml-64">
 				<Routes>
 					<Route path="/" element={<Dashboard />} />
-					<Route path="/payments" element={<PaymentsPage />} />
+					<Route path="/commission" element={<CommissionPage />} />
+					<Route path="/payments" element={<Navigate to="/commission" replace />} />
 					<Route path="/vendors" element={<VendorsPage />} />
 					<Route path="/categories" element={<CategoriesPage />} />
 					<Route path="/flash-sale" element={<FlashSalePage />} />

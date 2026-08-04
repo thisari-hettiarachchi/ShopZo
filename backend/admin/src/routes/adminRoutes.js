@@ -4,7 +4,6 @@ import {
 	getAdminAnalytics,
 	getAdminCustomers,
 	getAdminOrders,
-	getAdminPayments,
 	refundOrder,
 	getAdminInsights,
 	getAdminReviews,
@@ -18,6 +17,12 @@ import {
 	suspendCustomer,
 	updateAdminOrderStatus,
 } from "../controllers/adminController.js";
+import {
+	getCommissions,
+	markCommissionPaid,
+	markCommissionUnpaid,
+	markVendorCommissionsPaid,
+} from "../controllers/commissionController.js";
 
 const router = express.Router();
 
@@ -25,7 +30,10 @@ router.use(protectAdmin);
 
 router.get("/orders", getAdminOrders);
 router.patch("/orders/:id/status", updateAdminOrderStatus);
-router.get("/payments", getAdminPayments);
+router.get("/commissions", getCommissions);
+router.patch("/commissions/:id/paid", markCommissionPaid);
+router.patch("/commissions/:id/unpaid", markCommissionUnpaid);
+router.patch("/commissions/vendor/:vendorId/paid", markVendorCommissionsPaid);
 router.post("/orders/:id/refund", refundOrder);
 router.get("/customers", getAdminCustomers);
 router.patch("/customers/:id/suspend", suspendCustomer);

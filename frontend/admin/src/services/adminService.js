@@ -15,8 +15,23 @@ export const updateOrderStatus = async (id, status) => {
 	return data;
 };
 
-export const getPayments = async () => {
-	const { data } = await api.get("/api/admin/payments");
+export const getCommissions = async () => {
+	const { data } = await api.get("/api/admin/commissions");
+	return data;
+};
+
+export const markCommissionPaid = async (id, note = "") => {
+	const { data } = await api.patch(`/api/admin/commissions/${id}/paid`, { note });
+	return data;
+};
+
+export const markCommissionUnpaid = async (id) => {
+	const { data } = await api.patch(`/api/admin/commissions/${id}/unpaid`);
+	return data;
+};
+
+export const markVendorCommissionsPaid = async (vendorId, note = "") => {
+	const { data } = await api.patch(`/api/admin/commissions/vendor/${vendorId}/paid`, { note });
 	return data;
 };
 

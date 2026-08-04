@@ -7,7 +7,7 @@ import Review from "../models/Review.js";
 const getStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
 // Platform commission taken from each settled sale before payout.
-const PLATFORM_COMMISSION_RATE = 0.1;
+const PLATFORM_COMMISSION_RATE = 0.02;
 
 const isOrderSettled = (order) =>
   order.paymentStatus === "paid" || (order.paymentMethod !== "stripe" && order.status === "Delivered");
