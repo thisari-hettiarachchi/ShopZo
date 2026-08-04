@@ -23,6 +23,8 @@ const configuredOrigins = (process.env.CORS_ORIGIN || "")
 
 const defaultOrigins = [
 	process.env.ADMIN_FRONTEND_URL || "https://shop-zo-admin.vercel.app",
+	process.env.VENDOR_FRONTEND_URL || "https://shop-zo-vendor.vercel.app",
+	process.env.CLIENT_FRONTEND_URL || "https://shop-zo.vercel.app",
 	"http://localhost:5175",
 	"http://localhost:5173",
 	"http://localhost:5174",

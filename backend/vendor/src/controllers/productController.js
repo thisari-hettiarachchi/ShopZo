@@ -82,7 +82,21 @@ export const addVendorProduct = async (req, res) => {
     if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
     if (!requireApprovedVendor(req, res)) return;
 
-    const { name, price, description, stock, category, images, sizes, rating, oldPrice, discount, isFlashSale } = req.body;
+    const { name, price, description, stock, category, images, sizes, oldPrice, discount, isFlashSale } = req.body;
+
+    if (images !== undefined) {
+      if (!Array.isArray(images) || images.length === 0) {
+        return res.status(400).json({ message: "Please upload at least 1 product image." });
+      }
+      if (images.length > 5) {
+        return res.status(400).json({ message: "You can upload a maximum of 5 product images." });
+      }
+    }
+
+    const normalizedImages =
+      Array.isArray(images) && images.length > 0
+        ? images.slice(0, 5)
+        : ["https://via.placeholder.com/150"];
 
     const newProduct = new Product({
       name,
@@ -90,9 +104,9 @@ export const addVendorProduct = async (req, res) => {
       description,
       stock,
       category: category || "General",
-      images: images && images.length > 0 ? images : ["https://via.placeholder.com/150"],
-      sizes: sizes && sizes.length > 0 ? sizes : ["S", "M", "L"],
-      rating: rating || 0,
+      images: normalizedImages,
+      sizes: Array.isArray(sizes) ? sizes : [],
+      rating: 0,
       oldPrice: oldPrice || null,
       discount: discount || 0,
       isFlashSale: await resolveFlashSaleFlag(isFlashSale),
@@ -119,17 +133,17 @@ export const updateVendorProduct = async (req, res) => {
     const product = await Product.findOne({ _id: id, vendor: vendorId });
     if (!product) return res.status(404).json({ message: "Product not found or unauthorized" });
 
-    const { name, price, description, stock, category, images, sizes, rating, oldPrice, discount, isFlashSale } = req.body;
+    const { name, price, description, stock, category, images, sizes, oldPrice, discount, isFlashSale } = req.body;
 
     // Validate required fields
     if (!images || !Array.isArray(images) || images.length === 0) {
       return res.status(400).json({ message: "Images are required and must be a non-empty array." });
     }
-    if (!sizes || !Array.isArray(sizes) || sizes.length === 0) {
-      return res.status(400).json({ message: "Sizes are required and must be a non-empty array." });
+    if (images.length > 5) {
+      return res.status(400).json({ message: "You can upload a maximum of 5 product images." });
     }
-    if (rating === undefined || rating === null) {
-      return res.status(400).json({ message: "Rating is required." });
+    if (sizes !== undefined && !Array.isArray(sizes)) {
+      return res.status(400).json({ message: "Sizes must be an array." });
     }
     if (!category || typeof category !== "string" || category.trim() === "") {
       return res.status(400).json({ message: "Category is required." });
@@ -140,9 +154,9 @@ export const updateVendorProduct = async (req, res) => {
     product.description = description !== undefined ? description : product.description;
     product.stock = stock !== undefined ? stock : product.stock;
     product.category = category !== undefined ? category : product.category;
-    product.images = images !== undefined ? images : product.images;
-    product.sizes = sizes !== undefined ? sizes : product.sizes;
-    product.rating = rating !== undefined ? rating : product.rating;
+    product.images = images.slice(0, 5);
+    product.sizes = Array.isArray(sizes) ? sizes : product.sizes;
+    // Rating is customer-driven only — vendors cannot set or update it.
     product.oldPrice = oldPrice !== undefined ? oldPrice : product.oldPrice;
     product.discount = discount !== undefined ? discount : product.discount;
     if (isFlashSale !== undefined) {

@@ -9,9 +9,12 @@ import { protectAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Public read so vendor/client apps can load the admin-managed catalog.
+router.get("/", getCategories);
+router.get("/public", getCategories);
+
 router.use(protectAdmin);
 
-router.get("/", getCategories);
 router.post("/", createCategory);
 router.put("/:id", updateCategory);
 router.delete("/:id", deleteCategory);

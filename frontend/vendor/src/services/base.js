@@ -7,11 +7,16 @@ const clientApiBaseUrl =
   import.meta.env.VITE_CLIENT_API_BASE_URL?.trim() ||
   import.meta.env.VITE_CLIENT_API_URL?.trim();
 
+const adminApiBaseUrl =
+  import.meta.env.VITE_ADMIN_API_BASE_URL?.trim() ||
+  import.meta.env.VITE_ADMIN_API_URL?.trim();
+
 const runtimeFallback = (() => {
   if (typeof window === "undefined") {
     return {
       vendor: "https://shop-zo-vendor-backend.vercel.app/api",
       client: "https://shop-zo-client-backend.vercel.app/api",
+      admin: "https://shop-zo-admin-backend.vercel.app/api",
     };
   }
 
@@ -20,8 +25,10 @@ const runtimeFallback = (() => {
   return {
     vendor: isLocalhost ? "http://localhost:5001/api" : "https://shop-zo-vendor-backend.vercel.app/api",
     client: isLocalhost ? "http://localhost:5000/api" : "https://shop-zo-client-backend.vercel.app/api",
+    admin: isLocalhost ? "http://localhost:5002/api" : "https://shop-zo-admin-backend.vercel.app/api",
   };
 })();
 
 export const VENDOR_API_BASE_URL = (vendorApiBaseUrl || runtimeFallback.vendor).replace(/\/+$/, "");
 export const CLIENT_API_BASE_URL = (clientApiBaseUrl || runtimeFallback.client).replace(/\/+$/, "");
+export const ADMIN_API_BASE_URL = (adminApiBaseUrl || runtimeFallback.admin).replace(/\/+$/, "");
