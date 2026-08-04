@@ -11,10 +11,11 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
-import cardRoutes from "./routes/cardRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import checkoutRoutes from "./routes/checkoutRoutes.js";
+import { stripeWebhook } from "./controllers/checkoutController.js";
 
 dotenv.config();
 connectCloudinary();
@@ -47,6 +48,10 @@ app.use(
   })
 );
 
+// Stripe requires the raw, unparsed request body to verify webhook signatures,
+// so this route must be registered before the JSON body parser below.
+app.post("/api/checkout/webhook", express.raw({ type: "application/json" }), stripeWebhook);
+
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
@@ -58,10 +63,10 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/vendors", vendorRoutes);
 app.use("/api/user", userRoutes); 
 app.use("/api/user/addresses", addressRoutes);
-app.use("/api/user/cards", cardRoutes);
 app.use("/api/user", orderRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/user/notifications", notificationRoutes);
+app.use("/api/checkout", checkoutRoutes);
 
 app.get("/", (req, res) => res.send("ShopZo API running 🚀"));
 

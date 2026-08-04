@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, MapPin, User, Tag, Edit, X } from "lucide-react";
+import { toast } from "react-toastify";
+import { ShoppingCart, MapPin, User, Tag, Edit, X, Loader2 } from "lucide-react";
 import { fetchCart } from "../../api/cartApi";
 import { getAddresses, addAddress } from "../../services/addressService";
+import { validateCoupon } from "../../services/checkoutService";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function CheckoutPage() {
@@ -11,6 +13,8 @@ export default function CheckoutPage() {
 
   const [promoCode, setPromoCode] = useState("");
   const [isPromoApplied, setIsPromoApplied] = useState(false);
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [discount, setDiscount] = useState(null);
   const [address, setAddress] = useState(null);
   const [cartItems, setCartItems] = useState([]);
 
@@ -72,7 +76,31 @@ export default function CheckoutPage() {
   );
 
   const deliveryFee = 286;
-  const total = itemsTotal + deliveryFee;
+  const discountAmount = discount?.discountAmount || 0;
+  const total = Math.max(itemsTotal + deliveryFee - discountAmount, 0);
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setIsApplyingPromo(true);
+    try {
+      const result = await validateCoupon(promoCode.trim(), itemsTotal);
+      setDiscount(result);
+      setIsPromoApplied(true);
+      toast.success(`Coupon "${result.code}" applied - Rs. ${result.discountAmount} off`);
+    } catch (err) {
+      setDiscount(null);
+      setIsPromoApplied(false);
+      toast.error(err.response?.data?.message || "Invalid coupon code");
+    } finally {
+      setIsApplyingPromo(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoCode("");
+    setDiscount(null);
+    setIsPromoApplied(false);
+  };
 
   const handleSaveAddress = () => {
     const selected = allAddresses.find(
@@ -84,7 +112,7 @@ export default function CheckoutPage() {
 
   const handleAddNewAddress = async () => {
     if (!newAddress.fullName || !newAddress.phone || !newAddress.region || !newAddress.addressLine) {
-      return alert("Please fill all fields");
+      return toast.error("Please fill all fields");
     }
     try {
       const res = await addAddress({ ...newAddress, isDefaultShipping: true });
@@ -95,8 +123,9 @@ export default function CheckoutPage() {
       
       setSelectedAddressId(added._id || added.id);
       setIsAddingAddress(false);
+      toast.success("Address added");
     } catch (err) {
-      alert("Failed to add address");
+      toast.error("Failed to add address");
     }
   };
 
@@ -209,6 +238,46 @@ export default function CheckoutPage() {
                 ))
               )}
             </div>
+
+            {/* COUPON */}
+            <div className="bg-[var(--bg-card)] p-6 rounded-2xl border-2 border-[var(--border)]">
+              <div className="flex items-center gap-3 mb-4">
+                <Tag className="text-[var(--color-primary)]" />
+                <h2 className="text-xl font-semibold">Have a coupon?</h2>
+              </div>
+
+              {isPromoApplied ? (
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-muted)] border border-[var(--color-primary)]">
+                  <div>
+                    <p className="font-semibold text-[var(--color-primary)]">{discount?.code}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      You saved Rs. {discountAmount}
+                    </p>
+                  </div>
+                  <button onClick={handleRemovePromo} className="text-[var(--text-muted)] hover:text-red-500">
+                    <X size={18} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    placeholder="Enter coupon code"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    className="flex-1 p-3 rounded-lg border-2 border-[var(--border)] bg-[var(--bg-main)] uppercase"
+                  />
+                  <button
+                    onClick={handleApplyPromo}
+                    disabled={isApplyingPromo || !promoCode.trim()}
+                    className="px-5 py-2 rounded-xl font-semibold text-white bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] disabled:opacity-60 flex items-center gap-2"
+                  >
+                    {isApplyingPromo && <Loader2 size={16} className="animate-spin" />}
+                    Apply
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* RIGHT */}
@@ -227,6 +296,13 @@ export default function CheckoutPage() {
               <span>Rs. {deliveryFee}</span>
             </div>
 
+            {discountAmount > 0 && (
+              <div className="flex justify-between mb-2 text-green-600">
+                <span>Coupon discount</span>
+                <span>- Rs. {discountAmount}</span>
+              </div>
+            )}
+
             <div className="flex justify-between text-lg font-bold border-t pt-3">
               <span>Total</span>
               <span className="text-[var(--color-primary)]">
@@ -237,12 +313,24 @@ export default function CheckoutPage() {
             <button 
               onClick={() => {
                 if (!address) {
-                  alert("Please select or add a shipping & billing address before proceeding.");
+                  toast.error("Please select or add a shipping & billing address before proceeding.");
                   setShowAddressPopup(true);
                   if (allAddresses.length === 0) setIsAddingAddress(true);
                   return;
                 }
-                navigate(`/proceedtopay`);
+                if (cartItems.length === 0) {
+                  toast.error("Your cart is empty.");
+                  return;
+                }
+                navigate("/proceedtopay", {
+                  state: {
+                    cartItems,
+                    address,
+                    deliveryFee,
+                    couponCode: isPromoApplied ? discount?.code : null,
+                    discountAmount,
+                  },
+                });
               }}
               className="w-full mt-6 flex items-center justify-center gap-2 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90">
               Proceed to Pay
