@@ -6,8 +6,6 @@ import AddProductPage from "../pages/AddProduct";
 import EditProductPage from "../pages/EditProduct";
 import ProductDetailsPage from "../pages/ProductDetails";
 import OrdersPage from "../pages/Orders";
-import CustomersPage from "../pages/CustomersPage";
-import AnalyticsPage from "../pages/AnalyticsPage";
 import EarningsPage from "../pages/EarningsPage";
 import ReviewsPage from "../pages/ReviewsPage";
 import VendorProfilePage from "../pages/VendorProfile";
@@ -25,12 +23,10 @@ const getActiveFromPath = (pathname) => {
   switch (pathname) {
     case "/orders":
       return "orders";
-    case "/customers":
-      return "customers";
-    case "/analytics":
-      return "analytics";
+    case "/finance":
     case "/earnings":
-      return "earnings";
+    case "/analytics":
+      return "finance";
     case "/reviews":
       return "reviews";
     case "/coupons":
@@ -70,9 +66,9 @@ function VendorDashboardShell() {
           <Route path="/products/edit/:id" element={<EditProductPage />} />
           <Route path="/products/:id" element={<ProductDetailsPage />} />
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/customers" element={<CustomersPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/earnings" element={<EarningsPage />} />
+          <Route path="/finance" element={<EarningsPage />} />
+          <Route path="/earnings" element={<Navigate to="/finance" replace />} />
+          <Route path="/analytics" element={<Navigate to="/finance" replace />} />
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/coupons" element={<CouponsPage />} />
           <Route path="/promotions" element={<PromotionsPage />} />

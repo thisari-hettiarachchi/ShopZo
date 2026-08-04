@@ -76,7 +76,7 @@ export default function Sidebar({ active }) {
       <nav className="space-y-2 flex-1">
         {[
           { id: "overview", label: "Overview", icon: BarChart3, path: "/" },
-          { id: "payments", label: "Payments", icon: Wallet, path: "/payments" },
+          { id: "commission", label: "Commission", icon: Wallet, path: "/commission" },
           { id: "vendors", label: "Vendors", icon: Package, path: "/vendors" },
           { id: "categories", label: "Categories", icon: Tag, path: "/categories" },
           { id: "flash-sale", label: "Flash Sale", icon: Zap, path: "/flash-sale" },

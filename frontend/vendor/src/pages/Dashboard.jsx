@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   TrendingUp,
@@ -11,6 +12,9 @@ import {
   TicketPercent,
   Bell,
   Send,
+  BadgePercent,
+  Wallet,
+  ArrowRight,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -24,17 +28,19 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { getDashboardAnalytics } from "../services/analyticsService";
+import { getDashboardAnalytics, getVendorEarnings } from "../services/analyticsService";
 import { getLowStockAlerts, getVendorNotifications, sendApprovalRequest } from "../services/featureService";
 import { getVendorProfile } from "../services/vendorService";
 import { readVendorSession, saveVendorSession } from "../utils/authStorage";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lowStockAlerts, setLowStockAlerts] = useState([]);
   const [profile, setProfile] = useState(() => readVendorSession());
   const [notifications, setNotifications] = useState([]);
+  const [earnings, setEarnings] = useState(null);
   const [requesting, setRequesting] = useState(false);
 
   useEffect(() => {
@@ -79,8 +85,18 @@ export default function Dashboard() {
       }
     };
 
+    const loadEarnings = async () => {
+      try {
+        const res = await getVendorEarnings();
+        if (!cancelled) setEarnings(res.data || null);
+      } catch {
+        if (!cancelled) setEarnings(null);
+      }
+    };
+
     loadProfile();
     loadNotifications();
+    loadEarnings();
 
     return () => {
       cancelled = true;
@@ -117,6 +133,14 @@ export default function Dashboard() {
       setRequesting(false);
     }
   };
+
+  const commissionSummary = earnings?.summary || {};
+  const previewNotifications = useMemo(() => {
+    const unread = notifications.filter((item) => !item.isRead);
+    const source = unread.length > 0 ? unread : notifications;
+    return source.slice(0, 3);
+  }, [notifications]);
+  const unreadCount = notifications.filter((item) => !item.isRead).length;
 
   if (loading || !data) {
     return (
@@ -374,34 +398,116 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-8 shadow-lg">
-          <div className="mb-5 flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-semibold">Vendor notifications</h3>
-              <p className="text-sm text-[var(--text-secondary)]">Approval, rejection, suspension, and verification updates.</p>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Notifications preview */}
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-lg md:p-8">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-semibold">Notifications</h3>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {unreadCount > 0 ? `${unreadCount} unread` : "Latest updates"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/notifications")}
+                className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:underline"
+              >
+                View all <ArrowRight size={13} />
+              </button>
             </div>
-            <Bell className="text-[var(--text-secondary)]" size={18} />
+
+            {previewNotifications.length === 0 ? (
+              <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-5">
+                <Bell className="text-[var(--text-secondary)]" size={18} />
+                <p className="text-sm text-[var(--text-secondary)]">No notifications yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {previewNotifications.map((item) => (
+                  <div
+                    key={item._id}
+                    className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-[var(--text-primary)]">{item.title}</p>
+                        <p className="mt-1 line-clamp-2 text-sm text-[var(--text-secondary)]">
+                          {item.message}
+                        </p>
+                      </div>
+                      {!item.isRead && (
+                        <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-700">
+                          New
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {notifications.length === 0 ? (
-            <p className="text-sm text-[var(--text-secondary)]">No notifications yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {notifications.slice(0, 5).map((item) => (
-                <div key={item._id} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-[var(--text-primary)]">{item.title}</p>
-                      <p className="mt-1 text-sm text-[var(--text-secondary)]">{item.message}</p>
-                    </div>
-                    <span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${item.isRead ? "bg-[var(--bg-muted)] text-[var(--text-secondary)]" : "bg-emerald-100 text-emerald-700"}`}>
-                      {item.type}
-                    </span>
-                  </div>
-                </div>
-              ))}
+          {/* Commission summary */}
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-lg md:p-8">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-semibold">Platform Commission</h3>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {Math.round((commissionSummary.commissionRate || 0.02) * 100)}% on settled sales
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/finance")}
+                className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:underline"
+              >
+                Finance <ArrowRight size={13} />
+              </button>
             </div>
-          )}
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
+                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[var(--color-primary)]">
+                  <BadgePercent size={18} />
+                </div>
+                <p className="text-xs text-[var(--text-secondary)]">Commission owed</p>
+                <p className="mt-1 text-xl font-black text-[var(--text-primary)]">
+                  Rs. {Number(commissionSummary.commission || 0).toLocaleString()}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
+                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                  <Wallet size={18} />
+                </div>
+                <p className="text-xs text-[var(--text-secondary)]">Net earnings</p>
+                <p className="mt-1 text-xl font-black text-[var(--text-primary)]">
+                  Rs. {Number(commissionSummary.netEarnings || 0).toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3">
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="text-[var(--text-secondary)]">Gross settled sales</span>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Rs. {Number(commissionSummary.grossSettled || 0).toLocaleString()}
+                </span>
+              </div>
+              <div className="mt-2 flex items-center justify-between gap-3 text-sm">
+                <span className="text-[var(--text-secondary)]">Settled orders</span>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  {commissionSummary.settledOrderCount || 0}
+                </span>
+              </div>
+              <div className="mt-2 flex items-center justify-between gap-3 text-sm">
+                <span className="text-[var(--text-secondary)]">Pending settlement</span>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Rs. {Number(commissionSummary.pendingAmount || 0).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
