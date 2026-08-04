@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { Mail, Lock, User, Eye, EyeOff, Store, ArrowRight, Check } from 'lucide-react';
 import { registerUser, loginUser } from "../../services/authService";
 
@@ -37,18 +38,18 @@ export default function AuthPages() {
         console.log(res.data);
 
         if (res.data?.user?.role === 'vendor') {
-          alert('Vendor accounts can’t sign in here. Please use the vendor portal.');
+          toast.error('Vendor accounts can’t sign in here. Please use the vendor portal.');
           return;
         }
 
         localStorage.setItem("token", res.data.token);
-        alert("Login successful");
+        toast.success("Login successful");
 
         navigate("/"); 
 
       } else {
         if (formData.password !== formData.confirmPassword) {
-          alert("Passwords do not match");
+          toast.error("Passwords do not match");
           return;
         }
 
@@ -56,15 +57,14 @@ export default function AuthPages() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          accountType: 'customer'
         });
 
         console.log(res.data);
-        alert("Account created successfully");
+        toast.success("Account created successfully");
         setIsLogin(true);
       }
     } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 
