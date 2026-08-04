@@ -9,6 +9,7 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
+import bannerRoutes from "./routes/bannerRoutes.js";
 
 dotenv.config();
 
@@ -66,6 +67,7 @@ app.use("/api/admin/dashboard", dashboardRoutes);
 app.use("/api/admin/products", productRoutes);
 app.use("/api/admin/categories", categoryRoutes);
 app.use("/api/admin/settings", settingsRoutes);
+app.use("/api/admin/banners", bannerRoutes);
 
 const startServer = async () => {
 	try {

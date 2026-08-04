@@ -115,6 +115,26 @@ export const getFlashSaleProducts = async () => {
 	return data;
 };
 
+export const getBanners = async (status) => {
+	const { data } = await api.get("/api/admin/banners", { params: status ? { status } : {} });
+	return data;
+};
+
+export const updateBannerStatus = async (id, payload) => {
+	const { data } = await api.patch(`/api/admin/banners/${id}/status`, payload);
+	return data;
+};
+
+export const updateBannerActive = async (id, isActive) => {
+	const { data } = await api.patch(`/api/admin/banners/${id}/active`, { isActive });
+	return data;
+};
+
+export const deleteBanner = async (id) => {
+	const { data } = await api.delete(`/api/admin/banners/${id}`);
+	return data;
+};
+
 export const getAdminProfile = async () => {
 	const { data } = await api.get("/api/admin/auth/me");
 	return data;

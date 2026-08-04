@@ -13,6 +13,7 @@ import ReviewsPage from "../pages/ReviewsPage";
 import VendorsPage from "../pages/VendorsPage";
 import CategoriesPage from "../pages/CategoriesPage";
 import FlashSalePage from "../pages/FlashSalePage";
+import PromotionsPage from "../pages/PromotionsPage";
 import AdminProfilePage from "../pages/AdminProfile";
 import EditProfilePage from "../pages/EditProfile";
 import AuthPages from "../pages/Auth";
@@ -33,6 +34,8 @@ const getActiveFromPath = (pathname) => {
 				return "categories";
 			case "/flash-sale":
 				return "flash-sale";
+			case "/promotions":
+				return "promotions";
 		case "/analytics":
 			return "analytics";
 		case "/reviews":
@@ -72,6 +75,7 @@ function AdminDashboardShell() {
 					<Route path="/vendors" element={<VendorsPage />} />
 					<Route path="/categories" element={<CategoriesPage />} />
 					<Route path="/flash-sale" element={<FlashSalePage />} />
+					<Route path="/promotions" element={<PromotionsPage />} />
 					<Route path="/analytics" element={<AnalyticsPage />} />
 					<Route path="/reviews" element={<ReviewsPage />} />
 					<Route path="/profile" element={<AdminProfilePage />} />

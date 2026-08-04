@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   Wallet,
+  Megaphone,
 } from "lucide-react";
 import Assets from '../../assets/assets'
 import { clearVendorSession, readVendorSession } from "../../utils/authStorage";
@@ -73,6 +74,7 @@ export default function Sidebar({ active }) {
             { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/analytics" },
             { id: "earnings", label: "Earnings", icon: Wallet, path: "/earnings" },
             { id: "coupons", label: "Coupons", icon: TicketPercent, path: "/coupons" },
+            { id: "promotions", label: "Promotions", icon: Megaphone, path: "/promotions" },
             { id: "chat", label: "Chat", icon: MessageCircle, path: "/chat" },
             { id: "reviews", label: "Reviews", icon: Star, path: "/reviews" },
             { id: "profile", label: "Profile", icon: Settings, path: "/profile" },

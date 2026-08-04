@@ -35,6 +35,7 @@ export default function Home() {
   const [flashSaleProducts, setFlashSaleProducts] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [justForYou, setJustForYou] = useState([]);
+  const [promoBanners, setPromoBanners] = useState([]);
 
   useEffect(() => {
     axios.get(`${API_BASE_URL}/categories`).then((response) => setCategories(response.data)).catch(console.error);
@@ -52,13 +53,17 @@ export default function Home() {
     axios.get(`${API_BASE_URL}/products`).then((response) => setJustForYou(response.data)).catch(console.error);
   }, []);
 
+  useEffect(() => {
+    axios.get(`${API_BASE_URL}/banners`).then((response) => setPromoBanners(response.data)).catch(console.error);
+  }, []);
+
   return (
     <div className="shopzo-root bg-[var(--bg-main)]">
       <style>{FONT_STYLE}</style>
       <HeroSection />
       <CategoriesSection categories={categories} />
       <FlashSaleSection products={flashSaleProducts} />
-      <PromoSection />
+      <PromoSection banners={promoBanners} />
       <FeaturedVendorsSection vendors={vendors} />
       <JustForYouSection products={justForYou} />
     </div>
