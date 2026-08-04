@@ -64,7 +64,7 @@ export default function AdminProfilePage() {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const { data } = await api.get("/api/admin/auth/me");
+        const { data } = await api.get("/api/auth/me");
         setAdmin(data);
       } catch (requestError) {
         try {

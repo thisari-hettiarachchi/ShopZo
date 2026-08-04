@@ -35,7 +35,7 @@ export default function AdminAuthPage() {
     setLoading(true);
 
     try {
-      const { data } = await api.post("/api/admin/auth/login", {
+      const { data } = await api.post("/api/auth/login", {
         email: formData.email,
         password: formData.password,
       });
