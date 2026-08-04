@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { addToCartApi } from "../../../api/cartApi";
 import { addToWishlistApi, removeFromWishlistApi } from "../../../api/wishlistApi";
+import { filterBestSellers } from "../../../utils/productHelpers";
 
 function BestSellerCard({ product, index }) {
   const navigate = useNavigate();
@@ -57,26 +58,22 @@ function BestSellerCard({ product, index }) {
       onClick={() => navigate(`/products/${product._id}`)}
       className="group relative flex cursor-pointer overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_16px_40px_-28px_var(--shadow)] transition hover:-translate-y-1 hover:border-[var(--color-primary)]/30 hover:shadow-[0_24px_48px_-24px_var(--shadow)]"
     >
-      <span className="absolute left-3 top-3 z-10 rounded-lg bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
-        Bestseller
-      </span>
-
       <button
         type="button"
         onClick={handleWishlist}
-        className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-elevated)]/95 backdrop-blur-sm transition hover:scale-105"
+        className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-elevated)]/90 text-[var(--color-primary)] backdrop-blur-sm transition hover:scale-105"
       >
         <Heart
           size={15}
-          className={wishlisted ? "fill-[var(--color-primary)] text-[var(--color-primary)]" : "text-[var(--color-primary)]"}
+          className={wishlisted ? "fill-[var(--color-primary)]" : ""}
         />
       </button>
 
-      <div className="relative flex w-[42%] shrink-0 items-center justify-center bg-[linear-gradient(150deg,var(--bg-muted),var(--bg-card))] p-4 sm:w-[38%]">
+      <div className="relative w-[42%] shrink-0 self-stretch overflow-hidden bg-[var(--bg-muted)] sm:w-[38%]">
         <img
           src={product.images?.[0]}
           alt={product.name}
-          className="h-36 w-full object-contain transition duration-500 group-hover:scale-105 sm:h-40"
+          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
       </div>
 
@@ -113,42 +110,27 @@ function BestSellerCard({ product, index }) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            className="flex-1 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-bold text-white shadow-[0_12px_24px_-14px_var(--shadow)] transition hover:opacity-90"
-          >
-            Quick Add
-          </button>
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            aria-label="Add to cart"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-main)] text-[var(--text-primary)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-          >
-            <ShoppingCart size={17} />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-bold text-white shadow-[0_12px_24px_-14px_var(--shadow)] transition hover:opacity-90"
+        >
+          <ShoppingCart size={16} />
+          Add to Cart
+        </button>
       </div>
     </motion.div>
   );
 }
 
 export default function BestSellersSection({ products }) {
-  const items = [...(products || [])]
-    .sort((a, b) => {
-      const scoreA = Number(a.rating || 0) * 10 + Number(a.ratingCount || 0);
-      const scoreB = Number(b.rating || 0) * 10 + Number(b.ratingCount || 0);
-      return scoreB - scoreA;
-    })
-    .slice(0, 3);
+  const items = filterBestSellers(products).slice(0, 3);
 
   if (items.length === 0) return null;
 
   return (
-    <section className="py-16 px-4 bg-[var(--bg-card)]">
-      <div className="max-w-7xl mx-auto">
+    <section className="bg-[var(--bg-card)] px-4 py-16">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-14 flex items-end justify-between gap-4">
           <div className="relative">
             <span className="section-eyebrow relative mb-3 block">Top picks</span>
@@ -157,7 +139,7 @@ export default function BestSellersSection({ products }) {
             </h2>
           </div>
           <Link
-            to="/products"
+            to="/products?bestsellers=1"
             className="hidden items-center gap-2 rounded-full border border-[var(--color-primary)] px-5 py-2.5 text-sm font-bold text-[var(--color-primary)] transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white md:inline-flex"
           >
             View All Best Sellers <ArrowRight size={13} />

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ProductGrid from "../../components/sections/product/ProductGrid";
 import { fetchProducts } from "../../api/productApi";
-import { filterNewArrivals } from "../../utils/productHelpers";
+import { filterBestSellers, filterNewArrivals } from "../../utils/productHelpers";
 
 export default function Products() {
   const [searchParams] = useSearchParams();
@@ -27,6 +27,10 @@ export default function Products() {
     searchParams.get("new") === "1" ||
     searchParams.get("new") === "true" ||
     searchParams.get("filter") === "new";
+  const bestSellersOnly =
+    searchParams.get("bestsellers") === "1" ||
+    searchParams.get("bestsellers") === "true" ||
+    searchParams.get("filter") === "bestsellers";
 
   useEffect(() => {
     const params = {
@@ -90,9 +94,26 @@ export default function Products() {
   };
 
   const filteredProducts = useMemo(() => {
-    if (!newArrivalsOnly) return products;
-    return filterNewArrivals(products);
-  }, [products, newArrivalsOnly]);
+    if (newArrivalsOnly) return filterNewArrivals(products);
+    if (bestSellersOnly) return filterBestSellers(products);
+    return products;
+  }, [products, newArrivalsOnly, bestSellersOnly]);
+
+  const pageTitle = newArrivalsOnly
+    ? "New Arrivals"
+    : bestSellersOnly
+      ? "Best Sellers"
+      : "Explore Products";
+  const pageEyebrow = newArrivalsOnly
+    ? "Fresh Drops"
+    : bestSellersOnly
+      ? "Top Picks"
+      : "Marketplace Catalog";
+  const pageSubtitle = newArrivalsOnly
+    ? "Products added in the last 5 days."
+    : bestSellersOnly
+      ? "Top-rated and most-reviewed products."
+      : "Filter by brand, location, rating, and budget to find your perfect match.";
     
   return (
     <div className="min-h-screen bg-[var(--bg-main)] mt-10 px-3 pb-10  md:px-4">
@@ -103,18 +124,16 @@ export default function Products() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
-                {newArrivalsOnly ? "Fresh Drops" : "Marketplace Catalog"}
+                {pageEyebrow}
               </p>
               <h1
                 className="mt-1 text-2xl font-extrabold text-[var(--text-primary)] md:text-3xl"
                 style={{ fontFamily: "'Sora', sans-serif", letterSpacing: "-0.02em" }}
               >
-                {newArrivalsOnly ? "New Arrivals" : "Explore Products"}
+                {pageTitle}
               </h1>
               <p className="mt-1 text-xs text-[var(--text-secondary)] md:text-sm">
-                {newArrivalsOnly
-                  ? "Products added in the last 5 days."
-                  : "Filter by brand, location, rating, and budget to find your perfect match."}
+                {pageSubtitle}
               </p>
               {searchText && (
                 <p className="mt-1 text-xs text-[var(--color-primary)]">
