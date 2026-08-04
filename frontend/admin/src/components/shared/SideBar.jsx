@@ -5,10 +5,7 @@ import {
   Sun,
   BarChart3,
   Package,
-  ShoppingBag,
-  Users,
   TrendingUp,
-  Star,
   Settings,
   LogOut,
   Wallet,
@@ -79,16 +76,12 @@ export default function Sidebar({ active }) {
       <nav className="space-y-2 flex-1">
         {[
           { id: "overview", label: "Overview", icon: BarChart3, path: "/" },
-          { id: "products", label: "Products", icon: Package, path: "/products" },
-          { id: "orders", label: "Orders", icon: ShoppingBag, path: "/orders" },
           { id: "payments", label: "Payments", icon: Wallet, path: "/payments" },
-          { id: "customers", label: "Customers", icon: Users, path: "/customers" },
           { id: "vendors", label: "Vendors", icon: Package, path: "/vendors" },
           { id: "categories", label: "Categories", icon: Tag, path: "/categories" },
           { id: "flash-sale", label: "Flash Sale", icon: Zap, path: "/flash-sale" },
           { id: "promotions", label: "Promotions", icon: Megaphone, path: "/promotions" },
           { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/analytics" },
-          { id: "reviews", label: "Reviews", icon: Star, path: "/reviews" },
           { id: "profile", label: "Profile", icon: Settings, path: "/profile" },
         ].map((item) => (
           <button

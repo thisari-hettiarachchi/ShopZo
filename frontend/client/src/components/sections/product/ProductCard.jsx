@@ -54,30 +54,30 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
   return (
     <div
       onClick={() => navigate(`/products/${product._id}`)}
-      className="group relative flex flex-col cursor-pointer overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--bg-card)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_-16px_rgba(249,115,22,0.18)]"
+      className="group relative flex h-full flex-col cursor-pointer overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_12px_32px_-24px_var(--shadow)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[var(--color-primary)]/30 hover:shadow-[0_24px_48px_-20px_var(--shadow)]"
     >
       {/* Image area */}
-      <div className="relative flex-shrink-0 overflow-hidden bg-[linear-gradient(150deg,var(--bg-muted),var(--bg-card))] p-5 h-[160px] flex items-center justify-center">
+      <div className="relative flex h-[168px] flex-shrink-0 items-center justify-center overflow-hidden bg-[linear-gradient(150deg,var(--bg-muted),var(--bg-card))] p-5">
         {product.oldPrice && (
-          <span className="absolute left-3 top-3 z-10 rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold text-white">
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-[var(--text-primary)] px-2.5 py-1 text-[10px] font-bold text-[var(--bg-main)]">
             Save Rs. {Math.max(product.oldPrice - product.price, 0)}
           </span>
         )}
         <img
           src={product.images?.[0]}
           alt={product.name}
-          className="h-full w-full object-contain transition-transform duration-400 group-hover:scale-110"
+          className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110"
         />
         <button
           onClick={handleWishlistClick}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-elevated)] transition hover:scale-110 hover:border-[var(--color-primary)]"
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-elevated)]/95 backdrop-blur-sm transition hover:scale-110 hover:border-[var(--color-primary)]"
         >
-          <Heart className={`h-[15px] w-[15px] ${isWishlisted ? "fill-red-500 text-red-500" : "text-[var(--color-primary)]"}`} />
+          <Heart className={`h-[15px] w-[15px] ${isWishlisted ? "fill-[var(--color-primary)] text-[var(--color-primary)]" : "text-[var(--color-primary)]"}`} />
         </button>
       </div>
 
       {/* Body — flex:1 so it stretches, pushing button to bottom */}
-      <div className="flex flex-1 flex-col px-4 pt-3 pb-0">
+      <div className="flex flex-1 flex-col px-4 pt-3.5 pb-0">
 
         <h3 className="mb-2 truncate text-[13px] font-bold text-[var(--text-primary)]"
             style={{ fontFamily: "'Sora', sans-serif" }}>
@@ -86,7 +86,7 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
 
         <div className="mb-2.5 flex items-center gap-0.5">
           {[...Array(5)].map((_, i) => (
-            <Star key={i} className={`h-3 w-3 ${i < Math.round(product.rating) ? "fill-[var(--color-primary)] text-[var(--color-primary)]" : "text-slate-200"}`} />
+            <Star key={i} className={`h-3 w-3 ${i < Math.round(product.rating) ? "fill-[var(--color-primary)] text-[var(--color-primary)]" : "text-[var(--border)]"}`} />
           ))}
           <span className="ml-1 text-[11px] text-[var(--text-muted)]">({product.ratingCount ?? 0})</span>
         </div>
@@ -99,7 +99,7 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
               Rs. {product.price}
             </span>
             {discount && (
-              <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
+              <span className="rounded-full bg-[var(--bg-muted)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-primary)]">
                 -{discount}%
               </span>
             )}
@@ -125,10 +125,10 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
       <div className="p-4 pt-3">
         <button
           onClick={handleAddToCart}
-          className="flex h-[38px] w-full items-center justify-center gap-1.5 rounded-xl text-[13px] font-bold text-white transition duration-200 hover:opacity-90 active:scale-[0.98]"
+          className="flex h-[38px] w-full items-center justify-center gap-1.5 rounded-2xl text-[13px] font-bold text-white transition duration-200 hover:opacity-90 active:scale-[0.98]"
           style={{
             background: "linear-gradient(90deg, var(--color-primary), var(--color-secondary))",
-            boxShadow: "0 4px 14px rgba(249,115,22,0.25)",
+            boxShadow: "0 8px 20px -10px var(--shadow)",
           }}
         >
           <ShoppingCart className="h-[15px] w-[15px]" />

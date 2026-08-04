@@ -1,6 +1,9 @@
+import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProductCard from "../product/ProductCard";
+
+const stagger = (index, base = 0.05) => ({ delay: index * base });
 
 export default function JustForYouSection({ products }) {
   return (
@@ -19,8 +22,17 @@ export default function JustForYouSection({ products }) {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
+          {products.map((product, index) => (
+            <motion.div
+              key={product._id || index}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ ...stagger(index, 0.05), duration: 0.4 }}
+              className="h-full"
+            >
+              <ProductCard product={product} />
+            </motion.div>
           ))}
         </div>
 
