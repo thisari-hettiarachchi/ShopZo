@@ -71,3 +71,21 @@ export const removeWishlistItem = async (req, res) => {
     res.status(500).json({ message: "Failed to remove from wishlist" });
   }
 };
+
+// CLEAR wishlist
+export const clearWishlist = async (req, res) => {
+  try {
+    const wishlist = await Wishlist.findOne({ user: req.user._id });
+    if (!wishlist) {
+      return res.json({ items: [] });
+    }
+
+    wishlist.items = [];
+    await wishlist.save();
+
+    res.json(wishlist);
+  } catch (error) {
+    console.error("Error clearing wishlist:", error);
+    res.status(500).json({ message: "Failed to clear wishlist" });
+  }
+};

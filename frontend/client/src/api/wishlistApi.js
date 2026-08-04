@@ -27,3 +27,10 @@ export const removeFromWishlistApi = async (productId, token) => {
   });
   return res.data;
 };
+
+export const clearWishlistApi = async (token) => {
+  const res = await axios.delete(`${API_URL}/clear`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
