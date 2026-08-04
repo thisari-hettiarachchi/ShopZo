@@ -7,19 +7,13 @@ export default function Products() {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [filtersOpen, setFiltersOpen] = useState({
-    brand: false,
-    service: false,
     shippedFrom: false,
     price: false,
     rating: false,
-    warranty: false,
-    delivery: false,
-    color: false,
   });
 
   // ✅ FILTER STATE
   const [filters, setFilters] = useState({
-    brand: [],
     shippedFrom: [],
     rating: null,
     price: { min: "", max: "" },
@@ -84,7 +78,6 @@ export default function Products() {
 
   const clearAllFilters = () => {
     setFilters({
-      brand: [],
       shippedFrom: [],
       rating: null,
       price: { min: "", max: "" },
@@ -152,32 +145,6 @@ export default function Products() {
               <option value="priceDesc">Price: High to Low</option>
               <option value="rating">Top Rated</option>
             </select>
-
-            {/* Brand */}
-            <div className="mb-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">
-              <div onClick={() => toggleFilter("brand")} className="flex cursor-pointer items-center justify-between px-3 py-2.5">
-                <span className="text-[13px] font-bold text-[var(--text-primary)]">Brand</span>
-                <span className="flex h-5 w-5 items-center justify-center rounded-md text-[13px] font-bold text-[var(--color-primary)]"
-                  style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)' }}>
-                  {filtersOpen.brand ? "−" : "+"}
-                </span>
-              </div>
-              {filtersOpen.brand && (
-                <div className="border-t border-[var(--border)] px-3 py-2.5 flex flex-col gap-2">
-                  {["Brand A", "Brand B", "Brand C", "Brand D"].map((b) => (
-                    <label key={b} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={filters.brand.includes(b)}
-                        onChange={() => handleCheckbox("brand", b)}
-                        className="h-3.5 w-3.5 accent-[var(--color-primary)]"
-                      />
-                      <span className="text-xs text-[var(--text-secondary)]">{b}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
 
             {/* Shipped From */}
             <div className="mb-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-main)]">
@@ -264,7 +231,7 @@ export default function Products() {
 
           {/* Main */}
           <main className="flex-1 flex flex-col gap-3">
-            {(filters.brand.length || filters.shippedFrom.length || filters.rating || filters.price.min || filters.price.max) && (
+            {(filters.shippedFrom.length || filters.rating || filters.price.min || filters.price.max) && (
               <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-3 flex flex-wrap items-center gap-2">
                 {/* unchanged */}
               </div>

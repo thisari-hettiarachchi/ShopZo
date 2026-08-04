@@ -4,7 +4,6 @@ import bcrypt from "bcryptjs";
 // GET /api/user/profile
 export const getUserProfile = async (req, res) => {
   try {
-    console.log("req.user:", req.user); // debug
     const user = await User.findById(req.user._id).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
@@ -26,7 +25,8 @@ export const updateUserProfile = async (req, res) => {
     if (password) user.password = await bcrypt.hash(password, 10);
 
     const updatedUser = await user.save();
-    res.json({ message: "Profile updated successfully", user: updatedUser });
+    const { password: _password, ...safeUser } = updatedUser.toObject();
+    res.json({ message: "Profile updated successfully", user: safeUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });

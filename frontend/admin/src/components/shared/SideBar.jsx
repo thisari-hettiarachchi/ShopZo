@@ -11,6 +11,7 @@ import {
   Star,
   Settings,
   LogOut,
+  Wallet,
 } from "lucide-react";
 import Assets from '../../assets/assets'
 
@@ -77,6 +78,7 @@ export default function Sidebar({ active }) {
           { id: "overview", label: "Overview", icon: BarChart3, path: "/" },
           { id: "products", label: "Products", icon: Package, path: "/products" },
           { id: "orders", label: "Orders", icon: ShoppingBag, path: "/orders" },
+          { id: "payments", label: "Payments", icon: Wallet, path: "/payments" },
           { id: "customers", label: "Customers", icon: Users, path: "/customers" },
           { id: "vendors", label: "Vendors", icon: Package, path: "/vendors" },
           { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/analytics" },

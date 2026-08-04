@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getProducts, updateProduct } from "../services/productService";
+import { getProductById, updateProduct } from "../services/productService";
 import { Save, ArrowLeft } from "lucide-react";
 import { getCategories } from "../services/categoryService";
 
@@ -47,8 +47,8 @@ export default function EditProductPage() {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await getProducts();
-        const product = res.data.find((p) => p._id === id);
+        const res = await getProductById(id);
+        const product = res.data;
         if (!product) {
           setError("Product not found");
           return;
@@ -64,7 +64,7 @@ export default function EditProductPage() {
         });
         setImages(product.images && product.images.length > 0 ? product.images : [""]);
       } catch (err) {
-        setError("Failed to fetch product");
+        setError(err?.response?.data?.message || "Failed to fetch product");
       } finally {
         setLoading(false);
       }

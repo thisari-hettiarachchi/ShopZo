@@ -2,6 +2,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
+	ResponsiveContainer,
+	AreaChart,
+	Area,
+	CartesianGrid,
+	XAxis,
+	YAxis,
+	Tooltip,
+} from "recharts";
+import {
 	AlertTriangle,
 	ArrowDownRight,
 	ArrowUpRight,
@@ -138,7 +147,6 @@ export default function Dashboard() {
 	const revenueData = insights?.revenueData || [];
 	const latestOrders = insights?.newOrders || [];
 	const maxVendorRevenue = Math.max(1, ...revenuePerVendor.map((item) => item.revenue || 0));
-	const maxTrendRevenue = Math.max(1, ...revenueData.map((item) => item.revenue || 0));
 
 	const overviewCards = useMemo(
 		() => [
@@ -356,24 +364,26 @@ export default function Dashboard() {
 					</div>
 
 					<div className="rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_80px_-45px_var(--shadow)] backdrop-blur-xl">
-						<SectionTitle eyebrow="Trend" title="Revenue over time" subtitle="Simple trend view for the current order stream." />
-						<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-							{revenueData.length === 0 ? (
-								<p className="text-sm text-[var(--text-secondary)]">No revenue trend available yet.</p>
-							) : (
-								revenueData.map((point) => (
-									<div key={point.day} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
-										<div className="mb-2 flex items-center justify-between">
-											<p className="font-semibold text-[var(--text-primary)]">{point.day}</p>
-											<span className="text-sm text-[var(--text-secondary)]">{currency(point.revenue)}</span>
-										</div>
-										<div className="h-2 rounded-full bg-[var(--bg-elevated)]">
-											<div className="h-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-400" style={{ width: `${Math.min(100, Math.max(8, (point.revenue / maxTrendRevenue) * 100))}%` }} />
-										</div>
-									</div>
-								))
-							)}
-						</div>
+						<SectionTitle eyebrow="Trend" title="Revenue over time" subtitle="Revenue trend for the last 14 days." />
+						{revenueData.length === 0 ? (
+							<p className="text-sm text-[var(--text-secondary)]">No revenue trend available yet.</p>
+						) : (
+							<ResponsiveContainer width="100%" height={280}>
+								<AreaChart data={revenueData}>
+									<defs>
+										<linearGradient id="dashboardRevenueFill" x1="0" y1="0" x2="0" y2="1">
+											<stop offset="5%" stopColor="#f97316" stopOpacity={0.4} />
+											<stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+										</linearGradient>
+									</defs>
+									<CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+									<XAxis dataKey="day" tick={{ fontSize: 11 }} />
+									<YAxis tick={{ fontSize: 11 }} />
+									<Tooltip formatter={(value) => [currency(value), "Revenue"]} />
+									<Area type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} fill="url(#dashboardRevenueFill)" />
+								</AreaChart>
+							</ResponsiveContainer>
+						)}
 					</div>
 				</div>
 			</div>

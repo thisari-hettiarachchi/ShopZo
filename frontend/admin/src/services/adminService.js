@@ -15,6 +15,16 @@ export const updateOrderStatus = async (id, status) => {
 	return data;
 };
 
+export const getPayments = async () => {
+	const { data } = await api.get("/api/admin/payments");
+	return data;
+};
+
+export const refundOrder = async (id) => {
+	const { data } = await api.post(`/api/admin/orders/${id}/refund`);
+	return data;
+};
+
 export const getCustomers = async () => {
 	const { data } = await api.get("/api/admin/customers");
 	return data;
@@ -35,6 +45,16 @@ export const getReviews = async () => {
 	return data;
 };
 
+export const getAllReviews = async () => {
+	const { data } = await api.get("/api/admin/reviews/all");
+	return data;
+};
+
+export const deleteReview = async (id) => {
+	const { data } = await api.delete(`/api/admin/reviews/${id}`);
+	return data;
+};
+
 export const getVendors = async () => {
 	const { data } = await api.get("/api/admin/vendors");
 	return data;
@@ -47,6 +67,16 @@ export const approveVendor = async (id, payload) => {
 
 export const updateVendorStatus = async (id, payload) => {
 	const { data } = await api.patch(`/api/admin/vendors/${id}/status`, payload);
+	return data;
+};
+
+export const reviewVendorDocuments = async (id, payload) => {
+	const { data } = await api.patch(`/api/admin/vendors/${id}/documents`, payload);
+	return data;
+};
+
+export const suspendCustomer = async (id, payload) => {
+	const { data } = await api.patch(`/api/admin/customers/${id}/suspend`, payload);
 	return data;
 };
 

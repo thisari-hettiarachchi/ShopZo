@@ -6,6 +6,7 @@ import AddProductPage from "../pages/AddProduct";
 import EditProductPage from "../pages/EditProduct";
 import ProductDetailsPage from "../pages/ProductDetails";
 import OrdersPage from "../pages/Orders";
+import PaymentsPage from "../pages/Payments";
 import CustomersPage from "../pages/CustomersPage";
 import AnalyticsPage from "../pages/AnalyticsPage";
 import ReviewsPage from "../pages/ReviewsPage";
@@ -20,6 +21,8 @@ const getActiveFromPath = (pathname) => {
 	switch (pathname) {
 		case "/orders":
 			return "orders";
+		case "/payments":
+			return "payments";
 		case "/customers":
 			return "customers";
 			case "/vendors":
@@ -58,6 +61,7 @@ function AdminDashboardShell() {
 					<Route path="/products/edit/:id" element={<EditProductPage />} />
 					<Route path="/products/:id" element={<ProductDetailsPage />} />
 					<Route path="/orders" element={<OrdersPage />} />
+					<Route path="/payments" element={<PaymentsPage />} />
 					<Route path="/customers" element={<CustomersPage />} />
 					<Route path="/vendors" element={<VendorsPage />} />
 					<Route path="/analytics" element={<AnalyticsPage />} />

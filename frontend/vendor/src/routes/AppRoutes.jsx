@@ -8,6 +8,7 @@ import ProductDetailsPage from "../pages/ProductDetails";
 import OrdersPage from "../pages/Orders";
 import CustomersPage from "../pages/CustomersPage";
 import AnalyticsPage from "../pages/AnalyticsPage";
+import EarningsPage from "../pages/EarningsPage";
 import ReviewsPage from "../pages/ReviewsPage";
 import VendorProfilePage from "../pages/VendorProfile";
 import EditProfilePage from "../pages/EditProfile";
@@ -26,6 +27,8 @@ const getActiveFromPath = (pathname) => {
       return "customers";
     case "/analytics":
       return "analytics";
+    case "/earnings":
+      return "earnings";
     case "/reviews":
       return "reviews";
     case "/coupons":
@@ -63,6 +66,7 @@ function VendorDashboardShell() {
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/earnings" element={<EarningsPage />} />
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/coupons" element={<CouponsPage />} />
           <Route path="/chat" element={<ChatPage />} />

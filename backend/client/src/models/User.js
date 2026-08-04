@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema(
     name: String,
     email: String,
     password: String,
+    role: { type: String, enum: ["user", "admin"], default: "user" },
+    isSuspended: { type: Boolean, default: false },
+    suspensionReason: { type: String, default: "" },
     followingVendors: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vendor" }],
 
     addresses: {

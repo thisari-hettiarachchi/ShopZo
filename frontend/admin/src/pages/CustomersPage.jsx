@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { getCustomers } from "../services/adminService";
+import { toast } from "react-toastify";
+import { Ban, ShieldCheck } from "lucide-react";
+import { getCustomers, suspendCustomer } from "../services/adminService";
 
 function Avatar({ name }) {
   const initials = (name || "?")
@@ -65,6 +67,7 @@ export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
   const [sort, setSort] = useState({ field: "totalSpent", dir: "desc" });
+  const [savingId, setSavingId] = useState("");
 
   useEffect(() => {
     const loadCustomers = async () => {
@@ -79,6 +82,25 @@ export default function CustomersPage() {
     };
     loadCustomers();
   }, []);
+
+  const handleToggleSuspend = async (customer) => {
+    const nextSuspended = !customer.isSuspended;
+    const reason = nextSuspended ? window.prompt("Suspension reason (optional)")?.trim() || "" : "";
+    setSavingId(customer.id);
+    try {
+      await suspendCustomer(customer.id, { suspended: nextSuspended, reason });
+      setCustomers((prev) =>
+        prev.map((item) =>
+          item.id === customer.id ? { ...item, isSuspended: nextSuspended, suspensionReason: reason } : item
+        )
+      );
+      toast.success(nextSuspended ? "Customer suspended" : "Customer reactivated");
+    } catch (requestError) {
+      toast.error(requestError?.response?.data?.message || "Action failed");
+    } finally {
+      setSavingId("");
+    }
+  };
 
   const toggleSort = (field) => {
     setSort((prev) =>
@@ -239,6 +261,12 @@ export default function CustomersPage() {
                       </span>
                     </th>
                   ))}
+                  <th className="whitespace-nowrap px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+                    Status
+                  </th>
+                  <th className="whitespace-nowrap px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">

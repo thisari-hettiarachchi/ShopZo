@@ -169,10 +169,6 @@ export default function AllCategoriesPage({ categories: initialCategoriesProp })
       } catch (err) {
         if (isMounted) {
           setError(err.message || "Could not load categories");
-          // Keep UI usable if backend is temporarily unavailable.
-          if (initialCategories.length === 0) {
-            setCategories(MOCK_CATEGORIES);
-          }
         }
       } finally {
         if (isMounted) {

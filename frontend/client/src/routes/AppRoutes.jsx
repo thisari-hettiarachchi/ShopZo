@@ -11,6 +11,8 @@ import AllCategoriesPage from '../pages/Categories/AllCategories';
 import ProfilePage from '../pages/Profile/ProfileDashboard';
 import CheckoutPage from '../pages/Checkout/Checkout';
 import ProceedToPay from '../pages/Checkout/ProceedToPay';
+import OrderSuccess from '../pages/Checkout/OrderSuccess';
+import OrderCancel from '../pages/Checkout/OrderCancel';
 import VendorStorePage from '../pages/Vendor/VendorStore';
 import MessagePage from '../pages/Vendor/VendorMessage';
 import FlashSalePage from '../pages/FlashSale/FlashSale';
@@ -31,6 +33,8 @@ export default function AppRoutes() {
       <Route path="/profile" element={<ProfilePage />} />
       <Route path='/checkout' element={<CheckoutPage />} />
       <Route path='/proceedtopay' element={<ProceedToPay />} />
+      <Route path='/order/success' element={<OrderSuccess />} />
+      <Route path='/order/cancel' element={<OrderCancel />} />
       <Route path='/messages/:id' element={<MessagePage />} />
       <Route path='/flashsale' element={<FlashSalePage />} />
     </Routes>
