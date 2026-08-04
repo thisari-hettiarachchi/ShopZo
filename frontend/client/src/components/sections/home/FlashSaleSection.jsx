@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProductCard from "../product/ProductCard";
+import { scrollViewport } from "../../shared/ScrollReveal";
 
 const stagger = (index, base = 0.06) => ({ delay: index * base });
 
@@ -84,7 +85,7 @@ export default function FlashSaleSection({ products }) {
               key={product._id || index}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={scrollViewport}
               transition={{ ...stagger(index, 0.06), duration: 0.4 }}
               className="h-full"
             >

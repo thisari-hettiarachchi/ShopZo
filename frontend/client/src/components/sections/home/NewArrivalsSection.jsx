@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import NewArrivalCard from "../product/NewArrivalCard";
+import ScrollReveal, { scrollViewport } from "../../shared/ScrollReveal";
 import { filterNewArrivals } from "../../../utils/productHelpers";
 
 const stagger = (index, base = 0.05) => ({ delay: index * base });
@@ -14,7 +15,7 @@ export default function NewArrivalsSection({ products }) {
   return (
     <section className="bg-[var(--bg-main)] px-4 py-16">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-14 flex items-end justify-between gap-4">
+        <ScrollReveal className="mb-14 flex items-end justify-between gap-4" y={20}>
           <div className="relative">
             <span className="section-eyebrow relative mb-3 block">Fresh drops</span>
             <h2 className="display-font relative mt-4 text-[2.6rem] font-black leading-[1.0] tracking-tight text-[var(--text-primary)] md:text-[3.4rem] lg:text-[4rem]">
@@ -27,7 +28,7 @@ export default function NewArrivalsSection({ products }) {
           >
             View All New Arrivals <ArrowRight size={13} />
           </Link>
-        </div>
+        </ScrollReveal>
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {items.map((product, index) => (
@@ -35,7 +36,7 @@ export default function NewArrivalsSection({ products }) {
               key={product._id || index}
               initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={scrollViewport}
               transition={{ ...stagger(index), duration: 0.4 }}
               className="h-full"
             >

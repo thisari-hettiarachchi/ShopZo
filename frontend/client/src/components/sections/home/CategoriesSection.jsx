@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import ScrollReveal, { scrollViewport } from "../../shared/ScrollReveal";
 
 function CategoryImage({ cat, className }) {
   if (cat.image) {
@@ -27,7 +28,7 @@ function CatHero({ cat, index }) {
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      viewport={scrollViewport}
       transition={{ duration: 0.55, delay: index * 0.07 }}
       className="col-span-2 row-span-2 relative overflow-hidden rounded-3xl cursor-pointer group border border-[var(--border)]"
       style={{ minHeight: 340 }}
@@ -60,7 +61,7 @@ function CatPortrait({ cat, index }) {
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      viewport={scrollViewport}
       transition={{ duration: 0.5, delay: index * 0.07 }}
       className="col-span-1 row-span-2 relative overflow-hidden rounded-2xl cursor-pointer group border border-[var(--border)]"
       style={{ minHeight: 280 }}
@@ -88,7 +89,7 @@ function CatSquare({ cat, index }) {
     <motion.div
       initial={{ opacity: 0, x: 16 }}
       whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
+      viewport={scrollViewport}
       transition={{ duration: 0.45, delay: index * 0.07 }}
       className="col-span-1 relative overflow-hidden rounded-2xl cursor-pointer group border border-[var(--border)]"
     >
@@ -118,21 +119,21 @@ export default function CategoriesSection({ categories }) {
   return (
     <section className="py-24 px-4 bg-[var(--bg-main)] overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between mb-14">
+        <ScrollReveal className="mb-14 flex items-end justify-between" y={20}>
           <div className="relative">
-            <span className="section-eyebrow block mb-3 relative">Browse</span>
-            <h2 className="mt-4 display-font relative text-[2.6rem] md:text-[3.4rem] lg:text-[4rem] font-black text-[var(--text-primary)] leading-[1.0] tracking-tight">
+            <span className="section-eyebrow relative mb-3 block">Browse</span>
+            <h2 className="display-font relative mt-4 text-[2.6rem] font-black leading-[1.0] tracking-tight text-[var(--text-primary)] md:text-[3.4rem] lg:text-[4rem]">
               Shop by <span className="display-font italic text-[var(--color-primary)]">Category</span>
             </h2>
           </div>
 
           <Link
             to="/categories"
-            className="hidden md:inline-flex items-center gap-2 text-sm font-bold text-[var(--color-primary)] border border-[var(--color-primary)] px-5 py-2.5 rounded-full hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300"
+            className="hidden items-center gap-2 rounded-full border border-[var(--color-primary)] px-5 py-2.5 text-sm font-bold text-[var(--color-primary)] transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white md:inline-flex"
           >
             All Categories <ArrowRight size={13} />
           </Link>
-        </div>
+        </ScrollReveal>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[160px]">
           {hero && <CatHero cat={hero} index={0} />}

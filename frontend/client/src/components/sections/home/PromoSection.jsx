@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Assets from "../../../assets/assets";
+import ScrollReveal from "../../shared/ScrollReveal";
 
 const AUTO_MS = 5500;
 
@@ -142,13 +143,14 @@ export default function PromoSection({ banners }) {
   return (
     <section className="bg-[var(--bg-main)] px-4 py-16">
       <div className="mx-auto max-w-7xl">
-
-        <div className={`grid gap-5 ${hasRight ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}>
-          <BannerPanel banners={leftBanners} fallbackImage={Assets.flashSale} />
-          {hasRight && (
-            <BannerPanel banners={rightBanners} fallbackImage={Assets.newArrival} />
-          )}
-        </div>
+        <ScrollReveal y={32} duration={0.55}>
+          <div className={`grid gap-5 ${hasRight ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}>
+            <BannerPanel banners={leftBanners} fallbackImage={Assets.flashSale} />
+            {hasRight && (
+              <BannerPanel banners={rightBanners} fallbackImage={Assets.newArrival} />
+            )}
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );

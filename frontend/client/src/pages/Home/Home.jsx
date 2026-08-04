@@ -7,6 +7,7 @@ import BestSellersSection from "../../components/sections/home/BestSellersSectio
 import PromoSection from "../../components/sections/home/PromoSection";
 import ValuePropsSection from "../../components/sections/home/ValuePropsSection";
 import JustForYouSection from "../../components/sections/home/JustForYouSection";
+import ScrollToTopButton from "../../components/shared/ScrollToTopButton";
 import { API_BASE_URL } from "../../api/base";
 
 if (typeof document !== "undefined" && !document.getElementById("shopzo-fonts")) {
@@ -41,7 +42,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/products`).then((response) => setProducts(response.data)).catch(console.error);
+    axios
+      .get(`${API_BASE_URL}/products`, { params: { limit: 100 } })
+      .then((response) => setProducts(Array.isArray(response.data) ? response.data : []))
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -58,6 +62,7 @@ export default function Home() {
       <PromoSection banners={promoBanners} />
       <ValuePropsSection />
       <JustForYouSection products={products} />
+      <ScrollToTopButton />
     </div>
   );
 }

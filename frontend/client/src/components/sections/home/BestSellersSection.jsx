@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { addToCartApi } from "../../../api/cartApi";
 import { addToWishlistApi, removeFromWishlistApi } from "../../../api/wishlistApi";
+import ScrollReveal, { scrollViewport } from "../../shared/ScrollReveal";
 import { filterBestSellers } from "../../../utils/productHelpers";
 
 function BestSellerCard({ product, index }) {
@@ -53,7 +54,7 @@ function BestSellerCard({ product, index }) {
     <motion.div
       initial={{ opacity: 0, y: 22 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      viewport={scrollViewport}
       transition={{ delay: index * 0.08, duration: 0.45 }}
       onClick={() => navigate(`/products/${product._id}`)}
       className="group relative flex cursor-pointer overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_16px_40px_-28px_var(--shadow)] transition hover:-translate-y-1 hover:border-[var(--color-primary)]/30 hover:shadow-[0_24px_48px_-24px_var(--shadow)]"
@@ -131,7 +132,7 @@ export default function BestSellersSection({ products }) {
   return (
     <section className="bg-[var(--bg-card)] px-4 py-16">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-14 flex items-end justify-between gap-4">
+        <ScrollReveal className="mb-14 flex items-end justify-between gap-4" y={20}>
           <div className="relative">
             <span className="section-eyebrow relative mb-3 block">Top picks</span>
             <h2 className="display-font relative mt-4 text-[2.6rem] font-black leading-[1.0] tracking-tight text-[var(--text-primary)] md:text-[3.4rem] lg:text-[4rem]">
@@ -144,7 +145,7 @@ export default function BestSellersSection({ products }) {
           >
             View All Best Sellers <ArrowRight size={13} />
           </Link>
-        </div>
+        </ScrollReveal>
 
         <div className="grid gap-5 lg:grid-cols-3">
           {items.map((product, index) => (

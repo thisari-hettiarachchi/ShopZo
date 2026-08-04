@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, Lock, ShieldCheck, Truck } from "lucide-react";
+import { scrollViewport } from "../../shared/ScrollReveal";
 
 const PROPS = [
   {
@@ -35,7 +36,7 @@ export default function ValuePropsSection() {
               key={item.title}
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={scrollViewport}
               transition={{ delay: index * 0.06, duration: 0.35 }}
               className="flex items-start gap-3 px-2"
             >
