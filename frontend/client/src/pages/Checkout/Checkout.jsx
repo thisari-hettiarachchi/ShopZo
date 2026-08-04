@@ -1,8 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, MapPin, User, Tag, Edit, X } from "lucide-react";
+import { toast } from "react-toastify";
+import {
+  ShoppingBag,
+  MapPin,
+  Tag,
+  X,
+  Loader2,
+  Mail,
+  Phone,
+  User,
+  Home,
+} from "lucide-react";
 import { fetchCart } from "../../api/cartApi";
-import { getAddresses, addAddress } from "../../services/addressService";
+import { getAddresses } from "../../services/addressService";
+import { getUserProfile } from "../../services/userService";
+import { validateCoupon } from "../../services/checkoutService";
 import { useNavigate, useLocation } from "react-router-dom";
+
+const emptyShipping = {
+  fullName: "",
+  email: "",
+  phone: "",
+  region: "",
+  addressLine: "",
+};
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -11,26 +32,37 @@ export default function CheckoutPage() {
 
   const [promoCode, setPromoCode] = useState("");
   const [isPromoApplied, setIsPromoApplied] = useState(false);
-  const [address, setAddress] = useState(null);
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [discount, setDiscount] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // 🔹 popup state
-  const [showAddressPopup, setShowAddressPopup] = useState(false);
   const [allAddresses, setAllAddresses] = useState([]);
+  const [addressMode, setAddressMode] = useState("saved"); // saved | custom
   const [selectedAddressId, setSelectedAddressId] = useState(null);
-
-  const [isAddingAddress, setIsAddingAddress] = useState(false);
-  const [newAddress, setNewAddress] = useState({
-    fullName: "",
-    phone: "",
-    region: "",
-    addressLine: "",
-  });
+  const [shipping, setShipping] = useState(emptyShipping);
+  const [profileEmail, setProfileEmail] = useState("");
 
   useEffect(() => {
     const loadCheckoutData = async () => {
       try {
-        // Check if products were passed via Buy Now button
+        if (!token) {
+          toast.error("Please login to continue");
+          navigate("/auth");
+          return;
+        }
+
+        let profileName = "";
+        let email = "";
+        try {
+          const profileRes = await getUserProfile();
+          profileName = profileRes.data?.name || "";
+          email = profileRes.data?.email || "";
+          setProfileEmail(email);
+        } catch (err) {
+          console.error("Profile load error:", err);
+        }
+
         if (location.state?.products && location.state.products.length > 0) {
           const buyNowProducts = location.state.products.map((product) => ({
             _id: product._id,
@@ -38,6 +70,7 @@ export default function CheckoutPage() {
               _id: product._id,
               name: product.name,
               image: product.image,
+              images: product.image ? [product.image] : product.images,
             },
             price: product.price,
             qty: product.quantity || 1,
@@ -45,295 +78,566 @@ export default function CheckoutPage() {
           }));
           setCartItems(buyNowProducts);
         } else {
-          // Otherwise, fetch from cart API
           const cart = await fetchCart(token);
           setCartItems(cart.items || []);
         }
 
         const addressRes = await getAddresses();
         const addresses = addressRes.data || [];
+        setAllAddresses(addresses);
+
         const defaultShipping =
           addresses.find((a) => a.isDefaultShipping) || addresses[0] || null;
 
-        setAddress(defaultShipping);
-        setAllAddresses(addresses);
-        setSelectedAddressId(defaultShipping?.id || null);
+        if (defaultShipping) {
+          setAddressMode("saved");
+          setSelectedAddressId(defaultShipping.id || defaultShipping._id);
+          setShipping({
+            fullName: defaultShipping.fullName || profileName,
+            email,
+            phone: defaultShipping.phone || "",
+            region: defaultShipping.region || "",
+            addressLine: defaultShipping.addressLine || "",
+          });
+        } else {
+          setAddressMode("custom");
+          setShipping({
+            ...emptyShipping,
+            fullName: profileName,
+            email,
+          });
+        }
       } catch (err) {
         console.error("Checkout load error:", err);
+        toast.error("Failed to load checkout data");
+      } finally {
+        setLoading(false);
       }
     };
 
     loadCheckoutData();
-  }, [token, location.state]);
+  }, [token, location.state, navigate]);
 
-  const itemsTotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
-
+  const itemsTotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
   const deliveryFee = 286;
-  const total = itemsTotal + deliveryFee;
+  const discountAmount = discount?.discountAmount || 0;
+  const total = Math.max(itemsTotal + deliveryFee - discountAmount, 0);
+  const itemCount = cartItems.reduce((sum, item) => sum + (item.qty || 1), 0);
 
-  const handleSaveAddress = () => {
-    const selected = allAddresses.find(
-      (a) => a.id === selectedAddressId || a._id === selectedAddressId
-    );
-    setAddress(selected || null);
-    setShowAddressPopup(false);
+  const applySavedAddress = (addr) => {
+    if (!addr) return;
+    setSelectedAddressId(addr.id || addr._id);
+    setShipping((prev) => ({
+      fullName: addr.fullName || prev.fullName,
+      email: profileEmail || prev.email,
+      phone: addr.phone || "",
+      region: addr.region || "",
+      addressLine: addr.addressLine || "",
+    }));
   };
 
-  const handleAddNewAddress = async () => {
-    if (!newAddress.fullName || !newAddress.phone || !newAddress.region || !newAddress.addressLine) {
-      return alert("Please fill all fields");
+  const handleAddressModeChange = (mode) => {
+    setAddressMode(mode);
+    if (mode === "saved") {
+      const selected =
+        allAddresses.find((a) => (a.id || a._id) === selectedAddressId) ||
+        allAddresses.find((a) => a.isDefaultShipping) ||
+        allAddresses[0];
+      if (selected) applySavedAddress(selected);
+    } else {
+      setSelectedAddressId(null);
+      setShipping((prev) => ({
+        ...prev,
+        email: profileEmail || prev.email,
+      }));
     }
+  };
+
+  const handleShippingChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "email") return;
+    setShipping((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setIsApplyingPromo(true);
     try {
-      const res = await addAddress({ ...newAddress, isDefaultShipping: true });
-      const added = res.data; 
-      
-      const addressesRes = await getAddresses();
-      setAllAddresses(addressesRes.data || []);
-      
-      setSelectedAddressId(added._id || added.id);
-      setIsAddingAddress(false);
+      const result = await validateCoupon(promoCode.trim(), itemsTotal);
+      setDiscount(result);
+      setIsPromoApplied(true);
+      toast.success(`Coupon "${result.code}" applied - Rs. ${result.discountAmount} off`);
     } catch (err) {
-      alert("Failed to add address");
+      setDiscount(null);
+      setIsPromoApplied(false);
+      toast.error(err.response?.data?.message || "Invalid coupon code");
+    } finally {
+      setIsApplyingPromo(false);
     }
   };
+
+  const handleRemovePromo = () => {
+    setPromoCode("");
+    setDiscount(null);
+    setIsPromoApplied(false);
+  };
+
+  const buildShippingAddress = () => ({
+    fullName: shipping.fullName.trim(),
+    email: profileEmail || shipping.email,
+    phone: shipping.phone.trim(),
+    region: shipping.region.trim(),
+    addressLine: shipping.addressLine.trim(),
+  });
+
+  const validateShipping = () => {
+    const address = buildShippingAddress();
+    if (!address.fullName) return "Please enter your full name.";
+    if (!address.phone) return "Please enter your contact number.";
+    if (!address.addressLine) return "Please enter your street address.";
+    if (!address.region) return "Please enter your city / region.";
+    if (addressMode === "saved" && allAddresses.length > 0 && !selectedAddressId) {
+      return "Please select a saved address or switch to a custom address.";
+    }
+    return null;
+  };
+
+  const handleProceed = () => {
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty.");
+      return;
+    }
+
+    const error = validateShipping();
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    navigate("/proceedtopay", {
+      state: {
+        cartItems,
+        address: buildShippingAddress(),
+        deliveryFee,
+        couponCode: isPromoApplied ? discount?.code : null,
+        discountAmount,
+      },
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center bg-[var(--bg-main)]">
+        <p className="text-sm text-[var(--text-muted)]">Loading checkout...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="relative min-h-screen overflow-hidden bg-[var(--bg-main)]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-72 opacity-80"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 60% at 10% -10%, color-mix(in srgb, var(--color-primary) 22%, transparent), transparent 70%), radial-gradient(ellipse 60% 50% at 90% 0%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 65%)",
+        }}
+      />
 
-        {/* HEADER */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold">Checkout</h1>
-          <p className="text-[var(--text-secondary)]">
-            Review your order and complete payment
-          </p>
+      <div className="relative mx-auto max-w-7xl px-4 py-8 md:px-6 lg:px-8">
+        <div className="mb-8 flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_12px_28px_-18px_var(--shadow)]">
+            <ShoppingBag className="h-6 w-6 text-[var(--color-primary)]" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+              Secure Checkout
+            </p>
+            <h1
+              className="text-3xl font-semibold text-[var(--text-primary)]"
+              style={{ fontFamily: "'Sora', sans-serif" }}
+            >
+              Complete Your Order
+            </h1>
+            <p className="mt-0.5 text-sm text-[var(--text-muted)]">
+              Add shipping details, review items, then continue to payment.
+            </p>
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-
-          {/* LEFT */}
-          <div className="lg:col-span-2 space-y-6">
-
-            {/* SHIPPING & BILLING */}
-            <div className="bg-[var(--bg-card)] p-6 rounded-2xl border-2 border-[var(--border)]">
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-3">
-                  <MapPin className="text-[var(--color-primary)]" />
-                  <h2 className="text-xl font-semibold">
-                    Shipping & Billing
-                  </h2>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
+            {/* Shipping information */}
+            <section className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_60px_-36px_var(--shadow)] backdrop-blur-xl md:p-8">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--bg-hover)] text-[var(--color-primary)]">
+                  <User size={18} />
                 </div>
-
-                {/* EDIT BUTTON */}
-                <button
-                  onClick={() => setShowAddressPopup(true)}
-                  className="flex items-center gap-1 text-[var(--color-primary)]"
-                >
-                  <Edit size={16} /> EDIT
-                </button>
+                <div>
+                  <h2
+                    className="text-xl font-semibold text-[var(--text-primary)]"
+                    style={{ fontFamily: "'Sora', sans-serif" }}
+                  >
+                    Shipping information
+                  </h2>
+                  <p className="text-sm text-[var(--text-muted)]">
+                    Your email is linked to your account and cannot be changed here.
+                  </p>
+                </div>
               </div>
 
-              {address ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <User size={18} />
-                    <span className="font-semibold">
-                      {address.fullName}
-                    </span>
-                  </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field
+                  label="Full name"
+                  icon={User}
+                  name="fullName"
+                  value={shipping.fullName}
+                  onChange={handleShippingChange}
+                  placeholder="Recipient full name"
+                />
+                <Field
+                  label="Contact number"
+                  icon={Phone}
+                  name="phone"
+                  value={shipping.phone}
+                  onChange={handleShippingChange}
+                  placeholder="07X XXX XXXX"
+                />
+                <div className="sm:col-span-2">
+                  <Field
+                    label="Email"
+                    icon={Mail}
+                    name="email"
+                    type="email"
+                    value={profileEmail || shipping.email}
+                    onChange={handleShippingChange}
+                    placeholder="you@example.com"
+                    disabled
+                    hint="Autofilled from your ShopZo account"
+                  />
+                </div>
+              </div>
+            </section>
 
-                  <p className="text-sm">{address.phone}</p>
-
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    {address.addressLine}, {address.region}
+            {/* Delivery address */}
+            <section className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_60px_-36px_var(--shadow)] backdrop-blur-xl md:p-8">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--bg-hover)] text-[var(--color-primary)]">
+                  <MapPin size={18} />
+                </div>
+                <div>
+                  <h2
+                    className="text-xl font-semibold text-[var(--text-primary)]"
+                    style={{ fontFamily: "'Sora', sans-serif" }}
+                  >
+                    Delivery address
+                  </h2>
+                  <p className="text-sm text-[var(--text-muted)]">
+                    Use a saved address or enter a custom one for this order.
                   </p>
+                </div>
+              </div>
 
-                  {address.isDefaultShipping && (
-                    <span className="inline-block mt-2 text-xs px-2 py-1 rounded bg-green-100 text-green-700">
-                      Default Shipping Address
-                    </span>
-                  )}
+              <div className="mb-5 grid gap-3 sm:grid-cols-2">
+                <ModeButton
+                  active={addressMode === "saved"}
+                  onClick={() => handleAddressModeChange("saved")}
+                  title="Saved address"
+                  subtitle={
+                    allAddresses.length
+                      ? `${allAddresses.length} saved`
+                      : "No saved addresses yet"
+                  }
+                  disabled={allAddresses.length === 0}
+                />
+                <ModeButton
+                  active={addressMode === "custom"}
+                  onClick={() => handleAddressModeChange("custom")}
+                  title="Custom address"
+                  subtitle="Fill address fields below"
+                />
+              </div>
+
+              {addressMode === "saved" && allAddresses.length > 0 && (
+                <div className="mb-5 space-y-3">
+                  {allAddresses.map((addr) => {
+                    const id = addr.id || addr._id;
+                    const active = selectedAddressId === id;
+                    return (
+                      <label
+                        key={id}
+                        className={`flex cursor-pointer gap-3 rounded-2xl border-2 p-4 transition ${
+                          active
+                            ? "border-[var(--color-primary)] bg-[var(--bg-hover)]"
+                            : "border-[var(--border)] hover:border-[color-mix(in_srgb,var(--color-primary)_40%,var(--border))]"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="savedAddress"
+                          className="mt-1 accent-[var(--color-primary)]"
+                          checked={active}
+                          onChange={() => applySavedAddress(addr)}
+                        />
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-semibold text-[var(--text-primary)]">
+                              {addr.fullName}
+                            </p>
+                            {addr.isDefaultShipping && (
+                              <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+                                Default
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-1 text-sm text-[var(--text-secondary)]">{addr.phone}</p>
+                          <p className="text-sm text-[var(--text-muted)]">
+                            {addr.addressLine}, {addr.region}
+                          </p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+
+              {addressMode === "saved" && allAddresses.length === 0 && (
+                <div className="mb-5 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--bg-main)] px-4 py-5 text-sm text-[var(--text-muted)]">
+                  You have no saved addresses. Switch to custom address to continue, or add one
+                  later in your profile Address Book.
+                </div>
+              )}
+
+              <div className="grid gap-4">
+                <Field
+                  label="Street address"
+                  icon={Home}
+                  name="addressLine"
+                  value={shipping.addressLine}
+                  onChange={handleShippingChange}
+                  placeholder="House no, street, landmark"
+                  disabled={addressMode === "saved" && Boolean(selectedAddressId)}
+                />
+                <Field
+                  label="City / Region"
+                  icon={MapPin}
+                  name="region"
+                  value={shipping.region}
+                  onChange={handleShippingChange}
+                  placeholder="City, province or region"
+                  disabled={addressMode === "saved" && Boolean(selectedAddressId)}
+                />
+                {addressMode === "custom" && (
+                  <p className="text-xs text-[var(--text-muted)]">
+                    This custom address is used for this order only and is not saved to your
+                    address book automatically.
+                  </p>
+                )}
+                {addressMode === "saved" && selectedAddressId && (
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Address fields are filled from your selection. Switch to custom address to
+                    edit them for this order.
+                  </p>
+                )}
+              </div>
+            </section>
+
+            {/* Coupon */}
+            <section className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_60px_-36px_var(--shadow)] backdrop-blur-xl">
+              <div className="mb-4 flex items-center gap-3">
+                <Tag className="text-[var(--color-primary)]" />
+                <h2
+                  className="text-xl font-semibold text-[var(--text-primary)]"
+                  style={{ fontFamily: "'Sora', sans-serif" }}
+                >
+                  Have a coupon?
+                </h2>
+              </div>
+
+              {isPromoApplied ? (
+                <div className="flex items-center justify-between rounded-xl border border-[var(--color-primary)] bg-[var(--bg-muted)] p-4">
+                  <div>
+                    <p className="font-semibold text-[var(--color-primary)]">{discount?.code}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      You saved Rs. {discountAmount.toLocaleString("en-LK")}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemovePromo}
+                    className="text-[var(--text-muted)] transition hover:text-red-500"
+                  >
+                    <X size={18} />
+                  </button>
                 </div>
               ) : (
-                <p className="text-[var(--text-muted)]">
-                  No address found. Please add one.
-                </p>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <input
+                    type="text"
+                    placeholder="Enter coupon code"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3 text-sm uppercase text-[var(--text-primary)] outline-none transition focus:border-[var(--color-primary)] focus:shadow-[var(--ring)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    disabled={isApplyingPromo || !promoCode.trim()}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                  >
+                    {isApplyingPromo && <Loader2 size={16} className="animate-spin" />}
+                    Apply
+                  </button>
+                </div>
               )}
-            </div>
+            </section>
+          </div>
 
-            {/* CART ITEMS */}
-            <div className="bg-[var(--bg-card)] p-6 rounded-2xl border-2 border-[var(--border)]">
-              <h2 className="text-xl font-semibold mb-4">
-                Order Items
-              </h2>
+          {/* Order summary */}
+          <aside className="h-fit rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_60px_-36px_var(--shadow)] backdrop-blur-xl lg:sticky lg:top-24">
+            <h2
+              className="mb-1 text-xl font-semibold text-[var(--text-primary)]"
+              style={{ fontFamily: "'Sora', sans-serif" }}
+            >
+              Order summary
+            </h2>
+            <p className="mb-5 text-sm text-[var(--text-muted)]">
+              {itemCount} {itemCount === 1 ? "item" : "items"} in this order
+            </p>
 
-              {cartItems.length === 0 ? (
-                <p className="text-center text-[var(--text-muted)]">
-                  No items in cart
-                </p>
-              ) : (
-                cartItems.map((item) => (
+            {cartItems.length === 0 ? (
+              <p className="mb-5 text-sm text-[var(--text-muted)]">No items in cart</p>
+            ) : (
+              <div className="mb-5 max-h-72 space-y-3 overflow-y-auto pr-1">
+                {cartItems.map((item) => (
                   <div
-                    key={item._id}
-                    className="flex gap-4 p-4 mb-4 bg-[var(--bg-muted)] rounded-xl"
+                    key={item._id || item.product?._id}
+                    className="flex gap-3 rounded-2xl bg-[var(--bg-main)] p-3"
                   >
                     <img
                       src={item.product?.image || item.product?.images?.[0]}
-                      alt={item.product?.name}
-                      className="w-20 h-20 object-contain bg-white rounded"
+                      alt={item.product?.name || "Product"}
+                      className="h-16 w-16 rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] object-contain"
                     />
-
-                    <div className="flex-1">
-                      <h3 className="font-semibold">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
                         {item.product?.name}
-                      </h3>
-                      <p className="text-sm text-[var(--text-secondary)]">
-                        {item.vendor?.name || "Seller"}
                       </p>
-                      <p className="font-bold text-[var(--color-primary)] mt-1">
-                        Rs. {item.price}
+                      <p className="text-xs text-[var(--text-muted)]">
+                        Qty: {item.qty}
+                        {item.vendor?.storeName || item.vendor?.name
+                          ? ` · ${item.vendor?.storeName || item.vendor?.name}`
+                          : ""}
                       </p>
-                      <div className="flex justify-between items-center mt-2">
-                        <p className="text-sm text-[var(--text-secondary)]">
-                          Qty: <span className="font-semibold">{item.qty}</span>
-                        </p>
-                        <p className="text-sm font-semibold">
-                          Subtotal: <span className="text-[var(--color-primary)]">Rs. {item.price * item.qty}</span>
-                        </p>
-                      </div>
+                      <p className="mt-1 text-sm font-semibold text-[var(--color-primary)]">
+                        Rs. {(item.price * item.qty).toLocaleString("en-LK")}
+                      </p>
                     </div>
                   </div>
-                ))
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-2 border-t border-[var(--border)] pt-4 text-sm">
+              <div className="flex justify-between text-[var(--text-secondary)]">
+                <span>Items total</span>
+                <span>Rs. {itemsTotal.toLocaleString("en-LK")}</span>
+              </div>
+              <div className="flex justify-between text-[var(--text-secondary)]">
+                <span>Delivery</span>
+                <span>Rs. {deliveryFee.toLocaleString("en-LK")}</span>
+              </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                  <span>Coupon discount</span>
+                  <span>- Rs. {discountAmount.toLocaleString("en-LK")}</span>
+                </div>
               )}
-            </div>
-          </div>
-
-          {/* RIGHT */}
-          <div className="bg-[var(--bg-card)] p-6 rounded-2xl border-2 border-[var(--border)] h-fit">
-            <h2 className="text-xl font-semibold mb-4">
-              Order Summary
-            </h2>
-
-            <div className="flex justify-between mb-2">
-              <span>Items Total</span>
-              <span>Rs. {itemsTotal}</span>
+              <div className="flex justify-between border-t border-[var(--border)] pt-3 text-lg font-bold text-[var(--text-primary)]">
+                <span>Total</span>
+                <span className="text-[var(--color-primary)]">
+                  Rs. {total.toLocaleString("en-LK")}
+                </span>
+              </div>
             </div>
 
-            <div className="flex justify-between mb-2">
-              <span>Delivery</span>
-              <span>Rs. {deliveryFee}</span>
-            </div>
-
-            <div className="flex justify-between text-lg font-bold border-t pt-3">
-              <span>Total</span>
-              <span className="text-[var(--color-primary)]">
-                Rs. {total}
-              </span>
-            </div>
-
-            <button 
-              onClick={() => {
-                if (!address) {
-                  alert("Please select or add a shipping & billing address before proceeding.");
-                  setShowAddressPopup(true);
-                  if (allAddresses.length === 0) setIsAddingAddress(true);
-                  return;
-                }
-                navigate(`/proceedtopay`);
-              }}
-              className="w-full mt-6 flex items-center justify-center gap-2 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90">
+            <button
+              type="button"
+              onClick={handleProceed}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] py-3.5 text-sm font-semibold text-white shadow-[0_12px_28px_-14px_rgba(249,115,22,0.55)] transition hover:opacity-90"
+            >
               Proceed to Pay
             </button>
-          </div>
+          </aside>
         </div>
       </div>
-
-      {/* ADDRESS POPUP */}
-      {showAddressPopup && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[var(--bg-card)] w-full max-w-lg p-6 rounded-2xl">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">{isAddingAddress ? "Add New Address" : "Select Address"}</h3>
-              <button onClick={() => setShowAddressPopup(false)}>
-                <X />
-              </button>
-            </div>
-
-            {isAddingAddress ? (
-              <div className="space-y-4">
-                <input type="text" placeholder="Full Name" className="w-full p-3 border rounded-lg focus:outline-[var(--color-primary)]" value={newAddress.fullName} onChange={e => setNewAddress({...newAddress, fullName: e.target.value})} />
-                <input type="text" placeholder="Phone Number" className="w-full p-3 border rounded-lg focus:outline-[var(--color-primary)]" value={newAddress.phone} onChange={e => setNewAddress({...newAddress, phone: e.target.value})} />
-                <input type="text" placeholder="Region / City" className="w-full p-3 border rounded-lg focus:outline-[var(--color-primary)]" value={newAddress.region} onChange={e => setNewAddress({...newAddress, region: e.target.value})} />
-                <textarea placeholder="Full Address Line" className="w-full p-3 border rounded-lg focus:outline-[var(--color-primary)] h-24" value={newAddress.addressLine} onChange={e => setNewAddress({...newAddress, addressLine: e.target.value})} />
-                
-                <div className="flex justify-end gap-3 mt-5">
-                  <button onClick={() => setIsAddingAddress(false)} className="px-5 py-2 rounded-xl border-2">Cancel</button>
-                  <button onClick={handleAddNewAddress} className="px-5 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white font-semibold">Save Address</button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {allAddresses.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4">No addresses saved yet.</p>
-                  ) : (
-                    allAddresses.map((addr) => (
-                      <label
-                        key={addr._id || addr.id}
-                        className={`block p-4 rounded-xl border-2 cursor-pointer transition ${
-                          selectedAddressId === (addr._id || addr.id)
-                            ? "border-[var(--color-primary)] bg-orange-50"
-                            : "border-[var(--border)]"
-                        }`}
-                      >
-                        <div className="flex items-start">
-                          <input
-                            type="radio"
-                            name="address"
-                            className="mr-3 mt-1 cursor-pointer"
-                            checked={selectedAddressId === (addr._id || addr.id)}
-                            onChange={() => setSelectedAddressId(addr._id || addr.id)}
-                          />
-                          <div>
-                            <span className="font-semibold text-[var(--text-primary)]">{addr.fullName}</span>
-                            <p className="text-sm text-gray-600 mt-1">{addr.phone}</p>
-                            <p className="text-sm text-[var(--text-secondary)] mt-1">
-                              {addr.addressLine}, {addr.region}
-                            </p>
-                          </div>
-                        </div>
-                      </label>
-                    ))
-                  )}
-                </div>
-
-                <div className="flex justify-between items-center mt-5">
-                  <button onClick={() => setIsAddingAddress(true)} className="text-[var(--color-primary)] font-semibold text-sm hover:underline">
-                    + Add New Address
-                  </button>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setShowAddressPopup(false)}
-                      className="px-5 py-2 rounded-xl border-2"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSaveAddress}
-                      className="px-5 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white font-semibold"
-                    >
-                      Use Selected
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </div>
+  );
+}
+
+function Field({
+  label,
+  icon: Icon,
+  name,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  disabled = false,
+  hint,
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-semibold text-[var(--text-secondary)]">
+        {label}
+      </label>
+      <div className="relative">
+        <Icon
+          size={18}
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+        />
+        <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          placeholder={placeholder}
+          className="w-full rounded-xl border bg-[var(--bg-main)] py-3 pl-11 pr-4 text-sm text-[var(--text-primary)] outline-none transition placeholder:text-[var(--text-muted)] disabled:cursor-not-allowed disabled:opacity-70"
+          style={{
+            borderColor: disabled ? "var(--border)" : undefined,
+          }}
+          onFocus={(e) => {
+            if (!disabled) {
+              e.currentTarget.style.borderColor = "var(--color-primary)";
+              e.currentTarget.style.boxShadow = "var(--ring)";
+            }
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = "var(--border)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        />
+      </div>
+      {hint && <p className="mt-1.5 text-xs text-[var(--text-muted)]">{hint}</p>}
+    </div>
+  );
+}
+
+function ModeButton({ active, onClick, title, subtitle, disabled = false }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`rounded-2xl border-2 px-4 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
+        active
+          ? "border-[var(--color-primary)] bg-[var(--bg-hover)]"
+          : "border-[var(--border)] hover:border-[color-mix(in_srgb,var(--color-primary)_40%,var(--border))]"
+      }`}
+    >
+      <p className="text-sm font-semibold text-[var(--text-primary)]">{title}</p>
+      <p className="mt-0.5 text-xs text-[var(--text-muted)]">{subtitle}</p>
+    </button>
   );
 }

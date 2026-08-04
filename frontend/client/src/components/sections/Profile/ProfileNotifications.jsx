@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import { Bell, CheckCircle2 } from "lucide-react";
 import { API_BASE_URL, authHeaders } from "../../../api/base";
 import { useNavigate } from "react-router-dom";
+import ProfileSectionHeader from "./ProfileSectionHeader";
 
 export default function ProfileNotifications() {
   const navigate = useNavigate();
@@ -17,7 +19,7 @@ export default function ProfileNotifications() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login to continue");
+      toast.error("Please login to continue");
       navigate("/auth");
       return;
     }
@@ -42,7 +44,14 @@ export default function ProfileNotifications() {
       }
     };
 
+    // Load notifications immediately
     loadNotifications();
+
+    // Set up polling to refresh notifications every 30 seconds
+    const pollInterval = setInterval(loadNotifications, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollInterval);
   }, [navigate]);
 
   const markOneRead = async (notificationId) => {
@@ -88,45 +97,43 @@ export default function ProfileNotifications() {
   };
 
   return (
-    <div
-      className="p-6 rounded-2xl shadow-2xl"
-      style={{
-        backgroundColor: "var(--bg-card)",
-        boxShadow: "0 10px 40px var(--shadow)",
-      }}
-    >
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Bell className="text-[var(--color-primary)]" size={22} />
-          <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-            My Notifications
-          </h2>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Unread: {unreadCount}
-          </span>
-          <button
-            onClick={clearAllNotifications}
-            disabled={clearing || notifications.length === 0}
-            className="px-3 py-1.5 rounded-lg border border-[var(--border)] text-sm font-medium hover:bg-[var(--bg-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {clearing ? "Clearing..." : "Clear All"}
-          </button>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <ProfileSectionHeader
+        icon={Bell}
+        eyebrow="Communication"
+        title="My Notifications"
+        description="Alerts and updates about your account and orders."
+        actions={
+          <>
+            <span className="text-sm font-medium text-[var(--text-secondary)]">
+              Unread: {unreadCount}
+            </span>
+            <button
+              type="button"
+              onClick={clearAllNotifications}
+              disabled={clearing || notifications.length === 0}
+              className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {clearing ? "Clearing..." : "Clear All"}
+            </button>
+          </>
+        }
+      />
 
       {loading ? (
-        <p style={{ color: "var(--text-secondary)" }}>Loading notifications...</p>
+        <p className="text-sm text-[var(--text-muted)]">Loading notifications...</p>
       ) : notifications.length === 0 ? (
-        <p style={{ color: "var(--text-secondary)" }}>No notifications yet.</p>
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] py-16 text-center shadow-[0_24px_60px_-36px_var(--shadow)]">
+          <p className="text-[var(--text-secondary)]">No notifications yet.</p>
+        </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_60px_-36px_var(--shadow)] backdrop-blur-xl">
           {notifications.map((item) => (
             <button
               key={item._id}
+              type="button"
               onClick={() => markOneRead(item._id)}
-              className={`w-full text-left p-4 rounded-xl border-2 transition ${
+              className={`w-full rounded-xl border-2 p-4 text-left transition ${
                 item.isRead
                   ? "border-[var(--border)] opacity-80"
                   : "border-[var(--color-primary)]"
@@ -135,12 +142,8 @@ export default function ProfileNotifications() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                    {item.title}
-                  </p>
-                  <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-                    {item.message}
-                  </p>
+                  <p className="font-semibold text-[var(--text-primary)]">{item.title}</p>
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">{item.message}</p>
                 </div>
                 {item.isRead && <CheckCircle2 size={18} className="text-green-500" />}
               </div>

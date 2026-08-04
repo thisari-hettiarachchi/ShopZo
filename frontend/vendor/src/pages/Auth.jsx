@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { Mail, Lock, Eye, EyeOff, Store, ArrowRight, Check } from 'lucide-react';
 import { registerUser, loginUser } from "../services/authService";
 import { isVendorAuthenticated, saveVendorSession } from "../utils/authStorage";
@@ -44,13 +45,13 @@ export default function AuthPages() {
         console.log(res.data);
 
         saveVendorSession({ token: res.data.token, vendor: res.data?.vendor || null });
-        alert("Login successful");
+        toast.success("Login successful");
 
         navigate("/"); 
 
       } else {
         if (formData.password !== formData.confirmPassword) {
-          alert("Passwords do not match");
+          toast.error("Passwords do not match");
           return;
         }
 
@@ -61,11 +62,11 @@ export default function AuthPages() {
         });
 
         console.log(res.data);
-        alert("Account created successfully");
+        toast.success("Account created successfully - awaiting approval");
         setIsLogin(true);
       }
     } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 

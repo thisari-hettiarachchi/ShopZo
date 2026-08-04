@@ -8,13 +8,16 @@ import productRoutes from "./routes/productRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
+import bannerRoutes from "./routes/bannerRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
-import cardRoutes from "./routes/cardRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import checkoutRoutes from "./routes/checkoutRoutes.js";
+import { stripeWebhook } from "./controllers/checkoutController.js";
 
 dotenv.config();
 connectCloudinary();
@@ -34,10 +37,15 @@ const defaultOrigins = [
 
 const allowedOrigins = configuredOrigins.length > 0 ? configuredOrigins : defaultOrigins;
 
+// Vite picks the next free port (5173, 5174, 5175, 5176, ...) when running the
+// client/vendor/admin dev servers together, so allow any localhost port in dev
+// instead of hardcoding a fixed list that breaks the moment a port is taken.
+const isLocalDevOrigin = (origin) => /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || isLocalDevOrigin(origin)) {
         callback(null, true);
         return;
       }
@@ -47,6 +55,10 @@ app.use(
   })
 );
 
+// Stripe requires the raw, unparsed request body to verify webhook signatures,
+// so this route must be registered before the JSON body parser below.
+app.post("/api/checkout/webhook", express.raw({ type: "application/json" }), stripeWebhook);
+
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
@@ -55,13 +67,15 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/banners", bannerRoutes);
 app.use("/api/vendors", vendorRoutes);
 app.use("/api/user", userRoutes); 
 app.use("/api/user/addresses", addressRoutes);
-app.use("/api/user/cards", cardRoutes);
 app.use("/api/user", orderRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/user/notifications", notificationRoutes);
+app.use("/api/checkout", checkoutRoutes);
 
 app.get("/", (req, res) => res.send("ShopZo API running 🚀"));
 

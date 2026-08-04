@@ -6,6 +6,14 @@ import Review from "../models/Review.js";
 // Utility to get start of day
 const getStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
+// Platform commission taken from each settled sale before payout.
+const PLATFORM_COMMISSION_RATE = 0.02;
+
+const isOrderSettled = (order) =>
+  order.paymentStatus === "paid" || (order.paymentMethod !== "stripe" && order.status === "Delivered");
+
+const isOrderVoided = (order) => order.status === "Cancelled" || order.status === "Refunded" || order.paymentStatus === "refunded";
+
 export const getDashboardAnalytics = async (req, res) => {
   try {
     const vendorId = req.user?.id;
@@ -34,23 +42,36 @@ export const getDashboardAnalytics = async (req, res) => {
     let totalSales = 0;
     const uniqueCustomers = new Set();
     const productsCount = products.length;
-    
-    // Group weekly revenue by weekday
-    const revenueMap = {};
+
     const recentOrders = orders.slice(0, 5);
+
+    // Group revenue by actual calendar date over the last 14 days (avoids
+    // merging data from different weeks into the same weekday bucket).
+    const DAYS = 14;
+    const dayKeys = [];
+    const revenueMap = {};
+    for (let i = DAYS - 1; i >= 0; i -= 1) {
+      const date = getStartOfDay(new Date());
+      date.setDate(date.getDate() - i);
+      const key = date.toISOString().slice(0, 10);
+      dayKeys.push(key);
+      revenueMap[key] = 0;
+    }
 
     orders.forEach(order => {
       totalSales += order.total;
       if (order.user) uniqueCustomers.add(order.user._id.toString());
-      
-      const orderDay = new Date(order.createdAt).toLocaleDateString('en-US', { weekday: 'short' });
-      revenueMap[orderDay] = (revenueMap[orderDay] || 0) + order.total;
+
+      const key = getStartOfDay(new Date(order.createdAt)).toISOString().slice(0, 10);
+      if (revenueMap[key] !== undefined) {
+        revenueMap[key] += order.total;
+      }
     });
 
-    const weekdayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    const revenueData = weekdayOrder
-      .filter((day) => revenueMap[day] !== undefined)
-      .map((day) => ({ day, revenue: revenueMap[day] }));
+    const revenueData = dayKeys.map((key) => ({
+      day: new Date(key).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      revenue: revenueMap[key],
+    }));
 
     // Build category distribution from product categories in DB
     const categoryCounts = products.reduce((acc, item) => {
@@ -101,5 +122,85 @@ export const getDashboardAnalytics = async (req, res) => {
   } catch (error) {
     console.error("Error generating analytics:", error);
     res.status(500).json({ message: "Failed to generate analytics" });
+  }
+};
+
+export const getVendorEarnings = async (req, res) => {
+  try {
+    const vendorId = req.user?.id;
+    if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
+
+    const orders = await Order.find({ vendor: vendorId })
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+
+    let grossSettled = 0;
+    let pendingAmount = 0;
+    let voidedAmount = 0;
+    const settledOrders = [];
+
+    const DAYS = 14;
+    const dayKeys = [];
+    const earningsMap = {};
+    for (let i = DAYS - 1; i >= 0; i -= 1) {
+      const date = getStartOfDay(new Date());
+      date.setDate(date.getDate() - i);
+      const key = date.toISOString().slice(0, 10);
+      dayKeys.push(key);
+      earningsMap[key] = 0;
+    }
+
+    orders.forEach((order) => {
+      if (isOrderVoided(order)) {
+        voidedAmount += order.total || 0;
+        return;
+      }
+
+      if (isOrderSettled(order)) {
+        grossSettled += order.total || 0;
+        settledOrders.push(order);
+
+        const key = getStartOfDay(new Date(order.createdAt)).toISOString().slice(0, 10);
+        if (earningsMap[key] !== undefined) {
+          earningsMap[key] += (order.total || 0) * (1 - PLATFORM_COMMISSION_RATE);
+        }
+      } else {
+        pendingAmount += order.total || 0;
+      }
+    });
+
+    const commission = grossSettled * PLATFORM_COMMISSION_RATE;
+    const netEarnings = grossSettled - commission;
+
+    const earningsTrend = dayKeys.map((key) => ({
+      day: new Date(key).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      earnings: Number(earningsMap[key].toFixed(2)),
+    }));
+
+    res.json({
+      summary: {
+        grossSettled: Number(grossSettled.toFixed(2)),
+        commission: Number(commission.toFixed(2)),
+        netEarnings: Number(netEarnings.toFixed(2)),
+        pendingAmount: Number(pendingAmount.toFixed(2)),
+        voidedAmount: Number(voidedAmount.toFixed(2)),
+        commissionRate: PLATFORM_COMMISSION_RATE,
+        settledOrderCount: settledOrders.length,
+      },
+      earningsTrend,
+      recentSettledOrders: settledOrders.slice(0, 10).map((order) => ({
+        _id: order._id,
+        total: order.total,
+        netAmount: Number(((order.total || 0) * (1 - PLATFORM_COMMISSION_RATE)).toFixed(2)),
+        paymentMethod: order.paymentMethod || "cod",
+        paymentStatus: order.paymentStatus || "pending",
+        status: order.status,
+        createdAt: order.createdAt,
+        customer: order.user?.name || "Customer",
+      })),
+    });
+  } catch (error) {
+    console.error("Error generating earnings:", error);
+    res.status(500).json({ message: "Failed to generate earnings" });
   }
 };

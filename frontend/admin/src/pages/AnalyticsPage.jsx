@@ -1,5 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 import { getAnalytics } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState(null);
@@ -21,13 +35,15 @@ export default function AnalyticsPage() {
     loadAnalytics();
   }, []);
 
-  const maxRevenue = useMemo(() => {
-    return Math.max(0, ...(analytics?.revenueData || []).map((point) => point.revenue || 0));
-  }, [analytics]);
-
   return (
-    <section className="px-6 md:px-10 pt-8 pb-10 bg-[var(--bg-main)] text-[var(--text-primary)] min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Analytics</h1>
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Performance Insights"
+        title="Analytics"
+        description="Track sales, orders, customers, and category mix across the platform."
+        meta={analytics ? `${analytics.stats?.orders || 0} orders` : undefined}
+      />
 
       {error && <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">{error}</div>}
 
@@ -54,44 +70,54 @@ export default function AnalyticsPage() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
-              <h2 className="mb-4 text-lg font-semibold">Revenue by Day</h2>
-              <div className="space-y-3">
-                {(analytics.revenueData || []).length === 0 ? (
-                  <p className="text-sm text-[var(--text-secondary)]">No revenue data yet.</p>
-                ) : (
-                  analytics.revenueData.map((point) => (
-                    <div key={point.day}>
-                      <div className="mb-1 flex items-center justify-between text-sm">
-                        <span>{point.day}</span>
-                        <span className="text-[var(--text-secondary)]">${Number(point.revenue || 0).toFixed(2)}</span>
-                      </div>
-                      <div className="h-2 rounded-full bg-[var(--bg-main)]">
-                        <div
-                          className="h-2 rounded-full bg-[var(--color-primary)]"
-                          style={{ width: `${maxRevenue ? ((point.revenue || 0) / maxRevenue) * 100 : 0}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+              <h2 className="mb-4 text-lg font-semibold">Revenue - Last 14 Days</h2>
+              {(analytics.revenueData || []).length === 0 ? (
+                <p className="text-sm text-[var(--text-secondary)]">No revenue data yet.</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={280}>
+                  <AreaChart data={analytics.revenueData}>
+                    <defs>
+                      <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="day" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip formatter={(value) => [`$${Number(value).toFixed(2)}`, "Revenue"]} />
+                    <Area type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} fill="url(#revenueFill)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
               <h2 className="mb-4 text-lg font-semibold">Category Mix</h2>
-              <div className="space-y-3">
-                {(analytics.categoryData || []).length === 0 ? (
-                  <p className="text-sm text-[var(--text-secondary)]">No category data yet.</p>
-                ) : (
-                  analytics.categoryData.map((item) => (
-                    <div key={item.name} className="flex items-center gap-3">
-                      <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="flex-1 text-sm">{item.name}</span>
-                      <span className="text-sm text-[var(--text-secondary)]">{item.value}</span>
-                    </div>
-                  ))
-                )}
-              </div>
+              {(analytics.categoryData || []).length === 0 ? (
+                <p className="text-sm text-[var(--text-secondary)]">No category data yet.</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={280}>
+                  <PieChart>
+                    <Pie
+                      data={analytics.categoryData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={90}
+                      paddingAngle={2}
+                    >
+                      {analytics.categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
@@ -115,6 +141,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
       )}
+      </div>
     </section>
   );
 }

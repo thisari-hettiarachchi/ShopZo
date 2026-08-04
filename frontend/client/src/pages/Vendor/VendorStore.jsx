@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { API_BASE_URL, authHeaders } from "../../api/base";
 import { useNavigate } from "react-router-dom";
 
@@ -153,7 +154,7 @@ export default function VendorProfile() {
 
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login to follow vendors");
+      toast.error("Please login to follow vendors");
       navigate("/auth");
       return;
     }
@@ -177,7 +178,7 @@ export default function VendorProfile() {
         setFollowersCount(data.followersCount);
       }
     } catch (error) {
-      alert(error.message || "Failed to update follow status");
+      toast.error(error.message || "Failed to update follow status");
     } finally {
       setFollowLoading(false);
     }

@@ -1,47 +1,156 @@
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Assets from "../../../assets/assets";
+import ScrollReveal from "../../shared/ScrollReveal";
 
-const banners = [
-  { src: Assets.flashSale, alt: "Mega Sale", label: "Up to 70% Off", sub: "Flash Deals" },
-  { src: Assets.newArrival, alt: "New Arrivals", label: "Fresh Drops", sub: "New Arrivals" },
-];
+const AUTO_MS = 5500;
 
-export default function PromoSection() {
+function BannerPanel({ banners, fallbackImage }) {
+  const slides = banners && banners.length > 0 ? banners : [];
+  const count = slides.length;
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const startRef = useRef(Date.now());
+
+  useEffect(() => {
+    setActive(0);
+    setProgress(0);
+    startRef.current = Date.now();
+  }, [count]);
+
+  useEffect(() => {
+    if (count <= 1 || paused) return undefined;
+    startRef.current = Date.now() - progress * AUTO_MS;
+
+    const tick = setInterval(() => {
+      const elapsed = Date.now() - startRef.current;
+      const nextProgress = Math.min(elapsed / AUTO_MS, 1);
+      setProgress(nextProgress);
+
+      if (nextProgress >= 1) {
+        setActive((prev) => (prev + 1) % count);
+        setProgress(0);
+        startRef.current = Date.now();
+      }
+    }, 40);
+
+    return () => clearInterval(tick);
+  }, [count, paused, active]);
+
+  if (count === 0) return null;
+
+  const banner = slides[active];
+  const vendorId = banner?.vendor?._id || banner?.vendor;
+  const title = typeof banner?.title === "string" ? banner.title.trim() : "";
+  const subtitle = typeof banner?.subtitle === "string" ? banner.subtitle.trim() : "";
+  const href =
+    typeof vendorId === "string" && vendorId.length > 8
+      ? `/vendors/${vendorId}`
+      : "/products";
+
   return (
-    <section className="py-20 px-4 bg-[var(--bg-main)]">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-        {banners.map((banner, index) => (
+    <div
+      className="relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_28px_70px_-40px_var(--shadow)]"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div className="relative min-h-[280px] md:min-h-[320px]">
+        <AnimatePresence mode="wait">
           <motion.div
-            key={banner.alt}
-            initial={{ opacity: 0, x: index === 0 ? -30 : 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="group relative overflow-hidden rounded-3xl cursor-pointer border border-[var(--border)] bg-[var(--bg-card)]"
-            style={{ aspectRatio: "16/9" }}
+            key={banner._id || active}
+            initial={{ opacity: 0, scale: 1.03 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.99 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0"
           >
-            <img
-              src={banner.src}
-              alt={banner.alt}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute bottom-6 left-6 text-white">
-              <p className="section-eyebrow text-orange-400 mb-1">{banner.sub}</p>
-              <h3 className="display-font text-2xl md:text-3xl font-black leading-tight">{banner.label}</h3>
-            </div>
-            <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white bg-[var(--color-primary)] shadow-lg shadow-orange-500/40"
-              >
-                Shop <ArrowRight size={14} />
-              </Link>
-            </div>
+            <Link to={href} className="group block h-full w-full">
+              <img
+                src={banner.image || fallbackImage}
+                alt={title || "Promotion banner"}
+                className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+              {(subtitle || title) && (
+                <div className="absolute inset-0 flex items-end p-7 md:p-9">
+                  <div className="max-w-sm">
+                    {subtitle ? (
+                      <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/70">
+                        {subtitle}
+                      </p>
+                    ) : null}
+                    {title ? (
+                      <h3
+                        className={`display-font text-3xl font-black leading-tight text-white md:text-4xl ${
+                          subtitle ? "mt-3" : ""
+                        }`}
+                      >
+                        {title}
+                      </h3>
+                    ) : null}
+                  </div>
+                </div>
+              )}
+            </Link>
           </motion.div>
-        ))}
+        </AnimatePresence>
+      </div>
+
+      {count > 1 && (
+        <>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/15">
+            <div
+              className="h-full bg-[var(--color-primary)] transition-[width] duration-75"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+          <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2">
+            {slides.map((item, index) => (
+              <button
+                key={item._id || index}
+                type="button"
+                aria-label={`Go to banner ${index + 1}`}
+                onClick={() => {
+                  setActive(index);
+                  setProgress(0);
+                  startRef.current = Date.now();
+                }}
+                className={`h-2 rounded-full transition-all ${
+                  index === active ? "w-7 bg-white" : "w-2 bg-white/45 hover:bg-white/75"
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function PromoSection({ banners }) {
+  const list = Array.isArray(banners) ? banners : [];
+
+  // 1st, 3rd, 5th... → left | 2nd, 4th, 6th... → right
+  const leftBanners = list.filter((_, index) => index % 2 === 0);
+  const rightBanners = list.filter((_, index) => index % 2 === 1);
+
+  if (list.length === 0) return null;
+
+  const hasRight = rightBanners.length > 0;
+
+  return (
+    <section className="bg-[var(--bg-main)] px-4 py-16">
+      <div className="mx-auto max-w-7xl">
+        <ScrollReveal y={32} duration={0.55}>
+          <div className={`grid gap-5 ${hasRight ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}>
+            <BannerPanel banners={leftBanners} fallbackImage={Assets.flashSale} />
+            {hasRight && (
+              <BannerPanel banners={rightBanners} fallbackImage={Assets.newArrival} />
+            )}
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );

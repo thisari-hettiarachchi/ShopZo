@@ -1,203 +1,158 @@
 import React, { useState, useEffect } from "react";
-import { cancelOrder, fetchOrders as fetchOrdersApi, fetchReturns, requestReturn } from "../../../api/ordersApi";
+import { useNavigate } from "react-router-dom";
+import { Package, ChevronRight } from "lucide-react";
+import { fetchOrders as fetchOrdersApi } from "../../../api/ordersApi";
+import ProfileSectionHeader from "./ProfileSectionHeader";
+
+const STATUS_STYLES = {
+  Delivered: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+  Pending: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  Placed: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  Processing: "bg-sky-500/15 text-sky-700 dark:text-sky-400",
+  Shipped: "bg-violet-500/15 text-violet-700 dark:text-violet-400",
+  Cancelled: "bg-red-500/15 text-red-600 dark:text-red-400",
+  Refunded: "bg-slate-500/15 text-slate-600 dark:text-slate-300",
+};
+
+function formatOrderId(id = "") {
+  const short = String(id).slice(-8).toUpperCase();
+  return short ? `ORD-${short}` : "ORD---------";
+}
+
+function formatMoney(amount) {
+  return `Rs. ${(Number(amount) || 0).toLocaleString("en-LK")}`;
+}
+
+function formatDate(date) {
+  if (!date) return "—";
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function getItemCount(order) {
+  return (order.products || []).reduce((sum, item) => sum + (item?.quantity || 1), 0);
+}
 
 export default function OrdersPage() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
-  const [returnsByOrderId, setReturnsByOrderId] = useState({});
-  const [expandedOrderId, setExpandedOrderId] = useState("");
-  const [actionLoadingId, setActionLoadingId] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const refreshOrders = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setOrders([]);
-      setReturnsByOrderId({});
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const [ordersRes, returnsRes] = await Promise.all([fetchOrdersApi(), fetchReturns()]);
-      const list = Array.isArray(ordersRes.data) ? ordersRes.data : [];
-      const returns = Array.isArray(returnsRes.data) ? returnsRes.data : [];
-
-      const returnMap = returns.reduce((acc, item) => {
-        const orderId = item?.order?._id;
-        if (orderId) {
-          acc[orderId] = item;
-        }
-        return acc;
-      }, {});
-
-      setOrders(list);
-      setReturnsByOrderId(returnMap);
-      if (!expandedOrderId && list[0]?._id) {
-        setExpandedOrderId(list[0]._id);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    refreshOrders();
+    const loadOrders = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setOrders([]);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const ordersRes = await fetchOrdersApi();
+        setOrders(Array.isArray(ordersRes.data) ? ordersRes.data : []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOrders();
   }, []);
 
-  if (loading) return <p>Loading orders...</p>;
-
-  const canCancelOrder = (order) => {
-    const status = String(order.status || "").toLowerCase();
-    if (!["placed", "pending", "processing"].includes(status)) return false;
-
-    const referenceDate = order.createdAt ? new Date(order.createdAt).getTime() : Date.now();
-    const hoursFromOrder = (Date.now() - referenceDate) / (1000 * 60 * 60);
-    return hoursFromOrder <= 24;
-  };
-
-  const canReturnOrder = (order) => {
-    const status = String(order.status || "").toLowerCase();
-    if (["cancelled", "requested", "rejected", "refunded"].includes(status)) return false;
-
-    const hasReturnRequest = Boolean(returnsByOrderId[order._id]);
-    if (hasReturnRequest) return false;
-
-    const referenceDate = order.createdAt ? new Date(order.createdAt).getTime() : Date.now();
-    const daysFromOrder = (Date.now() - referenceDate) / (1000 * 60 * 60 * 24);
-    return daysFromOrder <= 7;
-  };
-
-  const handleRequestReturn = async (orderId) => {
-    const reason = prompt("Reason for return:");
-    if (!reason) return;
-    try {
-      setActionLoadingId(orderId);
-      await requestReturn(orderId, { reason, details: "Requested from profile" });
-      alert("Return request submitted");
-      await refreshOrders();
-    } catch (error) {
-      alert(error?.response?.data?.message || "Failed to request return");
-    } finally {
-      setActionLoadingId("");
-    }
-  };
-
-  const handleCancelOrder = async (orderId) => {
-    const confirmed = window.confirm("Do you want to cancel this order?");
-    if (!confirmed) return;
-
-    try {
-      setActionLoadingId(orderId);
-      await cancelOrder(orderId);
-      alert("Order cancelled");
-      await refreshOrders();
-    } catch (error) {
-      alert(error?.response?.data?.message || "Failed to cancel order");
-    } finally {
-      setActionLoadingId("");
-    }
-  };
-
   return (
-    <div className="p-6 rounded-2xl shadow-2xl bg-[var(--bg-card)]">
-      <h2 className="text-2xl font-bold mb-6 text-[var(--text-primary)]">
-        My Orders
-      </h2>
+    <div className="space-y-6">
+      <ProfileSectionHeader
+        icon={Package}
+        eyebrow="Orders"
+        title="My Orders"
+        description="Track purchases, cancel within 24 hours, or confirm receipt when shipped."
+      />
 
-      {orders.length === 0 ? (
-        <p className="text-center text-[var(--text-secondary)] py-10">
-          No orders found 🛒
-        </p>
+      {loading ? (
+        <p className="text-sm text-[var(--text-muted)]">Loading orders...</p>
+      ) : orders.length === 0 ? (
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] py-16 text-center shadow-[0_24px_60px_-36px_var(--shadow)]">
+          <p className="text-[var(--text-secondary)]">No orders found.</p>
+        </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {orders.map((order) => (
-            <div
-              key={order._id}
-              className="p-4 rounded-xl border border-[var(--border)] cursor-pointer"
-              onClick={() => setExpandedOrderId((prev) => (prev === order._id ? "" : order._id))}
-            >
-              <div className="flex items-center gap-4">
-                <img
-                  src={order.products?.[0]?.product?.images?.[0] || "https://via.placeholder.com/80"}
-                  alt=""
-                  className="w-20 h-20 rounded-lg object-cover"
-                />
+        <div className="flex flex-col gap-3">
+          {orders.map((order) => {
+            const itemCount = getItemCount(order);
+            const items = order.products || [];
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[var(--text-primary)] truncate">
-                    {order.products?.map((item) => item?.product?.name).filter(Boolean).join(", ") || "Product"}
-                  </p>
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    Ordered on {new Date(order.createdAt).toLocaleDateString()}
-                  </p>
-                  <p className="text-xs text-[var(--text-secondary)] mt-1">
-                    Vendor: {order.vendor?.storeName || order.vendor?.name || "Vendor"}
-                  </p>
-                </div>
+            return (
+              <article
+                key={order._id}
+                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_18px_40px_-30px_var(--shadow)] backdrop-blur-xl transition hover:border-[color-mix(in_srgb,var(--color-primary)_35%,var(--border))]"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3
+                        className="text-base font-semibold tracking-wide text-[var(--text-primary)]"
+                        style={{ fontFamily: "'Sora', sans-serif" }}
+                      >
+                        {formatOrderId(order._id)}
+                      </h3>
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                          STATUS_STYLES[order.status] ||
+                          "bg-[var(--bg-muted)] text-[var(--text-secondary)]"
+                        }`}
+                      >
+                        {order.status || "Pending"}
+                      </span>
+                    </div>
 
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-[var(--text-primary)]">{order.status}</p>
-                  <p className="font-semibold text-[var(--text-primary)]">₹{order.total}</p>
-                  {returnsByOrderId[order._id] && (
-                    <p className="text-[11px] text-amber-600 mt-1">Return: {returnsByOrderId[order._id].status}</p>
-                  )}
-                </div>
-              </div>
+                    <p className="mt-2 text-sm text-[var(--text-muted)]">
+                      Ordered on {formatDate(order.createdAt)}
+                    </p>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      {itemCount} {itemCount === 1 ? "item" : "items"}
+                    </p>
 
-              {expandedOrderId === order._id && (
-                <div className="w-full mt-4 border-t border-[var(--border)] pt-4" onClick={(event) => event.stopPropagation()}>
-                  <p className="text-xs text-[var(--text-secondary)] mb-2">Order ID: {order._id}</p>
-
-                  <div className="space-y-2 mb-4">
-                    {(order.products || []).map((item, idx) => (
-                      <div key={`${order._id}-${idx}`} className="flex items-center justify-between rounded-lg bg-[var(--bg-main)] px-3 py-2">
-                        <div className="min-w-0 pr-3">
-                          <p className="text-sm font-medium text-[var(--text-primary)] truncate">{item?.product?.name || "Product"}</p>
-                          <p className="text-xs text-[var(--text-secondary)]">Qty: {item?.quantity || 1}</p>
-                        </div>
-                        <p className="text-sm font-semibold text-[var(--text-primary)]">₹{item?.price || 0}</p>
-                      </div>
-                    ))}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {items.slice(0, 3).map((item, idx) => (
+                        <span
+                          key={`${order._id}-preview-${idx}`}
+                          className="inline-flex max-w-full truncate rounded-lg bg-[var(--bg-main)] px-2.5 py-1.5 text-xs text-[var(--text-secondary)]"
+                        >
+                          {item?.quantity || 1}x {item?.product?.name || "Product"}
+                        </span>
+                      ))}
+                      {items.length > 3 && (
+                        <span className="inline-flex rounded-lg bg-[var(--bg-main)] px-2.5 py-1.5 text-xs text-[var(--text-muted)]">
+                          +{items.length - 3} more
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-2 mb-4">
-                    {(order.trackingTimeline || []).map((step) => (
-                      <div key={step.status} className="text-center">
-                        <div className={`mx-auto h-2.5 w-2.5 rounded-full ${step.completed ? "bg-[var(--color-primary)]" : "bg-[var(--border)]"}`} />
-                        <p className="mt-1 text-[10px] text-[var(--text-secondary)]">{step.status}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      disabled={!canCancelOrder(order) || actionLoadingId === order._id}
-                      onClick={() => handleCancelOrder(order._id)}
-                      className="rounded-md border border-red-500 px-3 py-1 text-xs text-red-600 disabled:opacity-40"
+                  <div className="flex shrink-0 flex-col items-end justify-between self-stretch">
+                    <p
+                      className="text-xl font-semibold text-[var(--color-primary)] sm:text-2xl"
+                      style={{ fontFamily: "'Sora', sans-serif" }}
                     >
-                      {actionLoadingId === order._id ? "Updating..." : canCancelOrder(order) ? "Cancel Order" : "Cancel expired"}
-                    </button>
+                      {formatMoney(order.total)}
+                    </p>
 
                     <button
-                      disabled={!canReturnOrder(order) || actionLoadingId === order._id}
-                      onClick={() => handleRequestReturn(order._id)}
-                      className="rounded-md border border-[var(--color-primary)] px-3 py-1 text-xs text-[var(--color-primary)] disabled:opacity-40"
+                      type="button"
+                      onClick={() => navigate(`/orders/${order._id}`)}
+                      className="mt-6 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)] transition hover:text-[var(--color-primary)]"
                     >
-                      {canReturnOrder(order) ? "Request Return (within 7 days)" : "Return expired"}
+                      View details
+                      <ChevronRight size={14} />
                     </button>
-
-                    {!canReturnOrder(order) && !returnsByOrderId[order._id] && (
-                      <p className="text-[11px] text-[var(--text-secondary)] self-center">
-                        Return option expires after 7 days
-                      </p>
-                    )}
                   </div>
                 </div>
-              )}
-            </div>
-          ))}
+              </article>
+            );
+          })}
         </div>
       )}
     </div>

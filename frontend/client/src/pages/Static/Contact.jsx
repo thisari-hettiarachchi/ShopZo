@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import Assets from "../../assets/assets";
 import HeroSection from "../../components/sections/contact/HeroSection";
 import ContactSection from "../../components/sections/contact/ContactSection";
@@ -78,7 +79,7 @@ export default function Contact() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Message sent to branch:", selectedBranch.name, formData);
-    alert(`Message sent to ${selectedBranch.name}!`);
+    toast.success(`Message sent to ${selectedBranch.name}!`);
     setFormData({ name: "", email: "", subject: "", message: "" });
   };
 

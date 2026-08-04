@@ -9,6 +9,12 @@ export const fetchOrders = async () => {
   });
 };
 
+export const fetchOrderById = async (orderId) => {
+  return axios.get(`${USER_URL}/orders/${orderId}`, {
+    headers: authHeaders(),
+  });
+};
+
 export const fetchReturns = async () => {
   return axios.get(`${USER_URL}/returns`, {
     headers: authHeaders(),
@@ -40,4 +46,14 @@ export const cancelOrder = async (orderId) => {
   return axios.post(`${USER_URL}/orders/${orderId}/cancel`, {}, {
     headers: authHeaders(),
   });
+};
+
+export const confirmOrderReceipt = async (orderId) => {
+  return axios.post(
+    `${USER_URL}/orders/${orderId}/confirm-receipt`,
+    {},
+    {
+      headers: authHeaders(),
+    }
+  );
 };

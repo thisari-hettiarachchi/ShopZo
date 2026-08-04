@@ -28,6 +28,15 @@ export const fetchProductReviews = async (productId) => {
   return res.json();
 };
 
+export const fetchReviewEligibility = async (productId) => {
+  const res = await fetch(`${BASE_URL}/${productId}/review-eligibility`, {
+    headers: {
+      ...authHeaders(),
+    },
+  });
+  return res.json();
+};
+
 export const postProductReview = async (productId, payload) => {
   const res = await fetch(`${BASE_URL}/${productId}/reviews`, {
     method: "POST",

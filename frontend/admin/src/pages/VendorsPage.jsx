@@ -1,9 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import { FileText } from "lucide-react";
 import {
   approveVendor,
   getVendors,
+  reviewVendorDocuments,
   updateVendorStatus,
 } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
+
+const DOC_STATUS_TONE = {
+  pending: "bg-amber-50 text-amber-700 ring-amber-200",
+  verified: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  rejected: "bg-rose-50 text-rose-700 ring-rose-200",
+};
 
 const STATUS_TONE = {
   pending: "bg-amber-50 text-amber-700 ring-amber-200",
@@ -88,7 +98,7 @@ export default function VendorsPage() {
       await callback();
       await loadVendors();
     } catch (requestError) {
-      alert(requestError?.response?.data?.message || "Action failed");
+      toast.error(requestError?.response?.data?.message || "Action failed");
     } finally {
       setSavingId("");
     }
@@ -97,23 +107,22 @@ export default function VendorsPage() {
   const askReason = (label) => window.prompt(`${label} reason (optional)`)?.trim() || "";
 
   return (
-    <section className="min-h-screen bg-[var(--bg-main)] px-6 pb-16 pt-8 text-[var(--text-primary)] md:px-10">
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight">Vendor Workflow</h1>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              Approve or reject registrations, suspend or ban vendors, and manage verification checks.
-            </p>
-          </div>
+        <PageHeader
+          eyebrow="Vendor Ops"
+          title="Vendors"
+          description="Approve or reject registrations, suspend or ban vendors, and manage verification checks."
+          meta={`${filtered.length} vendors`}
+        >
           <input
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search vendor..."
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2 text-sm outline-none sm:w-72"
+            className="w-full max-w-sm rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-2.5 text-sm focus:border-[var(--color-primary)] focus:outline-none"
           />
-        </div>
+        </PageHeader>
 
         {error && (
           <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700">
@@ -127,6 +136,7 @@ export default function VendorsPage() {
               <tr>
                 <th className="px-4 py-3 text-left font-semibold">Vendor</th>
                 <th className="px-4 py-3 text-left font-semibold">Account</th>
+                <th className="px-4 py-3 text-left font-semibold">Documents</th>
                 <th className="px-4 py-3 text-left font-semibold">Moderation</th>
                 <th className="px-4 py-3 text-left font-semibold">Actions</th>
               </tr>
@@ -134,13 +144,13 @@ export default function VendorsPage() {
             <tbody className="divide-y divide-[var(--border)]">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-[var(--text-secondary)]">
+                  <td colSpan={5} className="px-4 py-8 text-center text-[var(--text-secondary)]">
                     Loading vendors...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-[var(--text-secondary)]">
+                  <td colSpan={5} className="px-4 py-8 text-center text-[var(--text-secondary)]">
                     No vendors found.
                   </td>
                 </tr>
@@ -148,6 +158,8 @@ export default function VendorsPage() {
                 filtered.map((vendor) => {
                   const status = readStatus(vendor);
                   const isSaving = savingId === String(vendor._id);
+                  const docStatus = String(vendor?.verification?.documents?.status || "pending").toLowerCase();
+                  const docFiles = vendor?.verification?.documents?.files || [];
 
                   return (
                     <tr key={vendor._id} className="align-top">
@@ -157,6 +169,54 @@ export default function VendorsPage() {
                       </td>
                       <td className="px-4 py-4">
                         <Badge value={status} />
+                      </td>
+                      <td className="px-4 py-4">
+                        <Badge value={docStatus} toneMap={DOC_STATUS_TONE} />
+                        {docFiles.length > 0 ? (
+                          <div className="mt-2 flex flex-col gap-1">
+                            {docFiles.map((file, idx) => (
+                              <a
+                                key={idx}
+                                href={file.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
+                              >
+                                <FileText size={12} />
+                                {file.name || `Document ${idx + 1}`}
+                              </a>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs text-[var(--text-secondary)]">No documents uploaded</p>
+                        )}
+                        {docFiles.length > 0 && docStatus !== "verified" && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <ActionButton
+                              label="Verify docs"
+                              variant="success"
+                              disabled={isSaving}
+                              onClick={() =>
+                                runAction(vendor._id, () =>
+                                  reviewVendorDocuments(vendor._id, { status: "verified" })
+                                )
+                              }
+                            />
+                            <ActionButton
+                              label="Reject docs"
+                              variant="danger"
+                              disabled={isSaving}
+                              onClick={() =>
+                                runAction(vendor._id, () =>
+                                  reviewVendorDocuments(vendor._id, {
+                                    status: "rejected",
+                                    note: askReason("Document rejection") || "Documents rejected by admin",
+                                  })
+                                )
+                              }
+                            />
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-4 text-xs text-[var(--text-secondary)]">
                         {vendor?.moderation?.note || vendor?.moderation?.rejectionReason || vendor?.moderation?.suspensionReason || vendor?.moderation?.banReason || "-"}

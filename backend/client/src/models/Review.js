@@ -9,6 +9,10 @@ const reviewSchema = new mongoose.Schema(
     comment: { type: String, default: "" },
     images: { type: [String], default: [] },
     verifiedBuyer: { type: Boolean, default: false },
+    reply: {
+      text: { type: String, default: "" },
+      repliedAt: { type: Date, default: null },
+    },
   },
   { timestamps: true }
 );

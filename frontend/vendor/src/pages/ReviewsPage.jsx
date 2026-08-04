@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { Star } from "lucide-react";
+import { toast } from "react-toastify";
+import { MessageSquare, Send, Star } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { getVendorReviewInsights, getVendorReviews } from "../services/featureService";
+import { getVendorReviewInsights, getVendorReviews, replyToReview } from "../services/featureService";
+import PageHeader from "../components/shared/PageHeader";
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState([]);
   const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [replyDrafts, setReplyDrafts] = useState({});
+  const [replyingId, setReplyingId] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -21,14 +25,40 @@ export default function ReviewsPage() {
     loadData();
   }, []);
 
+  const handleReplyChange = (reviewId, value) => {
+    setReplyDrafts((prev) => ({ ...prev, [reviewId]: value }));
+  };
+
+  const handleSubmitReply = async (reviewId) => {
+    const text = (replyDrafts[reviewId] || "").trim();
+    if (!text) {
+      toast.error("Please write a reply before submitting.");
+      return;
+    }
+    setReplyingId(reviewId);
+    try {
+      const res = await replyToReview(reviewId, text);
+      setReviews((prev) => prev.map((review) => (review._id === reviewId ? { ...review, reply: res.data.reply } : review)));
+      setReplyDrafts((prev) => ({ ...prev, [reviewId]: "" }));
+      toast.success("Reply posted.");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to post reply");
+    } finally {
+      setReplyingId(null);
+    }
+  };
+
   const trendRows = useMemo(() => insights?.ratingBreakdown?.map((item) => ({ label: `${item.rating}★`, count: item.count })) || [], [insights]);
 
   return (
-    <div className="p-6 md:p-10 bg-[var(--bg-main)] min-h-screen">
-      <h2 className="text-3xl font-extrabold text-[var(--color-primary)]">Reviews</h2>
-      <p className="mt-1 mb-10 text-sm text-[var(--text-secondary)]">
-        Monitor feedback, respond to reviews, and improve customer satisfaction.
-      </p>
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Feedback Center"
+        title="Reviews"
+        description="Monitor feedback, respond to reviews, and improve customer satisfaction."
+        meta={`${insights?.totalReviews ?? reviews.length} total reviews`}
+      />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         {[
@@ -88,10 +118,39 @@ export default function ReviewsPage() {
                     Verified Buyer
                   </span>
                 )}
+
+                {review.reply?.text ? (
+                  <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)]">
+                      <MessageSquare size={13} />
+                      Your reply
+                    </div>
+                    <p className="mt-1 text-sm text-[var(--text-primary)]">{review.reply.text}</p>
+                  </div>
+                ) : (
+                  <div className="mt-3 flex items-center gap-2">
+                    <input
+                      value={replyDrafts[review._id] || ""}
+                      onChange={(e) => handleReplyChange(review._id, e.target.value)}
+                      placeholder="Write a reply to this customer..."
+                      className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSubmitReply(review._id)}
+                      disabled={replyingId === review._id}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                    >
+                      <Send size={13} />
+                      {replyingId === review._id ? "Sending..." : "Reply"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );

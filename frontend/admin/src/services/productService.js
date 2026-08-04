@@ -14,3 +14,8 @@ export const updateProduct = async (id, payload) => {
   const { data } = await api.put(`/api/admin/products/${id}`, payload);
   return data;
 };
+
+export const deleteProduct = async (id) => {
+  const { data } = await api.delete(`/api/admin/products/${id}`);
+  return data;
+};

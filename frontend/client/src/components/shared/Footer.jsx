@@ -8,78 +8,54 @@ export default function Footer() {
   return (
     <footer className="bg-[var(--bg-card)] border-t-2 border-[var(--border)] mt-16">
       {/* Newsletter Section */}
-      <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[var(--shadow)] md:p-10"
-          style={{ boxShadow: 'var(--shadow)' }}>
-
-        {/* Top accent bar */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-3xl"
-            style={{ background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-accent))' }} />
-
-        {/* Glow blobs */}
-        <div className="pointer-events-none absolute -right-16 -top-14 h-48 w-48 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.12), transparent 70%)' }} />
-        <div className="pointer-events-none absolute -bottom-20 left-10 h-56 w-56 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.10), transparent 70%)' }} />
-
-        <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-xl">
-
-            {/* Badge */}
-            <p className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-widest"
-              style={{ background: 'linear-gradient(90deg, rgba(249,115,22,0.12), rgba(34,211,238,0.08))', borderColor: 'rgba(249,115,22,0.3)', color: 'var(--color-primary)' }}>
-              <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-primary)' }} />
-              Trusted by 12k+ developers
-            </p>
-
-            {/* Stars */}
-            <div className="mt-3 flex items-center gap-2">
-              {/* your existing stars SVG */}
-              <span className="text-sm text-[var(--text-secondary)]">4.5/5 · 2,300+ Reviews</span>
+      <div className="border-b border-[var(--border)] bg-[var(--bg-main)] px-4 py-12 md:py-14">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_60px_-40px_var(--shadow)] md:p-10">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-xl">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
+                Newsletter
+              </p>
+              <h2 className="text-[2rem] font-black leading-[1.1] tracking-tight text-[var(--text-primary)] md:text-[2.75rem]">
+                Stay ahead of{" "}
+                <span className="italic text-[var(--color-primary)]">every deal</span>
+              </h2>
+              <p className="mt-3 max-w-lg text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
+                Get curated picks, flash-sale alerts, and exclusive ShopZo offers delivered weekly — no spam, just value.
+              </p>
             </div>
 
-            <h2 className="mt-4 text-3xl font-bold leading-tight md:text-[40px] md:leading-[1.1]"
-                style={{ fontFamily: "'Sora', sans-serif", letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-              Get fresh deals, launches &{' '}
-              <span className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] bg-clip-text text-transparent">
-                insider drops
-              </span>{' '}first.
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed md:text-base" style={{ color: 'var(--text-secondary)' }}>
-              Weekly updates with no noise. Curated picks, price alerts, and exclusive seasonal offers — straight to your inbox.
-            </p>
-          </div>
-
-          {/* Form box */}
-          <div className="w-full max-w-md rounded-2xl border p-2.5"
-              style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)', boxShadow: '0 4px 20px rgba(249,115,22,0.08)' }}>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <div className="flex h-11 flex-1 items-center gap-2 rounded-xl border px-3"
-                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-                {/* mail icon */}
-                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16.5 5.25L9 9.75 1.5 5.25"/><rect x="1.5" y="3" width="15" height="12" rx="1.5"/>
-                </svg>
-                <input type="email" placeholder="Enter your email"
-                  className="h-full w-full bg-transparent text-sm outline-none"
-                  style={{ color: 'var(--text-primary)' }} />
+            <div className="w-full max-w-md">
+              <form
+                className="flex flex-col gap-2 sm:flex-row"
+                onSubmit={(e) => e.preventDefault()}
+              >
+                <label className="flex h-12 flex-1 items-center gap-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-3.5 transition focus-within:border-[var(--color-primary)]">
+                  <Mail size={16} className="shrink-0 text-[var(--color-primary)]" />
+                  <input
+                    type="email"
+                    required
+                    placeholder="Enter your email"
+                    className="h-full w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
+                  />
+                </label>
+                <button
+                  type="submit"
+                  className="h-12 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-6 text-sm font-bold text-white shadow-[0_14px_28px_-16px_var(--shadow)] transition hover:opacity-90"
+                >
+                  Subscribe
+                </button>
+              </form>
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+                {["No spam, ever", "Unsubscribe anytime", "Weekly digest"].map((item) => (
+                  <span key={item} className="text-xs text-[var(--text-secondary)]">
+                    {item}
+                  </span>
+                ))}
               </div>
-              <button className="h-11 rounded-xl px-5 text-sm font-bold text-white"
-                      style={{ background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary))', boxShadow: '0 6px 18px rgba(249,115,22,0.28)' }}>
-                Subscribe
-              </button>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-4 px-1">
-              {['No spam, ever', 'Unsubscribe anytime', 'Weekly digest'].map(t => (
-                <span key={t} className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  <span className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--color-accent)' }} />
-                  {t}
-                </span>
-              ))}
             </div>
           </div>
         </div>
       </div>
-    
 
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

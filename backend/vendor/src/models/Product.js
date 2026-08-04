@@ -7,11 +7,12 @@ const productSchema = new mongoose.Schema({
   oldPrice: { type: Number }, 
   images: { type: Array, required: true },
   description: { type: String, required: true },
-  sizes: { type: Array, required: true },
+  sizes: { type: Array, default: [] },
   stock: { type: Number, default: 0 },
   rating: { type: Number, required: true },
   category: { type: String, required: true },
   discount: { type: Number, default: 0 }, 
+  isFlashSale: { type: Boolean, default: false },
 }, { timestamps: true });
 
 export default mongoose.model("Product", productSchema);

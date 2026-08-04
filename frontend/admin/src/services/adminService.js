@@ -15,6 +15,31 @@ export const updateOrderStatus = async (id, status) => {
 	return data;
 };
 
+export const getCommissions = async () => {
+	const { data } = await api.get("/api/admin/commissions");
+	return data;
+};
+
+export const markCommissionPaid = async (id, note = "") => {
+	const { data } = await api.patch(`/api/admin/commissions/${id}/paid`, { note });
+	return data;
+};
+
+export const markCommissionUnpaid = async (id) => {
+	const { data } = await api.patch(`/api/admin/commissions/${id}/unpaid`);
+	return data;
+};
+
+export const markVendorCommissionsPaid = async (vendorId, note = "") => {
+	const { data } = await api.patch(`/api/admin/commissions/vendor/${vendorId}/paid`, { note });
+	return data;
+};
+
+export const refundOrder = async (id) => {
+	const { data } = await api.post(`/api/admin/orders/${id}/refund`);
+	return data;
+};
+
 export const getCustomers = async () => {
 	const { data } = await api.get("/api/admin/customers");
 	return data;
@@ -35,6 +60,16 @@ export const getReviews = async () => {
 	return data;
 };
 
+export const getAllReviews = async () => {
+	const { data } = await api.get("/api/admin/reviews/all");
+	return data;
+};
+
+export const deleteReview = async (id) => {
+	const { data } = await api.delete(`/api/admin/reviews/${id}`);
+	return data;
+};
+
 export const getVendors = async () => {
 	const { data } = await api.get("/api/admin/vendors");
 	return data;
@@ -47,6 +82,71 @@ export const approveVendor = async (id, payload) => {
 
 export const updateVendorStatus = async (id, payload) => {
 	const { data } = await api.patch(`/api/admin/vendors/${id}/status`, payload);
+	return data;
+};
+
+export const reviewVendorDocuments = async (id, payload) => {
+	const { data } = await api.patch(`/api/admin/vendors/${id}/documents`, payload);
+	return data;
+};
+
+export const suspendCustomer = async (id, payload) => {
+	const { data } = await api.patch(`/api/admin/customers/${id}/suspend`, payload);
+	return data;
+};
+
+export const getCategories = async () => {
+	const { data } = await api.get("/api/admin/categories");
+	return data;
+};
+
+export const createCategory = async (payload) => {
+	const { data } = await api.post("/api/admin/categories", payload);
+	return data;
+};
+
+export const updateCategory = async (id, payload) => {
+	const { data } = await api.put(`/api/admin/categories/${id}`, payload);
+	return data;
+};
+
+export const deleteCategory = async (id) => {
+	const { data } = await api.delete(`/api/admin/categories/${id}`);
+	return data;
+};
+
+export const getSettings = async () => {
+	const { data } = await api.get("/api/admin/settings");
+	return data;
+};
+
+export const updateFlashSaleStatus = async (enabled) => {
+	const { data } = await api.patch("/api/admin/settings/flash-sale", { enabled });
+	return data;
+};
+
+export const getFlashSaleProducts = async () => {
+	const { data } = await api.get("/api/admin/settings/flash-sale/products");
+	return data;
+};
+
+export const getBanners = async (status) => {
+	const { data } = await api.get("/api/admin/banners", { params: status ? { status } : {} });
+	return data;
+};
+
+export const updateBannerStatus = async (id, payload) => {
+	const { data } = await api.patch(`/api/admin/banners/${id}/status`, payload);
+	return data;
+};
+
+export const updateBannerActive = async (id, isActive) => {
+	const { data } = await api.patch(`/api/admin/banners/${id}/active`, { isActive });
+	return data;
+};
+
+export const deleteBanner = async (id) => {
+	const { data } = await api.delete(`/api/admin/banners/${id}`);
 	return data;
 };
 

@@ -3,8 +3,12 @@ import { Store, Mail, Phone, MapPin, FileText, Save, ArrowLeft, Camera } from "l
 import { useNavigate } from "react-router-dom";
 import { getVendorProfile, updateVendorProfile } from "../services/vendorService";
 import { getVendorToken, readVendorSession, saveVendorSession } from "../utils/authStorage";
+import PageHeader from "../components/shared/PageHeader";
 
 const STORAGE_KEY = "vendorProfile";
+
+const inputClass =
+  "w-full rounded-xl border border-[var(--border)] bg-[var(--bg-main)] py-2.5 pl-10 pr-3 text-sm focus:border-[var(--color-primary)] focus:outline-none disabled:opacity-60";
 
 const safeParseJson = (value) => {
   if (!value) return null;
@@ -94,7 +98,7 @@ export default function EditProfilePage() {
   const onSave = async () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
     const token = getVendorToken();
-    
+
     if (!token) {
       setSaved(true);
       return;
@@ -115,135 +119,162 @@ export default function EditProfilePage() {
       }
       setSaved(true);
     } catch (error) {
-      setSaved(true); // Still proceed to exit or show error
+      setSaved(true);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          className="p-2 -ml-2 rounded-full hover:bg-[var(--bg-muted)] transition"
-          onClick={() => navigate("/profile")}
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <h2 className="text-xl font-bold">Edit Profile</h2>
-          <p className="text-sm text-[var(--text-secondary)]">Update your store information.</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+        <PageHeader
+          eyebrow="Store Settings"
+          title="Edit Profile"
+          description="Update your store information and public appearance."
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={() => navigate("/profile")}
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)]"
+              >
+                <ArrowLeft size={16} />
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={onSave}
+                disabled={loading || saved}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90 disabled:opacity-50"
+              >
+                <Save size={18} />
+                {saved ? "Saved!" : loading ? "Saving..." : "Save Changes"}
+              </button>
+            </>
+          }
+        />
 
-      <div className="bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border)] p-6">
-        <div className="mb-6 flex items-center gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
-          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border border-[var(--border)] bg-[var(--bg-card)]">
-            {profile.profileImage ? (
-              <img src={profile.profileImage} alt={profile.storeName || "Vendor"} className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] text-xl font-bold text-white">
-                {(profile.storeName || "V")
-                  .split(" ")
-                  .map((word) => word[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_20px_50px_-34px_var(--shadow)] md:p-6">
+          <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4 sm:flex-row sm:items-center">
+            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
+              {profile.profileImage ? (
+                <img
+                  src={profile.profileImage}
+                  alt={profile.storeName || "Vendor"}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] text-xl font-bold text-white">
+                  {(profile.storeName || "V")
+                    .split(" ")
+                    .map((word) => word[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </div>
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-[var(--text-primary)]">Profile Picture</p>
+              <p className="text-xs text-[var(--text-secondary)]">Upload a square image for best results.</p>
+              <label className="mt-2 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-3 py-2 text-sm font-medium transition hover:bg-[var(--bg-muted)]">
+                <Camera size={16} />
+                Change Photo
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+              </label>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">Store Name</label>
+              <div className="relative">
+                <Store size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+                <input
+                  value={profile.storeName}
+                  onChange={onChange("storeName")}
+                  className={inputClass}
+                  placeholder="Your store name"
+                />
               </div>
-            )}
-          </div>
+            </div>
 
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold">Profile Picture</p>
-            <p className="text-xs text-[var(--text-secondary)]">Upload a square image for best results.</p>
-            <label className="mt-2 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-3 py-1.5 text-sm">
-              <Camera size={16} />
-              Change Photo
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-            </label>
-          </div>
-        </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">Email</label>
+              <div className="relative">
+                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+                <input
+                  type="email"
+                  value={profile.email}
+                  onChange={onChange("email")}
+                  className={inputClass}
+                  placeholder="you@store.com"
+                  disabled
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Store Name</label>
-            <div className="relative">
-              <Store size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-              <input
-                value={profile.storeName}
-                onChange={onChange("storeName")}
-                className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                placeholder="Your store name"
-              />
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">Phone</label>
+              <div className="relative">
+                <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+                <input
+                  value={profile.phone}
+                  onChange={onChange("phone")}
+                  className={inputClass}
+                  placeholder="+1 555 000 0000"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">Address</label>
+              <div className="relative">
+                <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+                <input
+                  value={profile.address}
+                  onChange={onChange("address")}
+                  className={inputClass}
+                  placeholder="City, Country"
+                />
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">Description</label>
+              <div className="relative">
+                <FileText size={18} className="absolute left-3 top-3 text-[var(--text-secondary)]" />
+                <textarea
+                  rows={5}
+                  value={profile.description}
+                  onChange={onChange("description")}
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-main)] py-2.5 pl-10 pr-3 text-sm focus:border-[var(--color-primary)] focus:outline-none"
+                  placeholder="Tell customers what you sell and what makes your store special..."
+                />
+              </div>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
-            <div className="relative">
-              <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-              <input
-                type="email"
-                value={profile.email}
-                onChange={onChange("email")}
-                className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                placeholder="you@store.com"
-                disabled
-              />
-            </div>
+          <div className="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-[var(--border)] pt-6">
+            <button
+              type="button"
+              onClick={() => navigate("/profile")}
+              className="rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm font-medium transition hover:bg-[var(--bg-muted)]"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={loading || saved}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90 disabled:opacity-50"
+            >
+              <Save size={18} />
+              {saved ? "Saved successfully!" : loading ? "Saving..." : "Save Changes"}
+            </button>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Phone</label>
-            <div className="relative">
-              <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-              <input
-                value={profile.phone}
-                onChange={onChange("phone")}
-                className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                placeholder="+1 555 000 0000"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Address</label>
-            <div className="relative">
-              <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-              <input
-                value={profile.address}
-                onChange={onChange("address")}
-                className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                placeholder="City, Country"
-              />
-            </div>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2">Description</label>
-            <div className="relative">
-              <FileText size={18} className="absolute left-3 top-3 text-[var(--text-secondary)]" />
-              <textarea
-                rows={5}
-                value={profile.description}
-                onChange={onChange("description")}
-                className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                placeholder="Tell customers what you sell and what makes your store special..."
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-col items-end gap-3">
-          <button
-            type="button"
-            onClick={onSave}
-            disabled={loading || saved}
-            className="px-6 py-2.5 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 flex items-center gap-2 transition disabled:opacity-50"
-          >
-            <Save size={18} />
-            {saved ? "Saved successfully!" : loading ? "Saving..." : "Save Changes"}
-          </button>
         </div>
       </div>
     </div>

@@ -11,6 +11,8 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import bannerRoutes from './routes/bannerRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
 
 dotenv.config();
 
@@ -31,9 +33,14 @@ const defaultOrigins = [
 
 const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
 
+// Vite picks the next free port when several dev servers run together, so allow
+// any localhost port in dev instead of a fixed list that breaks the moment a
+// preferred port is already taken.
+const isLocalDevOrigin = (origin) => /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || isLocalDevOrigin(origin)) {
       return callback(null, true);
     }
     return callback(new Error(`CORS blocked for origin: ${origin}`));
@@ -57,6 +64,8 @@ app.use('/api/vendor', vendorRoutes);
 app.use('/api/vendor/coupons', couponRoutes);
 app.use('/api/vendor/chat', chatRoutes);
 app.use('/api/vendor/reviews', reviewRoutes);
+app.use('/api/vendor/banners', bannerRoutes);
+app.use('/api/vendor/categories', categoryRoutes);
 
 app.use('/api/auth', authRoutes);
 

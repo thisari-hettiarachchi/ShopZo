@@ -2,9 +2,10 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import HeroSection from "../../components/sections/home/HeroSection";
 import CategoriesSection from "../../components/sections/home/CategoriesSection";
-import FlashSaleSection from "../../components/sections/home/FlashSaleSection";
+import NewArrivalsSection from "../../components/sections/home/NewArrivalsSection";
+import BestSellersSection from "../../components/sections/home/BestSellersSection";
 import PromoSection from "../../components/sections/home/PromoSection";
-import FeaturedVendorsSection from "../../components/sections/home/FeaturedVendorsSection";
+import ValuePropsSection from "../../components/sections/home/ValuePropsSection";
 import JustForYouSection from "../../components/sections/home/JustForYouSection";
 import { API_BASE_URL } from "../../api/base";
 
@@ -32,24 +33,22 @@ const FONT_STYLE = `
 
 export default function Home() {
   const [categories, setCategories] = useState([]);
-  const [flashSaleProducts, setFlashSaleProducts] = useState([]);
-  const [vendors, setVendors] = useState([]);
-  const [justForYou, setJustForYou] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [promoBanners, setPromoBanners] = useState([]);
 
   useEffect(() => {
     axios.get(`${API_BASE_URL}/categories`).then((response) => setCategories(response.data)).catch(console.error);
   }, []);
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/products/flash-sale`).then((response) => setFlashSaleProducts(response.data)).catch(console.error);
+    axios
+      .get(`${API_BASE_URL}/products`, { params: { limit: 100 } })
+      .then((response) => setProducts(Array.isArray(response.data) ? response.data : []))
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/vendors`).then((response) => setVendors(response.data)).catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    axios.get(`${API_BASE_URL}/products`).then((response) => setJustForYou(response.data)).catch(console.error);
+    axios.get(`${API_BASE_URL}/banners`).then((response) => setPromoBanners(response.data)).catch(console.error);
   }, []);
 
   return (
@@ -57,10 +56,11 @@ export default function Home() {
       <style>{FONT_STYLE}</style>
       <HeroSection />
       <CategoriesSection categories={categories} />
-      <FlashSaleSection products={flashSaleProducts} />
-      <PromoSection />
-      <FeaturedVendorsSection vendors={vendors} />
-      <JustForYouSection products={justForYou} />
+      <NewArrivalsSection products={products} />
+      <BestSellersSection products={products} />
+      <PromoSection banners={promoBanners} />
+      <ValuePropsSection />
+      <JustForYouSection products={products} />
     </div>
   );
 }

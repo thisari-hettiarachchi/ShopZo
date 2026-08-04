@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { getCustomers } from "../services/adminService";
+import { toast } from "react-toastify";
+import { Ban, ShieldCheck } from "lucide-react";
+import { getCustomers, suspendCustomer } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 function Avatar({ name }) {
   const initials = (name || "?")
@@ -65,6 +68,7 @@ export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
   const [sort, setSort] = useState({ field: "totalSpent", dir: "desc" });
+  const [savingId, setSavingId] = useState("");
 
   useEffect(() => {
     const loadCustomers = async () => {
@@ -79,6 +83,25 @@ export default function CustomersPage() {
     };
     loadCustomers();
   }, []);
+
+  const handleToggleSuspend = async (customer) => {
+    const nextSuspended = !customer.isSuspended;
+    const reason = nextSuspended ? window.prompt("Suspension reason (optional)")?.trim() || "" : "";
+    setSavingId(customer.id);
+    try {
+      await suspendCustomer(customer.id, { suspended: nextSuspended, reason });
+      setCustomers((prev) =>
+        prev.map((item) =>
+          item.id === customer.id ? { ...item, isSuspended: nextSuspended, suspensionReason: reason } : item
+        )
+      );
+      toast.success(nextSuspended ? "Customer suspended" : "Customer reactivated");
+    } catch (requestError) {
+      toast.error(requestError?.response?.data?.message || "Action failed");
+    } finally {
+      setSavingId("");
+    }
+  };
 
   const toggleSort = (field) => {
     setSort((prev) =>
@@ -115,20 +138,16 @@ export default function CustomersPage() {
   };
 
   return (
-    <section className="px-6 md:px-10 pt-8 pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] min-h-screen">
-
-      {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Customers</h1>
-          {!loading && (
-            <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
-              {customers.length} {customers.length === 1 ? "customer" : "customers"} total
-            </p>
-          )}
-        </div>
-        <div className="relative w-full sm:w-64">
-          <svg className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="User Management"
+        title="Customers"
+        description="View accounts, roles, and suspension status."
+        meta={!loading ? `${customers.length} total customers` : undefined}
+      >
+        <div className="relative max-w-sm">
+          <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
           <input
@@ -136,10 +155,10 @@ export default function CustomersPage() {
             placeholder="Search customers…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] pl-9 pr-4 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--border)]"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-main)] py-2.5 pl-9 pr-4 text-sm focus:border-[var(--color-primary)] focus:outline-none"
           />
         </div>
-      </div>
+      </PageHeader>
 
       {/* Role filter pills */}
       <div className="mb-6 flex flex-wrap gap-2">
@@ -239,6 +258,12 @@ export default function CustomersPage() {
                       </span>
                     </th>
                   ))}
+                  <th className="whitespace-nowrap px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+                    Status
+                  </th>
+                  <th className="whitespace-nowrap px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -291,6 +316,44 @@ export default function CustomersPage() {
                           })
                         : "—"}
                     </td>
+
+                    {/* Status */}
+                    <td className="px-6 py-4">
+                      {customer.role === "User" ? (
+                        customer.isSuspended ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-medium text-rose-700 ring-1 ring-inset ring-rose-200">
+                            Suspended
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                            Active
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-[var(--text-secondary)]">—</span>
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-6 py-4">
+                      {customer.role === "User" ? (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSuspend(customer)}
+                          disabled={savingId === customer.id}
+                          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                            customer.isSuspended
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                              : "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                          }`}
+                        >
+                          {customer.isSuspended ? <ShieldCheck size={13} /> : <Ban size={13} />}
+                          {customer.isSuspended ? "Reactivate" : "Suspend"}
+                        </button>
+                      ) : (
+                        <span className="text-[var(--text-secondary)]">—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -307,6 +370,7 @@ export default function CustomersPage() {
             </p>
           </div>
         )}
+      </div>
       </div>
     </section>
   );

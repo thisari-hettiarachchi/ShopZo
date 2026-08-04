@@ -7,6 +7,9 @@ import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
+import bannerRoutes from "./routes/bannerRoutes.js";
 
 dotenv.config();
 
@@ -20,6 +23,8 @@ const configuredOrigins = (process.env.CORS_ORIGIN || "")
 
 const defaultOrigins = [
 	process.env.ADMIN_FRONTEND_URL || "https://shop-zo-admin.vercel.app",
+	process.env.VENDOR_FRONTEND_URL || "https://shop-zo-vendor.vercel.app",
+	process.env.CLIENT_FRONTEND_URL || "https://shop-zo.vercel.app",
 	"http://localhost:5175",
 	"http://localhost:5173",
 	"http://localhost:5174",
@@ -27,9 +32,14 @@ const defaultOrigins = [
 
 const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
 
+// Vite picks the next free port when several dev servers run together, so allow
+// any localhost port in dev instead of a fixed list that breaks the moment a
+// preferred port is already taken.
+const isLocalDevOrigin = (origin) => /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+
 const corsOptions = {
 	origin: (origin, callback) => {
-		if (!origin || allowedOrigins.includes(origin)) {
+		if (!origin || allowedOrigins.includes(origin) || isLocalDevOrigin(origin)) {
 			return callback(null, true);
 		}
 		return callback(new Error(`CORS blocked for origin: ${origin}`));
@@ -57,6 +67,9 @@ app.use("/api/admin/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/dashboard", dashboardRoutes);
 app.use("/api/admin/products", productRoutes);
+app.use("/api/admin/categories", categoryRoutes);
+app.use("/api/admin/settings", settingsRoutes);
+app.use("/api/admin/banners", bannerRoutes);
 
 const startServer = async () => {
 	try {

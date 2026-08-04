@@ -6,14 +6,15 @@ import AddProductPage from "../pages/AddProduct";
 import EditProductPage from "../pages/EditProduct";
 import ProductDetailsPage from "../pages/ProductDetails";
 import OrdersPage from "../pages/Orders";
-import CustomersPage from "../pages/CustomersPage";
-import AnalyticsPage from "../pages/AnalyticsPage";
+import EarningsPage from "../pages/EarningsPage";
 import ReviewsPage from "../pages/ReviewsPage";
 import VendorProfilePage from "../pages/VendorProfile";
 import EditProfilePage from "../pages/EditProfile";
 import AuthPages from "../pages/Auth";
 import CouponsPage from "../pages/CouponsPage";
 import ChatPage from "../pages/ChatPage";
+import PromotionsPage from "../pages/PromotionsPage";
+import NotificationsPage from "../pages/NotificationsPage";
 import { isVendorAuthenticated } from "../utils/authStorage";
 
 const getActiveFromPath = (pathname) => {
@@ -22,17 +23,21 @@ const getActiveFromPath = (pathname) => {
   switch (pathname) {
     case "/orders":
       return "orders";
-    case "/customers":
-      return "customers";
+    case "/finance":
+    case "/earnings":
     case "/analytics":
-      return "analytics";
+      return "finance";
     case "/reviews":
       return "reviews";
     case "/coupons":
       return "coupons";
+    case "/promotions":
+      return "promotions";
     case "/chat":
       return "chat";
     case "/profile":
+    case "/profile/edit":
+    case "/notifications":
       return "profile";
     case "/":
     default:
@@ -61,13 +66,16 @@ function VendorDashboardShell() {
           <Route path="/products/edit/:id" element={<EditProductPage />} />
           <Route path="/products/:id" element={<ProductDetailsPage />} />
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/customers" element={<CustomersPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/finance" element={<EarningsPage />} />
+          <Route path="/earnings" element={<Navigate to="/finance" replace />} />
+          <Route path="/analytics" element={<Navigate to="/finance" replace />} />
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/coupons" element={<CouponsPage />} />
+          <Route path="/promotions" element={<PromotionsPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/profile" element={<VendorProfilePage />} />
           <Route path="/profile/edit" element={<EditProfilePage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

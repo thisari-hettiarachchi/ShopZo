@@ -13,3 +13,6 @@ const authHeaders = () => {
 
 export const getDashboardAnalytics = () =>
   API.get("/dashboard", { headers: authHeaders() });
+
+export const getVendorEarnings = () =>
+  API.get("/earnings", { headers: authHeaders() });

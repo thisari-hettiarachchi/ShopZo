@@ -1,34 +1,35 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Sidebar from "../components/shared/SideBar";
 import Dashboard from "../pages/Dashboard";
-import ProductsPage from "../pages/Products";
-import AddProductPage from "../pages/AddProduct";
-import EditProductPage from "../pages/EditProduct";
-import ProductDetailsPage from "../pages/ProductDetails";
-import OrdersPage from "../pages/Orders";
-import CustomersPage from "../pages/CustomersPage";
+import CommissionPage from "../pages/Commission";
 import AnalyticsPage from "../pages/AnalyticsPage";
-import ReviewsPage from "../pages/ReviewsPage";
 import VendorsPage from "../pages/VendorsPage";
+import CategoriesPage from "../pages/CategoriesPage";
+import FlashSalePage from "../pages/FlashSalePage";
+import PromotionsPage from "../pages/PromotionsPage";
 import AdminProfilePage from "../pages/AdminProfile";
 import EditProfilePage from "../pages/EditProfile";
+import NotificationsPage from "../pages/NotificationsPage";
 import AuthPages from "../pages/Auth";
 
 const getActiveFromPath = (pathname) => {
-	if (pathname.startsWith("/products")) return "products";
-
 	switch (pathname) {
-		case "/orders":
-			return "orders";
-		case "/customers":
-			return "customers";
-			case "/vendors":
-				return "vendors";
+		case "/commission":
+		case "/payments":
+			return "commission";
+		case "/vendors":
+			return "vendors";
+		case "/categories":
+			return "categories";
+		case "/flash-sale":
+			return "flash-sale";
+		case "/promotions":
+			return "promotions";
 		case "/analytics":
 			return "analytics";
-		case "/reviews":
-			return "reviews";
 		case "/profile":
+		case "/profile/edit":
+		case "/notifications":
 			return "profile";
 		case "/":
 		default:
@@ -53,17 +54,16 @@ function AdminDashboardShell() {
 			<main className="flex-1 overflow-auto ml-64">
 				<Routes>
 					<Route path="/" element={<Dashboard />} />
-					<Route path="/products" element={<ProductsPage />} />
-					<Route path="/products/new" element={<AddProductPage />} />
-					<Route path="/products/edit/:id" element={<EditProductPage />} />
-					<Route path="/products/:id" element={<ProductDetailsPage />} />
-					<Route path="/orders" element={<OrdersPage />} />
-					<Route path="/customers" element={<CustomersPage />} />
+					<Route path="/commission" element={<CommissionPage />} />
+					<Route path="/payments" element={<Navigate to="/commission" replace />} />
 					<Route path="/vendors" element={<VendorsPage />} />
+					<Route path="/categories" element={<CategoriesPage />} />
+					<Route path="/flash-sale" element={<FlashSalePage />} />
+					<Route path="/promotions" element={<PromotionsPage />} />
 					<Route path="/analytics" element={<AnalyticsPage />} />
-					<Route path="/reviews" element={<ReviewsPage />} />
 					<Route path="/profile" element={<AdminProfilePage />} />
 					<Route path="/profile/edit" element={<EditProfilePage />} />
+					<Route path="/notifications" element={<NotificationsPage />} />
 					<Route path="*" element={<Navigate to="/" replace />} />
 				</Routes>
 			</main>

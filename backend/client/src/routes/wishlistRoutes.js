@@ -3,6 +3,7 @@ import {
   getWishlist,
   addToWishlist,
   removeWishlistItem,
+  clearWishlist,
 } from "../controllers/wishlistController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -12,6 +13,7 @@ router.use(protect);
 
 router.get("/", getWishlist);
 router.post("/add", addToWishlist);
+router.delete("/clear", clearWishlist);
 router.delete("/remove/:productId", removeWishlistItem);
 
 export default router;

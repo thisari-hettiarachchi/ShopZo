@@ -32,13 +32,14 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid status" });
     }
 
-    const order = await Order.findOneAndUpdate(
-      { _id: id, vendor: vendorId },
-      { status },
-      { new: true }
-    ).populate("user", "name email");
-
+    const order = await Order.findOne({ _id: id, vendor: vendorId });
     if (!order) return res.status(404).json({ message: "Order not found or unauthorized" });
+
+    order.status = status;
+    const existingHistory = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+    order.statusHistory = [...existingHistory, { status, at: new Date() }];
+    await order.save();
+    await order.populate("user", "name email");
 
     res.json(order);
   } catch (error) {

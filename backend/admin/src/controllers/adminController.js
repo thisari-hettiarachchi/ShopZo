@@ -4,6 +4,8 @@ import AdminUser from "../models/AdminUser.js";
 import User from "../models/User.js";
 import Vendor from "../models/Vendor.js";
 import VendorNotification from "../models/VendorNotification.js";
+import Review from "../models/Review.js";
+import stripe from "../config/stripe.js";
 
 const populateOrderRelations = (query) =>
 	query
@@ -158,10 +160,22 @@ const buildAdminInsights = async () => {
 		})),
 	].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+	const DAYS_BACK = 14;
 	const revenueByDayMap = new Map();
+	const insightDayKeys = [];
+	for (let i = DAYS_BACK - 1; i >= 0; i -= 1) {
+		const date = new Date();
+		date.setHours(0, 0, 0, 0);
+		date.setDate(date.getDate() - i);
+		const key = date.toISOString().slice(0, 10);
+		insightDayKeys.push(key);
+		revenueByDayMap.set(key, 0);
+	}
 	for (const order of orders) {
-		const day = new Date(order.createdAt).toLocaleDateString("en-US", { weekday: "short" });
-		revenueByDayMap.set(day, (revenueByDayMap.get(day) || 0) + toNumber(order.total));
+		const key = new Date(order.createdAt).toISOString().slice(0, 10);
+		if (revenueByDayMap.has(key)) {
+			revenueByDayMap.set(key, revenueByDayMap.get(key) + toNumber(order.total));
+		}
 	}
 
 	return {
@@ -174,7 +188,10 @@ const buildAdminInsights = async () => {
 			vendorRequests: vendorRequests.length,
 			suspiciousOrders: ordersWithFlags.length,
 		},
-		revenueData: Array.from(revenueByDayMap.entries()).map(([day, revenue]) => ({ day, revenue })),
+		revenueData: insightDayKeys.map((key) => ({
+			day: new Date(key).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+			revenue: revenueByDayMap.get(key) || 0,
+		})),
 		revenuePerVendor,
 		topSellingProducts,
 		newOrders,
@@ -223,6 +240,78 @@ export const updateAdminOrderStatus = async (req, res) => {
 	}
 };
 
+export const getAdminPayments = async (_req, res) => {
+	try {
+		const orders = await Order.find({})
+			.sort({ createdAt: -1 })
+			.limit(300)
+			.populate("user", "name email")
+			.populate("vendor", "storeName");
+
+		const paid = orders.filter((order) => order.paymentStatus === "paid" || order.paymentMethod === "cod");
+		const totalCollected = paid
+			.filter((order) => order.paymentStatus === "paid")
+			.reduce((sum, order) => sum + toNumber(order.amountPaid || order.total), 0);
+		const totalRefunded = orders
+			.filter((order) => order.paymentStatus === "refunded")
+			.reduce((sum, order) => sum + toNumber(order.amountPaid || order.total), 0);
+		const codPending = orders
+			.filter((order) => order.paymentMethod === "cod" && order.paymentStatus !== "paid")
+			.reduce((sum, order) => sum + toNumber(order.total), 0);
+
+		res.json({
+			stats: {
+				totalCollected,
+				totalRefunded,
+				codPending,
+				paidCount: orders.filter((o) => o.paymentStatus === "paid").length,
+				refundedCount: orders.filter((o) => o.paymentStatus === "refunded").length,
+				codCount: orders.filter((o) => o.paymentMethod === "cod").length,
+			},
+			orders,
+		});
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+export const refundOrder = async (req, res) => {
+	try {
+		const order = await Order.findById(req.params.id);
+		if (!order) {
+			return res.status(404).json({ message: "Order not found" });
+		}
+
+		if (order.paymentMethod !== "stripe") {
+			return res.status(400).json({ message: "Only Stripe-paid orders can be refunded here. Mark COD orders manually." });
+		}
+		if (order.paymentStatus !== "paid") {
+			return res.status(400).json({ message: "Only paid orders can be refunded" });
+		}
+		if (!order.stripePaymentIntentId) {
+			return res.status(400).json({ message: "No Stripe payment found for this order" });
+		}
+
+		const refund = await stripe.refunds.create({
+			payment_intent: order.stripePaymentIntentId,
+		});
+
+		const updatedOrder = await Order.findByIdAndUpdate(
+			order._id,
+			{
+				$set: { paymentStatus: "refunded", status: "Refunded" },
+				$push: { statusHistory: { status: "Refunded", at: new Date() } },
+			},
+			{ new: true, strict: false }
+		);
+
+		res.json({ message: "Refund issued successfully", refundId: refund.id, order: updatedOrder });
+	} catch (error) {
+		console.error("Refund error:", error);
+		res.status(500).json({ message: error.message || "Failed to process refund" });
+	}
+};
+
 export const getAdminCustomers = async (_req, res) => {
 	try {
 		const [admins, users, vendors, orders] = await Promise.all([
@@ -255,6 +344,8 @@ export const getAdminCustomers = async (_req, res) => {
 				orderCount: 0,
 				totalSpent: 0,
 				lastOrderAt: null,
+				isSuspended: Boolean(user.isSuspended),
+				suspensionReason: user.suspensionReason || "",
 			});
 		}
 
@@ -316,12 +407,27 @@ export const getAdminAnalytics = async (_req, res) => {
 		]);
 
 		let totalSales = 0;
+
+		// Bucket by actual calendar date (last 14 days) rather than weekday name,
+		// so orders placed on the same weekday in different weeks don't get merged.
+		const DAYS_BACK = 14;
 		const revenueByDay = new Map();
+		const dayKeys = [];
+		for (let i = DAYS_BACK - 1; i >= 0; i -= 1) {
+			const date = new Date();
+			date.setHours(0, 0, 0, 0);
+			date.setDate(date.getDate() - i);
+			const key = date.toISOString().slice(0, 10);
+			dayKeys.push(key);
+			revenueByDay.set(key, 0);
+		}
 
 		for (const order of orders) {
 			totalSales += Number(order.total || 0);
-			const day = new Date(order.createdAt).toLocaleDateString("en-US", { weekday: "short" });
-			revenueByDay.set(day, (revenueByDay.get(day) || 0) + Number(order.total || 0));
+			const key = new Date(order.createdAt).toISOString().slice(0, 10);
+			if (revenueByDay.has(key)) {
+				revenueByDay.set(key, revenueByDay.get(key) + Number(order.total || 0));
+			}
 		}
 
 		res.json({
@@ -332,7 +438,10 @@ export const getAdminAnalytics = async (_req, res) => {
 				products: productCount,
 				vendors: vendorCount,
 			},
-			revenueData: Array.from(revenueByDay.entries()).map(([day, revenue]) => ({ day, revenue })),
+			revenueData: dayKeys.map((key) => ({
+				day: new Date(key).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+				revenue: revenueByDay.get(key) || 0,
+			})),
 			categoryData: categoryCounts.map((item, index) => ({
 				name: item._id,
 				value: item.count,
@@ -353,6 +462,37 @@ export const getAdminReviews = async (_req, res) => {
 			.populate("vendor", "storeName");
 
 		res.json(products);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+export const getAdminAllReviews = async (_req, res) => {
+	try {
+		const reviews = await Review.find({})
+			.sort({ createdAt: -1 })
+			.limit(200)
+			.populate("user", "name email")
+			.populate({
+				path: "product",
+				select: "name images vendor",
+				populate: { path: "vendor", select: "storeName" },
+			});
+
+		res.json(reviews);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+export const deleteAdminReview = async (req, res) => {
+	try {
+		const review = await Review.findByIdAndDelete(req.params.id);
+		if (!review) {
+			return res.status(404).json({ message: "Review not found" });
+		}
+
+		res.json({ message: "Review removed", reviewId: req.params.id });
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}
@@ -493,6 +633,73 @@ export const updateVendorStatus = async (req, res) => {
 	}
 };
 
+export const updateVendorDocumentVerification = async (req, res) => {
+	try {
+		const { status, note = "" } = req.body;
+		if (!["verified", "rejected", "pending"].includes(status)) {
+			return res.status(400).json({ message: "Invalid document verification status" });
+		}
+
+		const vendor = await Vendor.findById(req.params.id);
+		if (!vendor) {
+			return res.status(404).json({ message: "Vendor not found" });
+		}
+
+		vendor.verification = {
+			...(vendor.verification || {}),
+			documents: {
+				...(vendor.verification?.documents || {}),
+				status,
+				reviewedAt: new Date(),
+				note: String(note || ""),
+			},
+		};
+
+		await vendor.save();
+		await createVendorNotification({
+			vendorId: vendor._id,
+			type: "verification",
+			title: status === "verified" ? "Documents verified" : status === "rejected" ? "Documents rejected" : "Documents under review",
+			message:
+				status === "verified"
+					? "Your verification documents have been approved."
+					: status === "rejected"
+						? `Your verification documents were rejected${note ? `: ${note}` : "."}`
+						: "Your verification documents are pending review.",
+			action: status,
+			metadata: { note: note || "" },
+		});
+
+		res.json({ message: "Document verification updated", vendor: formatVendorForAdmin(vendor) });
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+export const suspendCustomer = async (req, res) => {
+	try {
+		const { suspended, reason = "" } = req.body;
+		if (typeof suspended !== "boolean") {
+			return res.status(400).json({ message: "'suspended' boolean is required" });
+		}
+
+		const user = await User.findById(req.params.id);
+		if (!user) {
+			return res.status(404).json({ message: "Customer not found" });
+		}
+
+		user.isSuspended = suspended;
+		user.suspensionReason = suspended ? String(reason || "Suspended by admin") : "";
+		await user.save();
+
+		res.json({
+			message: suspended ? "Customer suspended" : "Customer reactivated",
+			customer: { id: user._id, isSuspended: user.isSuspended, suspensionReason: user.suspensionReason },
+		});
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
 
 export const getAdminInsights = async (_req, res) => {
 	try {

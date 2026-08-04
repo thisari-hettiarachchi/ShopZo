@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight } from "lucide-react";
 import api from "../services/api";
 
@@ -35,7 +36,7 @@ export default function AdminAuthPage() {
     setLoading(true);
 
     try {
-      const { data } = await api.post("/api/admin/auth/login", {
+      const { data } = await api.post("/api/auth/login", {
         email: formData.email,
         password: formData.password,
       });
@@ -43,7 +44,7 @@ export default function AdminAuthPage() {
       sessionStorage.setItem("adminToken", data.token);
       sessionStorage.setItem("admin", JSON.stringify(data.admin));
 
-      alert("Admin login successful");
+      toast.success("Admin login successful");
       navigate("/");
     } catch (err) {
       const message = err?.response?.data?.message || "Login failed";

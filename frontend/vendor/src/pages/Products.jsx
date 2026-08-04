@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Star, Edit, Eye, Trash2, Plus, Loader } from "lucide-react";
-import { getProducts, deleteProduct } from "../services/productService";
+import { toast } from "react-toastify";
+import { Search, Star, Edit, Eye, Trash2, Plus, Loader, Zap } from "lucide-react";
+import { getProducts, deleteProduct, updateProduct } from "../services/productService";
+import { getFlashSaleStatus } from "../services/settingsService";
 import { readVendorSession } from "../utils/authStorage";
 
 const getStockStatus = (stock) => {
@@ -31,6 +33,8 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [flashSaleEnabled, setFlashSaleEnabled] = useState(false);
+  const [togglingId, setTogglingId] = useState("");
   const vendor = readVendorSession();
   const canAddProducts = String(vendor?.accountStatus || (vendor?.isApproved ? "approved" : "pending")).toLowerCase() === "approved";
 
@@ -48,7 +52,32 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetchProducts();
+
+    const fetchFlashSaleStatus = async () => {
+      try {
+        const res = await getFlashSaleStatus();
+        setFlashSaleEnabled(Boolean(res.data?.flashSaleEnabled));
+      } catch {
+        setFlashSaleEnabled(false);
+      }
+    };
+    fetchFlashSaleStatus();
   }, []);
+
+  const handleToggleFlashSale = async (product) => {
+    setTogglingId(product._id);
+    try {
+      const payload = { ...product, isFlashSale: !product.isFlashSale };
+      const res = await updateProduct(product._id, payload);
+      const updated = res.data;
+      setProducts((prev) => prev.map((p) => (p._id === product._id ? updated : p)));
+      toast.success(updated.isFlashSale ? "Added to Flash Sale" : "Removed from Flash Sale");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to update Flash Sale status");
+    } finally {
+      setTogglingId("");
+    }
+  };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
@@ -152,11 +181,18 @@ export default function ProductsPage() {
               <div className="p-6">
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-semibold text-xl group-hover:text-[var(--color-primary)] transition-colors">{product.name}</h4>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(product.stock || 0)}`}
-                  >
-                    {getStockStatus(product.stock || 0)}
-                  </span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(product.stock || 0)}`}
+                    >
+                      {getStockStatus(product.stock || 0)}
+                    </span>
+                    {product.isFlashSale && (
+                      <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                        <Zap size={12} /> Flash Sale
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center gap-1">
@@ -189,6 +225,25 @@ export default function ProductsPage() {
                     <Trash2 size={16} />
                   </button>
                 </div>
+                {flashSaleEnabled && (
+                  <button
+                    type="button"
+                    onClick={() => handleToggleFlashSale(product)}
+                    disabled={togglingId === product._id}
+                    className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                      product.isFlashSale
+                        ? "border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100"
+                        : "border-[var(--border)] text-[var(--text-secondary)] hover:border-orange-300 hover:text-orange-600"
+                    }`}
+                  >
+                    <Zap size={16} />
+                    {togglingId === product._id
+                      ? "Updating..."
+                      : product.isFlashSale
+                      ? "Remove from Flash Sale"
+                      : "Add to Flash Sale"}
+                  </button>
+                )}
               </div>
             </div>
           ))}

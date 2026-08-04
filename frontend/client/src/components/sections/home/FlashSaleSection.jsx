@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProductCard from "../product/ProductCard";
+import { scrollViewport } from "../../shared/ScrollReveal";
 
 const stagger = (index, base = 0.06) => ({ delay: index * base });
 
@@ -34,6 +35,11 @@ export default function FlashSaleSection({ products }) {
   }, []);
 
   const format = (value) => value.toString().padStart(2, "0");
+
+  // Only worth its own homepage section once there's a decent number of deals.
+  if (!products || products.length <= 10) {
+    return null;
+  }
 
   return (
     <section className="py-20 px-4 bg-[var(--bg-card)]">
@@ -79,7 +85,7 @@ export default function FlashSaleSection({ products }) {
               key={product._id || index}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={scrollViewport}
               transition={{ ...stagger(index, 0.06), duration: 0.4 }}
               className="h-full"
             >

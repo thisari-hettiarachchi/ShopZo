@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Save } from "lucide-react";
 import { createProduct, getVendors } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 const initialForm = {
   name: "",
@@ -16,6 +19,7 @@ const initialForm = {
 };
 
 export default function AddProductPage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -75,81 +79,133 @@ export default function AddProductPage() {
     }
   };
 
+  const inputClass =
+    "w-full rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2.5 text-sm focus:border-[var(--color-primary)] focus:outline-none";
+
   return (
-    <section className="px-6 md:px-10 pt-8 pb-10 bg-[var(--bg-main)] text-[var(--text-primary)] min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Add Product</h1>
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+        <PageHeader
+          eyebrow="Inventory"
+          title="Add Product"
+          description="Create a new catalog listing and assign it to a vendor."
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={() => navigate("/products")}
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)]"
+              >
+                <ArrowLeft size={16} />
+                Back
+              </button>
+              <button
+                type="submit"
+                form="add-admin-product-form"
+                disabled={loading}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90 disabled:opacity-50"
+              >
+                <Save size={18} />
+                {loading ? "Creating..." : "Create"}
+              </button>
+            </>
+          }
+        />
 
-      {error && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
+          </div>
+        )}
 
-      {success && (
-        <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-          {success}
-        </div>
-      )}
+        {success && (
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {success}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 space-y-4 max-w-3xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm mb-1">Name</label>
-            <input name="name" value={form.name} onChange={handleChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2" required />
+        <form
+          id="add-admin-product-form"
+          onSubmit={handleSubmit}
+          className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_20px_50px_-34px_var(--shadow)] md:p-6"
+        >
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium">Name</label>
+              <input name="name" value={form.name} onChange={handleChange} className={inputClass} required />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Category</label>
+              <input name="category" value={form.category} onChange={handleChange} className={inputClass} required />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Price</label>
+              <input name="price" type="number" min="0" step="0.01" value={form.price} onChange={handleChange} className={inputClass} required />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Stock</label>
+              <input name="stock" type="number" min="0" value={form.stock} onChange={handleChange} className={inputClass} />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Old Price</label>
+              <input name="oldPrice" type="number" min="0" step="0.01" value={form.oldPrice} onChange={handleChange} className={inputClass} />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Discount</label>
+              <input name="discount" type="number" min="0" step="0.01" value={form.discount} onChange={handleChange} className={inputClass} />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Rating</label>
+              <input name="rating" type="number" min="0" max="5" step="0.1" value={form.rating} onChange={handleChange} className={inputClass} />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Vendor</label>
+              <select name="vendor" value={form.vendor} onChange={handleChange} className={inputClass}>
+                <option value="">Select a vendor</option>
+                {vendorsLoading ? (
+                  <option>Loading vendors...</option>
+                ) : (
+                  vendors.map((vendor) => (
+                    <option key={vendor._id} value={vendor._id}>
+                      {vendor.storeName || vendor.email || vendor._id}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-medium">Description</label>
+              <textarea name="description" rows={4} value={form.description} onChange={handleChange} className={inputClass} required />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Images</label>
+              <input name="images" value={form.images} onChange={handleChange} placeholder="https://... , https://..." className={inputClass} />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Sizes</label>
+              <input name="sizes" value={form.sizes} onChange={handleChange} placeholder="S, M, L" className={inputClass} />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm mb-1">Category</label>
-            <input name="category" value={form.category} onChange={handleChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2" required />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Price</label>
-            <input name="price" type="number" min="0" step="0.01" value={form.price} onChange={handleChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2" required />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Stock</label>
-            <input name="stock" type="number" min="0" value={form.stock} onChange={handleChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2" />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Old Price</label>
-            <input name="oldPrice" type="number" min="0" step="0.01" value={form.oldPrice} onChange={handleChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2" />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Discount</label>
-            <input name="discount" type="number" min="0" step="0.01" value={form.discount} onChange={handleChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2" />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Rating</label>
-            <input name="rating" type="number" min="0" max="5" step="0.1" value={form.rating} onChange={handleChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2" />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Vendor</label>
-            <select name="vendor" value={form.vendor} onChange={handleChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2">
-              <option value="">Select a vendor</option>
-              {vendorsLoading ? <option>Loading vendors...</option> : vendors.map((vendor) => <option key={vendor._id} value={vendor._id}>{vendor.storeName || vendor.email || vendor._id}</option>)}
-            </select>
-          </div>
-        </div>
 
-        <div>
-          <label className="block text-sm mb-1">Description</label>
-          <textarea name="description" rows={4} value={form.description} onChange={handleChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2" required />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm mb-1">Images</label>
-            <input name="images" value={form.images} onChange={handleChange} placeholder="https://... , https://..." className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2" />
+          <div className="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-[var(--border)] pt-6">
+            <button
+              type="button"
+              onClick={() => navigate("/products")}
+              className="rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm font-medium transition hover:bg-[var(--bg-muted)]"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90 disabled:opacity-60"
+            >
+              <Save size={18} />
+              {loading ? "Creating..." : "Create Product"}
+            </button>
           </div>
-          <div>
-            <label className="block text-sm mb-1">Sizes</label>
-            <input name="sizes" value={form.sizes} onChange={handleChange} placeholder="S, M, L" className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2" />
-          </div>
-        </div>
-
-        <button type="submit" disabled={loading} className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white font-semibold disabled:opacity-60">
-          {loading ? "Creating..." : "Create Product"}
-        </button>
-      </form>
+        </form>
+      </div>
     </section>
   );
 }

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react"; 
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Trash2, ShoppingBag, ArrowRight, XCircle } from "lucide-react";
+import { toast } from "react-toastify";
 import {
   fetchCart,
   updateCartItemApi,
   removeCartItemApi,
+  clearCartApi,
 } from "../../api/cartApi";
 import { useNavigate } from "react-router-dom";
 
@@ -11,6 +13,7 @@ export default function Cart() {
   const token = localStorage.getItem("token");
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [clearing, setClearing] = useState(false);
 
   // Dispatch custom event to update navbar
   const dispatchCartUpdate = () => {
@@ -102,6 +105,27 @@ export default function Cart() {
     }
   };
 
+  // Remove all items
+  const handleRemoveAll = async () => {
+    if (cartItems.length === 0) return;
+    const confirmed = window.confirm("Remove all items from your cart?");
+    if (!confirmed) return;
+
+    setClearing(true);
+    try {
+      await clearCartApi(token);
+      setCartItems([]);
+      localStorage.setItem('cart', JSON.stringify([]));
+      dispatchCartUpdate();
+      toast.success("Cart cleared");
+    } catch (err) {
+      console.error("Failed to clear cart:", err);
+      toast.error("Failed to clear cart");
+    } finally {
+      setClearing(false);
+    }
+  };
+
   // Correct subtotal calculation
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * (item.quantity || 1),
@@ -126,34 +150,75 @@ export default function Cart() {
     return acc;
   }, {});
 
+  const itemCount = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
   if (loading) {
-    return <p className="text-center py-10">Loading your cart...</p>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-main)]">
+        <p className="text-[var(--text-muted)]">Loading your cart...</p>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-[var(--bg-main)] px-4 py-10">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <ShoppingBag className="w-7 h-7 text-[var(--color-primary)]" />
-          <h1 className="text-3xl font-bold">Your Cart</h1>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_12px_28px_-18px_var(--shadow)]">
+              <ShoppingBag className="w-6 h-6 text-[var(--color-primary)]" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-semibold text-[var(--text-primary)]" style={{ fontFamily: "'Sora', sans-serif" }}>
+                Your Cart
+              </h1>
+              <p className="text-sm text-[var(--text-muted)]">
+                {itemCount > 0 ? `${itemCount} item${itemCount > 1 ? "s" : ""} in your cart` : "No items yet"}
+              </p>
+            </div>
+          </div>
+
+          {cartItems.length > 0 && (
+            <button
+              onClick={handleRemoveAll}
+              disabled={clearing}
+              className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:border-red-500 hover:text-red-500 disabled:opacity-60"
+            >
+              <XCircle className="w-4 h-4" />
+              {clearing ? "Removing..." : "Remove All"}
+            </button>
+          )}
         </div>
 
         {cartItems.length === 0 ? (
-          <p className="text-center text-[var(--text-muted)]">
-            Your cart is empty.
-          </p>
+          <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] py-20 text-center shadow-[0_24px_60px_-36px_var(--shadow)]">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--bg-muted)]">
+              <ShoppingBag className="w-8 h-8 text-[var(--text-muted)]" />
+            </div>
+            <p className="text-[var(--text-secondary)]">Your cart is empty.</p>
+            <button
+              onClick={() => navigate("/products")}
+              className="mt-2 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Continue Shopping
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         ) : (
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
               {Object.entries(groupedCart).map(([vendorId, vendor]) => (
-                <div key={vendorId} className="bg-[var(--bg-card)] rounded-2xl shadow overflow-hidden">
+                <div
+                  key={vendorId}
+                  className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_18px_40px_-30px_var(--shadow)]"
+                >
                   {/* Vendor Header */}
-                  <div className="bg-gray-50 px-5 py-3 border-b flex items-center gap-2">
-                    <input type="checkbox" className="w-4 h-4 rounded text-[var(--color-primary)] cursor-pointer" defaultChecked />
+                  <div className="flex items-center gap-2 border-b border-[var(--border)] bg-[var(--bg-muted)] px-5 py-3">
+                    <input type="checkbox" className="w-4 h-4 rounded accent-[var(--color-primary)] cursor-pointer" defaultChecked />
                     <ShoppingBag className="w-5 h-5 text-[var(--color-primary)]" />
-                    <span className="font-bold text-gray-800 uppercase tracking-wide text-sm">
+                    <span className="text-sm font-bold uppercase tracking-wide text-[var(--text-primary)]">
                       {vendor.name}
                     </span>
                   </div>
@@ -163,12 +228,12 @@ export default function Cart() {
                     {vendor.items.map((item) => (
                       <div
                         key={item._id}
-                        className="flex gap-4 pb-4 border-b last:pb-0 last:border-0"
+                        className="flex gap-4 border-b border-[var(--border)] pb-4 last:border-0 last:pb-0"
                       >
                         <img
                           src={item.product.images?.[0] || item.product.image || "/placeholder.png"} 
                           alt={item.product.name || "Product"}
-                          className="w-24 h-24 object-contain rounded-lg bg-[var(--bg-muted)] border border-gray-100"
+                          className="w-24 h-24 rounded-lg border border-[var(--border)] bg-[var(--bg-muted)] object-contain"
                         />
 
                         <div className="flex-1 flex flex-col justify-between">
@@ -176,7 +241,7 @@ export default function Cart() {
                             <h3 className="font-semibold text-[var(--text-primary)] leading-tight">
                               {item.product.name}
                             </h3>
-                            <p className="text-xs text-gray-400 mt-1 line-clamp-1">{item.product.description}</p>
+                            <p className="mt-1 line-clamp-1 text-xs text-[var(--text-muted)]">{item.product.description}</p>
                           </div>
 
                           <div className="flex items-end justify-between mt-3">
@@ -189,26 +254,26 @@ export default function Cart() {
                               {/* Remove */}
                               <button
                                 onClick={() => removeItem(item._id)}
-                                className="text-gray-400 hover:text-red-500 transition tooltip"
+                                className="text-[var(--text-muted)] transition hover:text-red-500"
                                 title="Remove Item"
                               >
                                 <Trash2 className="w-5 h-5" />
                               </button>
 
                               {/* Quantity */}
-                              <div className="flex items-center border border-gray-200 rounded-lg bg-white">
+                              <div className="flex items-center rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)]">
                                 <button
                                   onClick={() => decreaseQty(item._id)}
-                                  className="p-1 px-3 hover:bg-[var(--bg-muted)] text-gray-600 transition tracking-wider"
+                                  className="p-1 px-3 tracking-wider text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
                                 >
                                   −
                                 </button>
-                                <span className="w-10 text-center font-medium font-mono text-sm">
+                                <span className="w-10 text-center font-mono text-sm font-medium text-[var(--text-primary)]">
                                   {item.quantity || 1}
                                 </span>
                                 <button
                                   onClick={() => increaseQty(item._id)}
-                                  className="p-1 px-3 hover:bg-[var(--bg-muted)] text-gray-600 transition tracking-wider"
+                                  className="p-1 px-3 tracking-wider text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
                                 >
                                   +
                                 </button>
@@ -224,8 +289,10 @@ export default function Cart() {
             </div>
 
             {/* Order Summary */}
-            <div className="p-6 rounded-2xl bg-[var(--bg-card)] shadow space-y-4 h-fit">
-              <h2 className="text-xl font-semibold">Order Summary</h2>
+            <div className="h-fit space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_18px_40px_-30px_var(--shadow)]">
+              <h2 className="text-xl font-semibold text-[var(--text-primary)]" style={{ fontFamily: "'Sora', sans-serif" }}>
+                Order Summary
+              </h2>
 
               <div className="flex justify-between text-sm text-[var(--text-secondary)]">
                 <span>Subtotal</span>
@@ -239,7 +306,7 @@ export default function Cart() {
 
               <hr className="border-[var(--border)]" />
 
-              <div className="flex justify-between text-lg font-bold">
+              <div className="flex justify-between text-lg font-bold text-[var(--text-primary)]">
                 <span>Total</span>
                 <span className="text-[var(--color-primary)]">
                   Rs. {subtotal}
@@ -248,7 +315,7 @@ export default function Cart() {
 
               <button 
                 onClick={() => navigate(`/checkout`)}
-                className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90">
+                className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] transition hover:opacity-90">
                 Proceed to Checkout
                 <ArrowRight className="w-5 h-5" />
               </button>

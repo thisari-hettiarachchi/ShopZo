@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import {
   Search,
   ShoppingCart,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react'
 import Assets from '../../assets/assets'
 import { fetchProductSuggestions } from '../../api/productApi'
+import { fetchCategories } from '../../api/categoryApi'
 import { API_BASE_URL, authHeaders } from '../../api/base'
 
 export default function Navbar() {
@@ -26,24 +28,23 @@ export default function Navbar() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     category: "",
-    vendor: "",
     priceMin: "",
     priceMax: "",
     rating: "",
-    availability: "",
-    color: "",
-    size: "",
   });
   const [sortBy, setSortBy] = useState("popularity");
   const searchDropdownRef = useRef(null);
   const [showFilters, setShowFilters] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [notifications, setNotifications] = useState([]);
-    // Example: categories, vendors, colors, sizes for dropdowns (replace with real data or fetch from API)
-    const categories = ["Electronics", "Clothing", "Books", "Home"];
-    const vendors = ["Vendor A", "Vendor B", "Vendor C"];
-    const colors = ["Red", "Blue", "Green", "Black"];
-    const sizes = ["S", "M", "L", "XL"];
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetchCategories()
+      .then((data) => setCategories(Array.isArray(data) ? data.map((c) => c.name) : []))
+      .catch(() => setCategories([]));
+  }, []);
+
     // Close search dropdown on outside click
     useEffect(() => {
       function handleClickOutside(event) {
@@ -124,7 +125,14 @@ export default function Navbar() {
       }
     };
 
+    // Load notifications immediately
     loadNotifications();
+
+    // Set up polling to refresh notifications every 30 seconds
+    const pollInterval = setInterval(loadNotifications, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollInterval);
   }, []);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -144,7 +152,7 @@ export default function Navbar() {
   const handleNotificationsClick = () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login to continue");
+      toast.error("Please login to continue");
       navigate("/auth");
       return;
     }
@@ -190,7 +198,7 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 mt-5">
       <div className="max-w-7xl mx-auto px-4">
         <div className="navbar-main h-16 px-6 rounded-full flex items-center justify-between">
           {/* LEFT */}
@@ -379,29 +387,11 @@ export default function Navbar() {
                     <option value="">Category</option>
                     {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
-                  <select className="border rounded-lg px-2 py-1" value={filters.vendor} onChange={e => setFilters(f => ({...f, vendor: e.target.value}))}>
-                    <option value="">Vendor</option>
-                    {vendors.map(v => <option key={v} value={v}>{v}</option>)}
-                  </select>
                   <input type="number" placeholder="Min Price" className="border rounded-lg px-2 py-1 w-20" value={filters.priceMin} onChange={e => setFilters(f => ({...f, priceMin: e.target.value}))} />
                   <input type="number" placeholder="Max Price" className="border rounded-lg px-2 py-1 w-20" value={filters.priceMax} onChange={e => setFilters(f => ({...f, priceMax: e.target.value}))} />
                   <select className="border rounded-lg px-2 py-1" value={filters.rating} onChange={e => setFilters(f => ({...f, rating: e.target.value}))}>
                     <option value="">Rating</option>
                     {[5,4,3,2,1].map(r => <option key={r} value={r}>{r} & Up</option>)}
-                  </select>
-                  <select className="border rounded-lg px-2 py-1" value={filters.availability} onChange={e => setFilters(f => ({...f, availability: e.target.value}))}>
-                    <option value="">Availability</option>
-                    <option value="Available">Available</option>
-                    <option value="Limited">Limited</option>
-                    <option value="Out of Stock">Out of Stock</option>
-                  </select>
-                  <select className="border rounded-lg px-2 py-1" value={filters.color} onChange={e => setFilters(f => ({...f, color: e.target.value}))}>
-                    <option value="">Color</option>
-                    {colors.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <select className="border rounded-lg px-2 py-1" value={filters.size} onChange={e => setFilters(f => ({...f, size: e.target.value}))}>
-                    <option value="">Size</option>
-                    {sizes.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
               )}
@@ -428,6 +418,7 @@ export default function Navbar() {
             })}
           </div>
         )}
+
       </div>
     </nav>
   )

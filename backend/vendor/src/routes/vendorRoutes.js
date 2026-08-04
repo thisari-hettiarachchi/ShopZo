@@ -15,7 +15,7 @@ import authMiddleware from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.get("/", getVendors);
-router.get("/users", getUsers); // Get all registered users (customers)
+router.get("/users", authMiddleware, getUsers); // Get all registered users (customers)
 router.get("/profile", authMiddleware, getVendorProfile);
 router.put("/profile", authMiddleware, updateVendorProfile);
 router.post("/approval-request", authMiddleware, sendApprovalRequest);

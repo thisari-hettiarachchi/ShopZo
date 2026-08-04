@@ -1,6 +1,7 @@
 import Product from "../models/Product.js";
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
+import Settings from "../models/Settings.js";
 
 // GET all products
 export const getProducts = async (req, res) => {
@@ -109,6 +110,23 @@ export const getProductReviews = async (req, res) => {
   }
 };
 
+export const getReviewEligibility = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const userId = req.user._id;
+
+    const purchased = await Order.exists({
+      user: userId,
+      "products.product": productId,
+      status: { $nin: ["Cancelled", "canceled", "cancelled"] },
+    });
+
+    res.json({ canReview: Boolean(purchased) });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to check review eligibility" });
+  }
+};
+
 export const addProductReview = async (req, res) => {
   try {
     const { rating, title, comment, images = [] } = req.body;
@@ -119,7 +137,17 @@ export const addProductReview = async (req, res) => {
       return res.status(400).json({ message: "Rating is required" });
     }
 
-    const purchased = await Order.exists({ user: userId, "products.product": productId });
+    const purchased = await Order.exists({
+      user: userId,
+      "products.product": productId,
+      status: { $nin: ["Cancelled", "canceled", "cancelled"] },
+    });
+
+    if (!purchased) {
+      return res.status(403).json({
+        message: "Only customers who purchased this product can submit a review",
+      });
+    }
 
     const review = await Review.findOneAndUpdate(
       { product: productId, user: userId },
@@ -130,7 +158,7 @@ export const addProductReview = async (req, res) => {
         title: title || "",
         comment: comment || "",
         images: Array.isArray(images) ? images : [],
-        verifiedBuyer: Boolean(purchased),
+        verifiedBuyer: true,
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
@@ -156,9 +184,14 @@ export const addProductReview = async (req, res) => {
 
 export const getFlashSaleProducts = async (req, res) => {
   try {
+    const settings = await Settings.findOne({ key: "global" });
+    if (!settings?.flashSaleEnabled) {
+      return res.status(200).json([]);
+    }
+
     const products = await Product.find({
-      discount: { $gt: 0 }
-    }).limit(10);
+      isFlashSale: true,
+    }).limit(50);
 
     res.status(200).json(products);
   } catch (error) {

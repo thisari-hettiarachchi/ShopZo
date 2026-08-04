@@ -26,6 +26,31 @@ export const getVendorReviews = async (req, res) => {
   }
 };
 
+export const replyToReview = async (req, res) => {
+  try {
+    const vendorId = req.user?.id;
+    const { id } = req.params;
+    const { text } = req.body;
+    if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
+
+    if (!text || !text.trim()) {
+      return res.status(400).json({ message: "Reply text is required" });
+    }
+
+    const review = await Review.findById(id).populate("product", "vendor");
+    if (!review || String(review.product?.vendor) !== String(vendorId)) {
+      return res.status(404).json({ message: "Review not found or unauthorized" });
+    }
+
+    review.reply = { text: text.trim(), repliedAt: new Date() };
+    await review.save();
+
+    res.json(review);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to reply to review" });
+  }
+};
+
 export const getVendorReviewInsights = async (req, res) => {
   try {
     const vendorId = req.user?.id;

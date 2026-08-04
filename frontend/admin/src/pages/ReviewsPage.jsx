@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { getReviews } from "../services/adminService";
+import { toast } from "react-toastify";
+import { Trash2 } from "lucide-react";
+import { deleteReview, getAllReviews, getReviews } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 const StarRating = ({ rating }) => {
   const filled = Math.round(Number(rating || 0));
@@ -41,6 +44,9 @@ export default function ReviewsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [customerReviews, setCustomerReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState("");
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -56,6 +62,34 @@ export default function ReviewsPage() {
     loadReviews();
   }, []);
 
+  useEffect(() => {
+    const loadCustomerReviews = async () => {
+      try {
+        const data = await getAllReviews();
+        setCustomerReviews(Array.isArray(data) ? data : []);
+      } catch (requestError) {
+        console.error("Failed to load customer reviews", requestError);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+    loadCustomerReviews();
+  }, []);
+
+  const handleDeleteReview = async (id) => {
+    if (!window.confirm("Remove this review permanently?")) return;
+    setDeletingId(id);
+    try {
+      await deleteReview(id);
+      setCustomerReviews((prev) => prev.filter((review) => review._id !== id));
+      toast.success("Review removed");
+    } catch (requestError) {
+      toast.error(requestError?.response?.data?.message || "Failed to remove review");
+    } finally {
+      setDeletingId("");
+    }
+  };
+
   const filtered = reviews.filter((p) =>
     [p.name, p.vendor?.storeName, p.category]
       .filter(Boolean)
@@ -68,35 +102,14 @@ export default function ReviewsPage() {
       : "—";
 
   return (
-    <section className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] px-6 md:px-10 pt-8 pb-12">
-
-      {/* Header */}
-      <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)] mb-1">
-            Admin Panel
-          </p>
-          <h1 className="text-3xl font-bold tracking-tight">Product Reviews</h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            Monitor ratings and customer feedback across your catalog.
-          </p>
-        </div>
-
-        {/* Stats pill */}
-        {!loading && !error && reviews.length > 0 && (
-          <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-5 py-3 self-start sm:self-auto">
-            <div className="text-center">
-              <p className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)]">Products</p>
-              <p className="text-xl font-bold text-[var(--color-primary)]">{reviews.length}</p>
-            </div>
-            <div className="h-8 w-px bg-[var(--border)]" />
-            <div className="text-center">
-              <p className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)]">Avg Rating</p>
-              <p className="text-xl font-bold">{avgRating}</p>
-            </div>
-          </div>
-        )}
-      </div>
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Feedback Center"
+        title="Reviews"
+        description="Monitor ratings and customer feedback across your catalog."
+        meta={!loading && !error ? `${reviews.length} products · ${avgRating} avg` : undefined}
+      />
 
       {/* Error */}
       {error && (
@@ -199,6 +212,61 @@ export default function ReviewsPage() {
           Showing {filtered.length} of {reviews.length} product{reviews.length !== 1 ? "s" : ""}
         </p>
       )}
+
+      {/* Review moderation */}
+      <div className="mt-10">
+        <h2 className="text-xl font-bold tracking-tight">Review Moderation</h2>
+        <p className="mt-1 mb-5 text-sm text-[var(--text-secondary)]">
+          Remove reviews that violate guidelines (spam, abuse, fake feedback).
+        </p>
+
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5">
+          {reviewsLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
+          ) : customerReviews.length === 0 ? (
+            <p className="py-8 text-center text-sm text-[var(--text-secondary)]">No customer reviews yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {customerReviews.map((review) => (
+                <div
+                  key={review._id}
+                  className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-4 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold">{review.user?.name || "Customer"}</p>
+                      <StarRating rating={review.rating} />
+                      {review.verifiedBuyer && (
+                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                          Verified
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                      {review.product?.name || "Product"} • {review.product?.vendor?.storeName || "Unknown vendor"}
+                    </p>
+                    {review.comment && (
+                      <p className="mt-1.5 text-sm text-[var(--text-primary)] line-clamp-2">{review.comment}</p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteReview(review._id)}
+                    disabled={deletingId === review._id}
+                    className="inline-flex items-center gap-1.5 self-start rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50 md:self-auto"
+                  >
+                    <Trash2 size={13} />
+                    {deletingId === review._id ? "Removing..." : "Remove"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      </div>
     </section>
   );
 }
