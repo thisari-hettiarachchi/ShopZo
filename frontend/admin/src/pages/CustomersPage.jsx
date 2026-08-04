@@ -319,6 +319,44 @@ export default function CustomersPage() {
                           })
                         : "—"}
                     </td>
+
+                    {/* Status */}
+                    <td className="px-6 py-4">
+                      {customer.role === "User" ? (
+                        customer.isSuspended ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-medium text-rose-700 ring-1 ring-inset ring-rose-200">
+                            Suspended
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                            Active
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-[var(--text-secondary)]">—</span>
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-6 py-4">
+                      {customer.role === "User" ? (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSuspend(customer)}
+                          disabled={savingId === customer.id}
+                          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                            customer.isSuspended
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                              : "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                          }`}
+                        >
+                          {customer.isSuspended ? <ShieldCheck size={13} /> : <Ban size={13} />}
+                          {customer.isSuspended ? "Reactivate" : "Suspend"}
+                        </button>
+                      ) : (
+                        <span className="text-[var(--text-secondary)]">—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -198,7 +198,7 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 mt-5">
       <div className="max-w-7xl mx-auto px-4">
         <div className="navbar-main h-16 px-6 rounded-full flex items-center justify-between">
           {/* LEFT */}
@@ -419,26 +419,6 @@ export default function Navbar() {
           </div>
         )}
 
-        {/* QUICK CATEGORY NAV */}
-        {categories.length > 0 && (
-          <div className="categories-bar hidden md:flex items-center gap-1 mt-3 px-4 py-2 rounded-full overflow-x-auto">
-            <button
-              onClick={() => navigate('/categories')}
-              className="category-btn primary shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold"
-            >
-              All Categories
-            </button>
-            {categories.slice(0, 10).map((cat) => (
-              <button
-                key={cat}
-                onClick={() => navigate(`/products?category=${encodeURIComponent(cat)}`)}
-                className="category-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-medium"
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </nav>
   )

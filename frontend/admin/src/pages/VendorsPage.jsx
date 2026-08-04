@@ -144,13 +144,13 @@ export default function VendorsPage() {
             <tbody className="divide-y divide-[var(--border)]">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-[var(--text-secondary)]">
+                  <td colSpan={5} className="px-4 py-8 text-center text-[var(--text-secondary)]">
                     Loading vendors...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-[var(--text-secondary)]">
+                  <td colSpan={5} className="px-4 py-8 text-center text-[var(--text-secondary)]">
                     No vendors found.
                   </td>
                 </tr>
@@ -158,6 +158,8 @@ export default function VendorsPage() {
                 filtered.map((vendor) => {
                   const status = readStatus(vendor);
                   const isSaving = savingId === String(vendor._id);
+                  const docStatus = String(vendor?.verification?.documents?.status || "pending").toLowerCase();
+                  const docFiles = vendor?.verification?.documents?.files || [];
 
                   return (
                     <tr key={vendor._id} className="align-top">
@@ -167,6 +169,54 @@ export default function VendorsPage() {
                       </td>
                       <td className="px-4 py-4">
                         <Badge value={status} />
+                      </td>
+                      <td className="px-4 py-4">
+                        <Badge value={docStatus} toneMap={DOC_STATUS_TONE} />
+                        {docFiles.length > 0 ? (
+                          <div className="mt-2 flex flex-col gap-1">
+                            {docFiles.map((file, idx) => (
+                              <a
+                                key={idx}
+                                href={file.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
+                              >
+                                <FileText size={12} />
+                                {file.name || `Document ${idx + 1}`}
+                              </a>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs text-[var(--text-secondary)]">No documents uploaded</p>
+                        )}
+                        {docFiles.length > 0 && docStatus !== "verified" && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <ActionButton
+                              label="Verify docs"
+                              variant="success"
+                              disabled={isSaving}
+                              onClick={() =>
+                                runAction(vendor._id, () =>
+                                  reviewVendorDocuments(vendor._id, { status: "verified" })
+                                )
+                              }
+                            />
+                            <ActionButton
+                              label="Reject docs"
+                              variant="danger"
+                              disabled={isSaving}
+                              onClick={() =>
+                                runAction(vendor._id, () =>
+                                  reviewVendorDocuments(vendor._id, {
+                                    status: "rejected",
+                                    note: askReason("Document rejection") || "Documents rejected by admin",
+                                  })
+                                )
+                              }
+                            />
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-4 text-xs text-[var(--text-secondary)]">
                         {vendor?.moderation?.note || vendor?.moderation?.rejectionReason || vendor?.moderation?.suspensionReason || vendor?.moderation?.banReason || "-"}
