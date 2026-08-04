@@ -24,6 +24,21 @@ const orderSchema = new mongoose.Schema({
     type: [statusHistorySchema],
     default: [{ status: "Placed" }],
   },
+  shippingAddress: { type: Object, default: null },
+  paymentMethod: { type: String, enum: ["stripe", "cod"], default: "cod" },
+  paymentStatus: {
+    type: String,
+    enum: ["pending", "paid", "failed", "refunded"],
+    default: "pending",
+  },
+  stripeSessionId: { type: String },
+  stripePaymentIntentId: { type: String },
+  amountPaid: { type: Number },
+  currency: { type: String, default: "lkr" },
+  coupon: {
+    code: { type: String },
+    discountAmount: { type: Number },
+  },
 }, { timestamps: true });
 
 export default mongoose.model("Order", orderSchema);

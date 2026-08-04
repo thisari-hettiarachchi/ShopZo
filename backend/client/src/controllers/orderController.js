@@ -1,6 +1,7 @@
 import Order from "../models/Order.js";
 import ReturnRequest from "../models/ReturnRequest.js";
 import Notification from "../models/Notification.js";
+import Coupon from "../models/Coupon.js";
 
 const TRACKING_FLOW = ["Placed", "Processing", "Shipped", "Delivered"];
 const RETURN_WINDOW_DAYS = 7;
@@ -89,11 +90,29 @@ export const getCancellations = async (req, res) => {
 
 export const createOrder = async (req, res) => {
   try {
-    const { items } = req.body;
+    const { items, shippingAddress, couponCode } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: "No order items" });
     }
+
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+    let appliedCoupon = null;
+    let discountAmount = 0;
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.trim().toUpperCase(), isActive: true });
+      const now = new Date();
+      const withinWindow = coupon && (!coupon.startsAt || coupon.startsAt <= now) && (!coupon.expiresAt || coupon.expiresAt >= now);
+      const underLimit = coupon && (!coupon.usageLimit || coupon.usedCount < coupon.usageLimit);
+      if (coupon && withinWindow && underLimit && subtotal >= (coupon.minOrderAmount || 0)) {
+        let discount = coupon.type === "percentage" ? (subtotal * coupon.value) / 100 : coupon.value;
+        if (coupon.maxDiscountAmount) discount = Math.min(discount, coupon.maxDiscountAmount);
+        discountAmount = Math.min(discount, subtotal);
+        appliedCoupon = coupon;
+      }
+    }
+    const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;
 
     // Group items by vendor
     const vendorMap = {};
@@ -111,16 +130,27 @@ export const createOrder = async (req, res) => {
     });
 
     // Create an Order for each vendor
-    const ordersToInsert = Object.keys(vendorMap).map((vid) => ({
-      user: req.user._id,
-      vendor: vid,
-      products: vendorMap[vid].products,
-      total: vendorMap[vid].total,
-      status: "Pending",
-      statusHistory: [{ status: "Placed", at: new Date() }],
-    }));
+    const ordersToInsert = Object.keys(vendorMap).map((vid) => {
+      const vendorDiscount = Math.round(vendorMap[vid].total * discountRatio * 100) / 100;
+      return {
+        user: req.user._id,
+        vendor: vid,
+        products: vendorMap[vid].products,
+        total: Math.max(vendorMap[vid].total - vendorDiscount, 0),
+        status: "Pending",
+        statusHistory: [{ status: "Placed", at: new Date() }],
+        shippingAddress: shippingAddress || null,
+        paymentMethod: "cod",
+        paymentStatus: "pending",
+        coupon: appliedCoupon ? { code: appliedCoupon.code, discountAmount: vendorDiscount } : undefined,
+      };
+    });
 
     const savedOrders = await Order.insertMany(ordersToInsert);
+
+    if (appliedCoupon) {
+      await Coupon.updateOne({ _id: appliedCoupon._id }, { $inc: { usedCount: 1 } });
+    }
 
     await Notification.create({
       user: req.user._id,
