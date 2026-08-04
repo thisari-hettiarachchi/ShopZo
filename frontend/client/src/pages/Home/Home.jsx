@@ -7,7 +7,6 @@ import BestSellersSection from "../../components/sections/home/BestSellersSectio
 import PromoSection from "../../components/sections/home/PromoSection";
 import ValuePropsSection from "../../components/sections/home/ValuePropsSection";
 import JustForYouSection from "../../components/sections/home/JustForYouSection";
-import ScrollToTopButton from "../../components/shared/ScrollToTopButton";
 import { API_BASE_URL } from "../../api/base";
 
 if (typeof document !== "undefined" && !document.getElementById("shopzo-fonts")) {
@@ -62,7 +61,6 @@ export default function Home() {
       <PromoSection banners={promoBanners} />
       <ValuePropsSection />
       <JustForYouSection products={products} />
-      <ScrollToTopButton />
     </div>
   );
 }

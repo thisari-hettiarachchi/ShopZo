@@ -4,6 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import AppRoutes from './routes/AppRoutes';
 import Navbar from './components/shared/Navbar';
 import Footer from './components/shared/Footer';
+import ScrollToTopButton from './components/shared/ScrollToTopButton';
 
 export default function App() {
   const location = useLocation();
@@ -14,6 +15,7 @@ export default function App() {
       {!noHeaderFooter && <Navbar />}
       <AppRoutes />
       {!noHeaderFooter && <Footer />}
+      <ScrollToTopButton />
       <ToastContainer
         position="top-right"
         autoClose={3500}
