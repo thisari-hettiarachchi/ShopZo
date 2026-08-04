@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import { toast } from "react-toastify";
 import { ShoppingCart, Heart, Star, Truck, MapPin, Shield, Store, RefreshCcw } from "lucide-react";
 import { fetchProductById, fetchProductReviews, postProductReview } from "../../api/productApi";
 import { API_BASE_URL, authHeaders } from "../../api/base";
@@ -65,7 +66,7 @@ export default function ProductDetails() {
 
   /* ---------------- Wishlist Toggle ---------------- */
   const handleWishlistClick = async () => {
-    if (!token) return alert("Login to use wishlist");
+    if (!token) return toast.error("Login to use wishlist");
 
     try {
       if (isWishlisted) {
@@ -82,36 +83,38 @@ export default function ProductDetails() {
 
   /* ---------------- Add to Cart ---------------- */
   const handleAddToCart = async () => {
-    if (!token) return alert("You must be logged in to add to cart");
+    if (!token) return toast.error("You must be logged in to add to cart");
 
     try {
       const updatedCart = await addToCartApi(product._id, quantity, token);
 
       if (updatedCart?.message) {
-        alert(updatedCart.message);
+        toast.info(updatedCart.message);
       } else {
-        alert("Added to cart!");
+        toast.success("Added to cart!");
+        window.dispatchEvent(new Event("cartUpdated"));
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to add to cart");
+      toast.error("Failed to add to cart");
     }
   };
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    if (!token) return alert("Login to submit a review");
+    if (!token) return toast.error("Login to submit a review");
 
     const created = await postProductReview(product._id, reviewForm);
-    if (created?.message) return alert(created.message);
+    if (created?.message && !created?._id) return toast.error(created.message);
 
+    toast.success("Thanks for your review!");
     const latest = await fetchProductReviews(product._id);
     setReviews(Array.isArray(latest) ? latest : []);
     setReviewForm({ rating: 5, title: "", comment: "" });
   };
 
   const handleSendChat = async () => {
-    if (!token) return alert("Login to chat with vendor");
+    if (!token) return toast.error("Login to chat with vendor");
     if (!product?.vendor?._id || !chatInput.trim()) return;
 
     const res = await fetch(`${API_BASE_URL}/chat/messages`, {
@@ -135,7 +138,7 @@ export default function ProductDetails() {
   };
 
   const handleBuyNow = () => {
-    if (!token) return alert("You must be logged in to checkout");
+    if (!token) return toast.error("You must be logged in to checkout");
     navigate("/checkout", {
       state: {
         products: [
@@ -154,7 +157,7 @@ export default function ProductDetails() {
   };
 
   const handleChatNow = () => {
-    if (!token) return alert("Login to chat with vendor");
+    if (!token) return toast.error("Login to chat with vendor");
     if (chatInputRef.current) {
       chatInputRef.current.focus();
       chatInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -227,7 +230,7 @@ export default function ProductDetails() {
               />
             ))}
             <span className="text-sm text-[var(--text-secondary)] ml-2">
-              ({product.reviews ?? 0} Ratings)
+              ({product.ratingCount ?? reviews.length ?? 0} Ratings)
             </span>
             <span className="text-[var(--border)] mx-2">|</span>
             <span className="text-sm text-[var(--color-primary)] hover:underline cursor-pointer">
@@ -328,6 +331,12 @@ export default function ProductDetails() {
                   <p className="text-xs text-[var(--text-secondary)] mt-1">{"★".repeat(review.rating)}{"☆".repeat(Math.max(0, 5 - review.rating))}</p>
                   {review.title && <p className="text-sm font-semibold mt-1">{review.title}</p>}
                   {review.comment && <p className="text-sm text-[var(--text-secondary)] mt-1">{review.comment}</p>}
+                  {review.reply?.text && (
+                    <div className="mt-2 rounded-lg border border-[var(--border)] bg-[var(--bg-main)] p-2.5">
+                      <p className="text-xs font-semibold text-[var(--color-primary)]">Seller response</p>
+                      <p className="mt-0.5 text-xs text-[var(--text-secondary)]">{review.reply.text}</p>
+                    </div>
+                  )}
                 </div>
               ))}
               {reviews.length === 0 && <p className="text-sm text-[var(--text-secondary)]">No reviews yet.</p>}
@@ -390,8 +399,8 @@ export default function ProductDetails() {
                 </p>
                 <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
                   <Star size={12} className="fill-amber-400 text-amber-400" />
-                  <span className="font-semibold text-gray-700">{product.vendor?.rating || 4.8} / 5</span> 
-                  <span>({Math.floor(Math.random() * 500) + 50} reviews)</span>
+                  <span className="font-semibold text-gray-700">{product.rating || "New"} / 5</span> 
+                  <span>({product.ratingCount ?? 0} reviews)</span>
                 </div>
               </div>
             </div>

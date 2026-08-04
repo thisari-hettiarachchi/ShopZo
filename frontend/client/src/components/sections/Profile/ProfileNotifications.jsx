@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import { Bell, CheckCircle2 } from "lucide-react";
 import { API_BASE_URL, authHeaders } from "../../../api/base";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +18,7 @@ export default function ProfileNotifications() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login to continue");
+      toast.error("Please login to continue");
       navigate("/auth");
       return;
     }

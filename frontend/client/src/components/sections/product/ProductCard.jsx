@@ -1,6 +1,7 @@
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { addToCartApi } from "../../../api/cartApi";
 import {
   addToWishlistApi,
@@ -23,19 +24,23 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
-    if (!token) return alert("You must be logged in to add to cart");
+    if (!token) return toast.error("You must be logged in to add to cart");
     try {
       const updatedCart = await addToCartApi(product._id, 1, token);
-      if (updatedCart?.message) alert(updatedCart.message);
-      else { alert("Added to cart!"); if (onCartUpdate) onCartUpdate(updatedCart); }
+      if (updatedCart?.message) toast.info(updatedCart.message);
+      else {
+        toast.success("Added to cart!");
+        window.dispatchEvent(new Event("cartUpdated"));
+        if (onCartUpdate) onCartUpdate(updatedCart);
+      }
     } catch (err) {
-      alert(err.message || "Failed to add to cart");
+      toast.error(err.message || "Failed to add to cart");
     }
   };
 
   const handleWishlistClick = async (e) => {
     e.stopPropagation();
-    if (!token) return alert("Login to use wishlist");
+    if (!token) return toast.error("Login to use wishlist");
     try {
       if (isWishlisted) { await removeFromWishlistApi(product._id, token); setIsWishlisted(false); }
       else { await addToWishlistApi(product._id, token); setIsWishlisted(true); }
@@ -83,7 +88,7 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
           {[...Array(5)].map((_, i) => (
             <Star key={i} className={`h-3 w-3 ${i < Math.round(product.rating) ? "fill-[var(--color-primary)] text-[var(--color-primary)]" : "text-slate-200"}`} />
           ))}
-          <span className="ml-1 text-[11px] text-[var(--text-muted)]">({product.reviews ?? 0})</span>
+          <span className="ml-1 text-[11px] text-[var(--text-muted)]">({product.ratingCount ?? 0})</span>
         </div>
 
         {/* Price block — fixed height so buttons always align */}

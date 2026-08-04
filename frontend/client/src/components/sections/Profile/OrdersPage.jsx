@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { CreditCard, Truck } from "lucide-react";
 import { cancelOrder, fetchOrders as fetchOrdersApi, fetchReturns, requestReturn } from "../../../api/ordersApi";
 
 export default function OrdersPage() {
@@ -75,10 +77,10 @@ export default function OrdersPage() {
     try {
       setActionLoadingId(orderId);
       await requestReturn(orderId, { reason, details: "Requested from profile" });
-      alert("Return request submitted");
+      toast.success("Return request submitted");
       await refreshOrders();
     } catch (error) {
-      alert(error?.response?.data?.message || "Failed to request return");
+      toast.error(error?.response?.data?.message || "Failed to request return");
     } finally {
       setActionLoadingId("");
     }
@@ -91,10 +93,10 @@ export default function OrdersPage() {
     try {
       setActionLoadingId(orderId);
       await cancelOrder(orderId);
-      alert("Order cancelled");
+      toast.success("Order cancelled");
       await refreshOrders();
     } catch (error) {
-      alert(error?.response?.data?.message || "Failed to cancel order");
+      toast.error(error?.response?.data?.message || "Failed to cancel order");
     } finally {
       setActionLoadingId("");
     }
@@ -140,6 +142,24 @@ export default function OrdersPage() {
                 <div className="text-right">
                   <p className="text-sm font-semibold text-[var(--text-primary)]">{order.status}</p>
                   <p className="font-semibold text-[var(--text-primary)]">₹{order.total}</p>
+                  <div className="flex items-center gap-1 justify-end mt-1">
+                    {order.paymentMethod === "cod" ? (
+                      <Truck size={12} className="text-[var(--text-secondary)]" />
+                    ) : (
+                      <CreditCard size={12} className="text-[var(--text-secondary)]" />
+                    )}
+                    <span
+                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                        order.paymentStatus === "paid"
+                          ? "text-green-700 bg-green-100"
+                          : order.paymentStatus === "refunded"
+                          ? "text-slate-600 bg-slate-100"
+                          : "text-amber-700 bg-amber-100"
+                      }`}
+                    >
+                      {order.paymentMethod === "cod" ? "COD" : order.paymentStatus || "pending"}
+                    </span>
+                  </div>
                   {returnsByOrderId[order._id] && (
                     <p className="text-[11px] text-amber-600 mt-1">Return: {returnsByOrderId[order._id].status}</p>
                   )}
@@ -149,6 +169,11 @@ export default function OrdersPage() {
               {expandedOrderId === order._id && (
                 <div className="w-full mt-4 border-t border-[var(--border)] pt-4" onClick={(event) => event.stopPropagation()}>
                   <p className="text-xs text-[var(--text-secondary)] mb-2">Order ID: {order._id}</p>
+                  {order.coupon?.code && (
+                    <p className="text-xs text-green-600 mb-2">
+                      Coupon "{order.coupon.code}" applied - saved ₹{order.coupon.discountAmount}
+                    </p>
+                  )}
 
                   <div className="space-y-2 mb-4">
                     {(order.products || []).map((item, idx) => (

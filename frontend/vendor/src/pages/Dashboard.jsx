@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import {
   TrendingUp,
   TrendingDown,
@@ -109,9 +110,9 @@ export default function Dashboard() {
           accountStatus: res.data.accountStatus || prev?.accountStatus || "pending",
         }));
       }
-      alert("Approval request sent.");
+      toast.success("Approval request sent.");
     } catch (error) {
-      alert(error?.response?.data?.message || "Failed to send approval request");
+      toast.error(error?.response?.data?.message || "Failed to send approval request");
     } finally {
       setRequesting(false);
     }

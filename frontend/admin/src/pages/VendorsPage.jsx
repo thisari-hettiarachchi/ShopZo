@@ -1,9 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import { FileText } from "lucide-react";
 import {
   approveVendor,
   getVendors,
+  reviewVendorDocuments,
   updateVendorStatus,
 } from "../services/adminService";
+
+const DOC_STATUS_TONE = {
+  pending: "bg-amber-50 text-amber-700 ring-amber-200",
+  verified: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  rejected: "bg-rose-50 text-rose-700 ring-rose-200",
+};
 
 const STATUS_TONE = {
   pending: "bg-amber-50 text-amber-700 ring-amber-200",
@@ -88,7 +97,7 @@ export default function VendorsPage() {
       await callback();
       await loadVendors();
     } catch (requestError) {
-      alert(requestError?.response?.data?.message || "Action failed");
+      toast.error(requestError?.response?.data?.message || "Action failed");
     } finally {
       setSavingId("");
     }
@@ -127,6 +136,7 @@ export default function VendorsPage() {
               <tr>
                 <th className="px-4 py-3 text-left font-semibold">Vendor</th>
                 <th className="px-4 py-3 text-left font-semibold">Account</th>
+                <th className="px-4 py-3 text-left font-semibold">Documents</th>
                 <th className="px-4 py-3 text-left font-semibold">Moderation</th>
                 <th className="px-4 py-3 text-left font-semibold">Actions</th>
               </tr>

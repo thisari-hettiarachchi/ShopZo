@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { User, Mail, Lock, LogOut } from "lucide-react";
 import { getUserProfile, updateUserProfile } from "../../../services/userService";
 
@@ -22,7 +23,7 @@ export default function ProfilePage() {
           password: "",
         });
       } catch (err) {
-        alert(err.response?.data?.message || "Failed to fetch profile");
+        toast.error(err.response?.data?.message || "Failed to fetch profile");
       }
     };
 
@@ -53,16 +54,16 @@ export default function ProfilePage() {
         password: "",
         accountType: res.data.user.role,
       });
-      alert(res.data.message);
+      toast.success(res.data.message);
       setEditMode(false);
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to update profile");
+      toast.error(err.response?.data?.message || "Failed to update profile");
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/login";
+    window.location.href = "/auth";
   };
 
   return (

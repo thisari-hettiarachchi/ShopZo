@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { Edit2, Plus, X } from "lucide-react";
 import {
   getAddresses,
   addAddress,
+  updateAddress,
   setDefaultAddress,
   deleteAddress,
 } from "../../../services/addressService";
@@ -31,7 +33,7 @@ export default function AddressBook() {
         setAddresses(res.data);
       } catch (err) {
         console.error(err);
-        alert("Failed to load addresses");
+        toast.error("Failed to load addresses");
       }
     };
     fetchAll();
@@ -69,9 +71,10 @@ export default function AddressBook() {
         isDefaultBilling: false,
       });
       setShowAddForm(false);
+      toast.success("Address added");
     } catch (err) {
       console.error(err);
-      alert("Failed to add address");
+      toast.error("Failed to add address");
     }
   };
 
@@ -88,9 +91,10 @@ export default function AddressBook() {
             type === "billing" ? addr.id === id : addr.isDefaultBilling,
         }))
       );
+      toast.success("Default address updated");
     } catch (err) {
       console.error(err);
-      alert("Failed to update default address");
+      toast.error("Failed to update default address");
     }
   };
 
@@ -103,16 +107,16 @@ export default function AddressBook() {
   // Save edited address
   const handleUpdateAddress = async () => {
     try {
+      const res = await updateAddress(editingAddress.id, editingAddress);
       setAddresses((prev) =>
-        prev.map((addr) =>
-          addr.id === editingAddress.id ? editingAddress : addr
-        )
+        prev.map((addr) => (addr.id === editingAddress.id ? res.data : addr))
       );
       setShowEditForm(false);
       setEditingAddress(null);
+      toast.success("Address updated");
     } catch (err) {
       console.error(err);
-      alert("Failed to update address");
+      toast.error("Failed to update address");
     }
   };
 
@@ -123,9 +127,10 @@ export default function AddressBook() {
     try {
       await deleteAddress(id);
       setAddresses((prev) => prev.filter((addr) => addr.id !== id));
+      toast.success("Address deleted");
     } catch (err) {
       console.error(err);
-      alert("Failed to delete address");
+      toast.error("Failed to delete address");
     }
   };
 

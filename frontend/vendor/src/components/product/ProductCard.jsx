@@ -1,6 +1,7 @@
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { addToCartApi } from "../../api/cartApi";
 import {
   addToWishlistApi,
@@ -30,26 +31,26 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
-    if (!token) return alert("You must be logged in to add to cart");
+    if (!token) return toast.error("You must be logged in to add to cart");
 
     try {
       const updatedCart = await addToCartApi(product._id, 1, token);
 
       if (updatedCart?.message) {
-        alert(updatedCart.message);
+        toast.info(updatedCart.message);
       } else {
-        alert("Added to cart!");
+        toast.success("Added to cart!");
         if (onCartUpdate) onCartUpdate(updatedCart);
       }
     } catch (err) {
       console.error("Failed to add to cart:", err);
-      alert(err.message || "Failed to add to cart");
+      toast.error(err.message || "Failed to add to cart");
     }
   };
 
   const handleWishlistClick = async (e) => {
     e.stopPropagation();
-    if (!token) return alert("Login to use wishlist");
+    if (!token) return toast.error("Login to use wishlist");
 
     try {
       if (isWishlisted) {

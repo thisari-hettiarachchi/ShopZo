@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { ArrowLeft, PackagePlus, Save } from "lucide-react";
 import { addProduct } from "../services/productService";
 import { getCategories } from "../services/categoryService";
@@ -110,7 +111,7 @@ export default function AddProductPage() {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!canAddProducts) {
-      alert("Your vendor account must be approved before you can add products.");
+      toast.error("Your vendor account must be approved before you can add products.");
       return;
     }
     setLoading(true);
