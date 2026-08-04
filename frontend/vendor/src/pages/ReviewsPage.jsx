@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Star } from "lucide-react";
+import { toast } from "react-toastify";
+import { MessageSquare, Send, Star } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { getVendorReviewInsights, getVendorReviews } from "../services/featureService";
+import { getVendorReviewInsights, getVendorReviews, replyToReview } from "../services/featureService";
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState([]);
   const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [replyDrafts, setReplyDrafts] = useState({});
+  const [replyingId, setReplyingId] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -20,6 +23,29 @@ export default function ReviewsPage() {
     };
     loadData();
   }, []);
+
+  const handleReplyChange = (reviewId, value) => {
+    setReplyDrafts((prev) => ({ ...prev, [reviewId]: value }));
+  };
+
+  const handleSubmitReply = async (reviewId) => {
+    const text = (replyDrafts[reviewId] || "").trim();
+    if (!text) {
+      toast.error("Please write a reply before submitting.");
+      return;
+    }
+    setReplyingId(reviewId);
+    try {
+      const res = await replyToReview(reviewId, text);
+      setReviews((prev) => prev.map((review) => (review._id === reviewId ? { ...review, reply: res.data.reply } : review)));
+      setReplyDrafts((prev) => ({ ...prev, [reviewId]: "" }));
+      toast.success("Reply posted.");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to post reply");
+    } finally {
+      setReplyingId(null);
+    }
+  };
 
   const trendRows = useMemo(() => insights?.ratingBreakdown?.map((item) => ({ label: `${item.rating}★`, count: item.count })) || [], [insights]);
 
@@ -87,6 +113,34 @@ export default function ReviewsPage() {
                   <span className="mt-2 inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
                     Verified Buyer
                   </span>
+                )}
+
+                {review.reply?.text ? (
+                  <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)]">
+                      <MessageSquare size={13} />
+                      Your reply
+                    </div>
+                    <p className="mt-1 text-sm text-[var(--text-primary)]">{review.reply.text}</p>
+                  </div>
+                ) : (
+                  <div className="mt-3 flex items-center gap-2">
+                    <input
+                      value={replyDrafts[review._id] || ""}
+                      onChange={(e) => handleReplyChange(review._id, e.target.value)}
+                      placeholder="Write a reply to this customer..."
+                      className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSubmitReply(review._id)}
+                      disabled={replyingId === review._id}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                    >
+                      <Send size={13} />
+                      {replyingId === review._id ? "Sending..." : "Reply"}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
