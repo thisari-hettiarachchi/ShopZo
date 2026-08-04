@@ -4,7 +4,6 @@ import HeroSection from "../../components/sections/home/HeroSection";
 import CategoriesSection from "../../components/sections/home/CategoriesSection";
 import FlashSaleSection from "../../components/sections/home/FlashSaleSection";
 import PromoSection from "../../components/sections/home/PromoSection";
-import FeaturedVendorsSection from "../../components/sections/home/FeaturedVendorsSection";
 import JustForYouSection from "../../components/sections/home/JustForYouSection";
 import { API_BASE_URL } from "../../api/base";
 
@@ -64,7 +63,6 @@ export default function Home() {
       <CategoriesSection categories={categories} />
       <FlashSaleSection products={flashSaleProducts} />
       <PromoSection banners={promoBanners} />
-      <FeaturedVendorsSection vendors={vendors} />
       <JustForYouSection products={justForYou} />
     </div>
   );
