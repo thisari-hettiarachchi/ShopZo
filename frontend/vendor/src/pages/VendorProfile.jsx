@@ -9,10 +9,12 @@ import {
   Users,
   ShieldCheck,
   Mail,
+  Bell,
 } from "lucide-react";
 import { getVendorProfile } from "../services/vendorService";
 import { useNavigate } from "react-router-dom";
 import { getVendorToken, readVendorSession, saveVendorSession } from "../utils/authStorage";
+import { getVendorNotifications } from "../services/featureService";
 
 const STORAGE_KEY = "vendorProfile";
 
@@ -64,6 +66,7 @@ export default function VendorProfilePage() {
   }, []);
 
   const [profile, setProfile] = useState(initialProfile);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const token = getVendorToken();
@@ -91,6 +94,16 @@ export default function VendorProfilePage() {
       .catch(() => {
       });
 
+    getVendorNotifications()
+      .then((res) => {
+        if (cancelled) return;
+        const list = Array.isArray(res.data) ? res.data : [];
+        setUnreadCount(list.filter((item) => !item.isRead).length);
+      })
+      .catch(() => {
+        if (!cancelled) setUnreadCount(0);
+      });
+
     return () => {
       cancelled = true;
     };
@@ -111,13 +124,30 @@ export default function VendorProfilePage() {
     <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 md:px-10 md:pb-12">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_20px_50px_-34px_var(--shadow)] md:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
-            Vendor Identity
-          </p>
-          <h2 className="mt-2 text-3xl font-extrabold text-[var(--color-primary)]">Store Profile</h2>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            View your store details and public appearance.
-          </p>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+                Vendor Identity
+              </p>
+              <h2 className="mt-2 text-3xl font-extrabold text-[var(--color-primary)]">Store Profile</h2>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                View your store details and public appearance.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/notifications")}
+              className="relative inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-2.5 text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
+              aria-label="Notifications"
+            >
+              <Bell size={18} />
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-bold text-white">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="mb-6 flex flex-col gap-5 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_20px_50px_-34px_var(--shadow)] md:flex-row md:items-center md:justify-between md:p-6">

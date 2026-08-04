@@ -57,18 +57,6 @@ export default function PromoSection({ banners }) {
   return (
     <section className="py-20 px-4 bg-[var(--bg-main)]">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] p-3 rounded-xl shadow-lg shadow-orange-500/20">
-            <Megaphone className="text-white" size={22} />
-          </div>
-          <div>
-            <span className="section-eyebrow block mb-1">Vendor Spotlight</span>
-            <h2 className="display-font text-2xl md:text-3xl font-black text-[var(--text-primary)] leading-tight">
-              Featured <span className="italic text-[var(--color-primary)]">Promotions</span>
-            </h2>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {banners.map((banner, index) => (
             <BannerCard key={banner._id} banner={banner} index={index} />

@@ -9,6 +9,7 @@ import FlashSalePage from "../pages/FlashSalePage";
 import PromotionsPage from "../pages/PromotionsPage";
 import AdminProfilePage from "../pages/AdminProfile";
 import EditProfilePage from "../pages/EditProfile";
+import NotificationsPage from "../pages/NotificationsPage";
 import AuthPages from "../pages/Auth";
 
 const getActiveFromPath = (pathname) => {
@@ -26,6 +27,8 @@ const getActiveFromPath = (pathname) => {
 		case "/analytics":
 			return "analytics";
 		case "/profile":
+		case "/profile/edit":
+		case "/notifications":
 			return "profile";
 		case "/":
 		default:
@@ -58,6 +61,7 @@ function AdminDashboardShell() {
 					<Route path="/analytics" element={<AnalyticsPage />} />
 					<Route path="/profile" element={<AdminProfilePage />} />
 					<Route path="/profile/edit" element={<EditProfilePage />} />
+					<Route path="/notifications" element={<NotificationsPage />} />
 					<Route path="*" element={<Navigate to="/" replace />} />
 				</Routes>
 			</main>

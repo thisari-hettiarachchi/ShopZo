@@ -16,6 +16,7 @@ import AuthPages from "../pages/Auth";
 import CouponsPage from "../pages/CouponsPage";
 import ChatPage from "../pages/ChatPage";
 import PromotionsPage from "../pages/PromotionsPage";
+import NotificationsPage from "../pages/NotificationsPage";
 import { isVendorAuthenticated } from "../utils/authStorage";
 
 const getActiveFromPath = (pathname) => {
@@ -39,6 +40,8 @@ const getActiveFromPath = (pathname) => {
     case "/chat":
       return "chat";
     case "/profile":
+    case "/profile/edit":
+    case "/notifications":
       return "profile";
     case "/":
     default:
@@ -76,6 +79,7 @@ function VendorDashboardShell() {
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/profile" element={<VendorProfilePage />} />
           <Route path="/profile/edit" element={<EditProfilePage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

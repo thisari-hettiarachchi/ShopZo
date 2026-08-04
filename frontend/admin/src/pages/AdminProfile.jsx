@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Edit, Mail, ShieldCheck, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Bell, Edit, Mail, ShieldCheck, User } from "lucide-react";
 import api from "../services/api";
+import { getDashboardInsights } from "../services/adminService";
 import PageHeader from "../components/shared/PageHeader";
 
 function SkeletonProfile() {
@@ -42,9 +43,11 @@ function InfoCard({ icon: Icon, label, value, tone }) {
 }
 
 export default function AdminProfilePage() {
+  const navigate = useNavigate();
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [alertCount, setAlertCount] = useState(0);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -65,7 +68,18 @@ export default function AdminProfilePage() {
         setLoading(false);
       }
     };
+
+    const loadAlerts = async () => {
+      try {
+        const data = await getDashboardInsights();
+        setAlertCount(Array.isArray(data?.notifications) ? data.notifications.length : 0);
+      } catch {
+        setAlertCount(0);
+      }
+    };
+
     loadProfile();
+    loadAlerts();
   }, []);
 
   const name = admin?.name || "Admin User";
@@ -86,13 +100,19 @@ export default function AdminProfilePage() {
           title="Admin Profile"
           description="View your admin account details and access level."
           actions={
-            <Link
-              to="/profile/edit"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90"
+            <button
+              type="button"
+              onClick={() => navigate("/notifications")}
+              className="relative inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-2.5 text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)] hover:text-[var(--color-primary)]"
+              aria-label="Notifications"
             >
-              <Edit size={18} />
-              Edit Profile
-            </Link>
+              <Bell size={18} />
+              {alertCount > 0 && (
+                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-bold text-white">
+                  {alertCount > 9 ? "9+" : alertCount}
+                </span>
+              )}
+            </button>
           }
         />
 
@@ -128,10 +148,10 @@ export default function AdminProfilePage() {
 
               <Link
                 to="/profile/edit"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)]"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90"
               >
-                <Edit size={16} />
-                Update details
+                <Edit size={18} />
+                Edit Profile
               </Link>
             </>
           )}
