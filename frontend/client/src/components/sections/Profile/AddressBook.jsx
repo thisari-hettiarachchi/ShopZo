@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { Edit2, Plus, X } from "lucide-react";
+import { Edit2, Plus, X, MapPin } from "lucide-react";
 import {
   getAddresses,
   addAddress,
@@ -8,6 +8,7 @@ import {
   setDefaultAddress,
   deleteAddress,
 } from "../../../services/addressService";
+import ProfileSectionHeader from "./ProfileSectionHeader";
 
 export default function AddressBook() {
   const [addresses, setAddresses] = useState([]);
@@ -135,21 +136,15 @@ export default function AddressBook() {
   };
 
   return (
-    <div
-      className="p-6 rounded-2xl shadow-2xl"
-      style={{
-        backgroundColor: "var(--bg-card)",
-        boxShadow: "0 10px 40px var(--shadow)",
-      }}
-    >
-      <h2
-        className="text-2xl font-bold mb-6"
-        style={{ color: "var(--text-primary)" }}
-      >
-        Address Book
-      </h2>
+    <div className="space-y-6">
+      <ProfileSectionHeader
+        icon={MapPin}
+        eyebrow="Account"
+        title="Address Book"
+        description="Manage your shipping and billing addresses."
+      />
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_60px_-36px_var(--shadow)] backdrop-blur-xl md:p-8">
         {/* Existing Addresses */}
         {addresses.map((addr) => (
           <div

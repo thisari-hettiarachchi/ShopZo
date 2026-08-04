@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Ban } from "lucide-react";
 import { API_BASE_URL } from "../../../api/base";
+import ProfileSectionHeader from "./ProfileSectionHeader";
 
 export default function MyCancellations() {
   const [cancellations, setCancellations] = useState([]);
@@ -15,10 +17,9 @@ export default function MyCancellations() {
       }
 
       try {
-        const res = await axios.get(
-          `${API_BASE_URL}/user/cancellations`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const res = await axios.get(`${API_BASE_URL}/user/cancellations`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setCancellations(res.data);
       } catch (err) {
         console.error(err);
@@ -30,32 +31,35 @@ export default function MyCancellations() {
     fetchCancellations();
   }, []);
 
-  if (loading) return <p>Loading cancellations...</p>;
-
   return (
-    <div className="p-6 rounded-2xl shadow-2xl bg-[var(--bg-card)]">
-      <h2 className="text-2xl font-bold mb-6 text-[var(--text-primary)]">
-        My Cancellations
-      </h2>
+    <div className="space-y-6">
+      <ProfileSectionHeader
+        icon={Ban}
+        eyebrow="Orders"
+        title="My Cancellations"
+        description="Orders you cancelled and their status."
+      />
 
-      {cancellations.length === 0 ? (
-        <p className="text-center text-[var(--text-secondary)] py-10">
-          No cancellations found ❌
-        </p>
+      {loading ? (
+        <p className="text-sm text-[var(--text-muted)]">Loading cancellations...</p>
+      ) : cancellations.length === 0 ? (
+        <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] py-16 text-center shadow-[0_24px_60px_-36px_var(--shadow)]">
+          <p className="text-[var(--text-secondary)]">No cancellations found.</p>
+        </div>
       ) : (
-        cancellations.map((cancel) => (
-          <div
-            key={cancel._id}
-            className="p-4 mb-4 rounded-xl border border-[var(--border)]"
-          >
-            <p className="font-semibold text-[var(--text-primary)]">
-              {cancel.items[0]?.product?.name}
-            </p>
-            <p className="text-sm text-[var(--text-secondary)]">
-              Status: {cancel.status}
-            </p>
-          </div>
-        ))
+        <div className="flex flex-col gap-4 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_60px_-36px_var(--shadow)] backdrop-blur-xl">
+          {cancellations.map((cancel) => (
+            <div
+              key={cancel._id}
+              className="rounded-xl border border-[var(--border)] p-4"
+            >
+              <p className="font-semibold text-[var(--text-primary)]">
+                {cancel.items?.[0]?.product?.name || "Product"}
+              </p>
+              <p className="text-sm text-[var(--text-secondary)]">Status: {cancel.status}</p>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
