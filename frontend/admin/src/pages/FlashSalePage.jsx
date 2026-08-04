@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { Zap, PackageX } from "lucide-react";
 import { getSettings, updateFlashSaleStatus, getFlashSaleProducts } from "../services/adminService";
 import { updateProduct } from "../services/productService";
+import PageHeader from "../components/shared/PageHeader";
 
 function Toggle({ checked, onChange, disabled }) {
   return (
@@ -90,14 +91,14 @@ export default function FlashSalePage() {
   };
 
   return (
-    <section className="min-h-screen bg-[var(--bg-main)] px-6 pb-16 pt-8 text-[var(--text-primary)] md:px-10">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-6">
-          <h1 className="text-3xl font-black tracking-tight">Flash Sale</h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            Turn the storefront Flash Sale on or off, and manage which products vendors have added to it.
-          </p>
-        </div>
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+        <PageHeader
+          eyebrow="Campaigns"
+          title="Flash Sale"
+          description="Turn the storefront Flash Sale on or off, and manage which products vendors have added to it."
+          meta={enabled ? "Currently ON" : "Currently OFF"}
+        />
 
         {/* Toggle card */}
         <div className="mb-8 flex items-center justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">

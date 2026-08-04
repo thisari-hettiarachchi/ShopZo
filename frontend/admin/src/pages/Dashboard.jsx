@@ -28,6 +28,7 @@ import {
 import { API_BASE_URL } from "../services/api";
 import { downloadReportPdf } from "../utils/pdf";
 import { getDashboardInsights } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 const CARD_META = [
 	{ key: "orders", title: "Total Orders", icon: ShoppingBag, tone: "from-orange-500 to-amber-400" },
@@ -169,49 +170,46 @@ export default function Dashboard() {
 	};
 
 	return (
-		<section className="relative min-h-screen overflow-hidden bg-[var(--bg-main)] px-6 pb-16 pt-8 text-[var(--text-primary)] md:px-10">
-			<div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-orange-300/20 blur-3xl dark:bg-orange-500/20" />
-			<div className="pointer-events-none absolute left-0 top-28 h-64 w-64 rounded-full bg-sky-200/30 blur-3xl dark:bg-sky-500/10" />
-
-			<div className="relative mx-auto max-w-7xl space-y-8">
-				<div className="rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_24px_80px_-40px_var(--shadow)] backdrop-blur-xl md:p-8">
-					<div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-						<div className="max-w-3xl">
-							<div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300">
-								<PulseDot />
-								{live ? "Live insights connected" : "Live feed reconnecting"}
-							</div>
-							<h1 className="text-4xl font-black tracking-tight text-[var(--text-primary)] md:text-5xl">
-								Command center for orders, risk, and vendor activity.
-							</h1>
-							<p className="mt-4 max-w-2xl text-base leading-7 text-[var(--text-secondary)] md:text-lg">
-								Monitor new orders, approval requests, revenue per vendor, and top-selling products in one live dashboard. Export a PDF report or invoice with one click.
-							</p>
-						</div>
-
-						<div className="flex flex-wrap gap-3">
+		<section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+			<div className="mx-auto max-w-7xl space-y-8">
+				<PageHeader
+					eyebrow="Command Center"
+					title="Dashboard"
+					description="Monitor orders, approval requests, revenue, and top-selling products in one place."
+					meta={
+						<span className="inline-flex items-center gap-2">
+							<PulseDot />
+							{live ? "Live insights connected" : "Live feed reconnecting"}
+						</span>
+					}
+					actions={
+						<>
 							<button
 								type="button"
 								onClick={() => downloadReportPdf(insights)}
 								disabled={!insights}
-								className="inline-flex items-center gap-2 rounded-2xl bg-[var(--text-primary)] px-4 py-3 text-sm font-semibold text-[var(--bg-main)] shadow-lg shadow-black/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+								className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
 							>
 								<Download size={16} />
-								Export PDF Report
+								Export PDF
 							</button>
 							<button
 								type="button"
 								onClick={handleRefresh}
-								className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-sm transition hover:-translate-y-0.5 hover:border-orange-300 hover:text-orange-600"
+								className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)]"
 							>
 								<RefreshCw size={16} className={loading ? "animate-spin" : ""} />
 								Refresh
 							</button>
-						</div>
-					</div>
+						</>
+					}
+				/>
 
-					{error && <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-200">{error}</div>}
-				</div>
+				{error && (
+					<div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+						{error}
+					</div>
+				)}
 
 				<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
 					{overviewCards.map((card, index) => {

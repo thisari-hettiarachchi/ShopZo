@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Ban, ShieldCheck } from "lucide-react";
 import { getCustomers, suspendCustomer } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 function Avatar({ name }) {
   const initials = (name || "?")
@@ -137,20 +138,16 @@ export default function CustomersPage() {
   };
 
   return (
-    <section className="px-6 md:px-10 pt-8 pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] min-h-screen">
-
-      {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Customers</h1>
-          {!loading && (
-            <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
-              {customers.length} {customers.length === 1 ? "customer" : "customers"} total
-            </p>
-          )}
-        </div>
-        <div className="relative w-full sm:w-64">
-          <svg className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="User Management"
+        title="Customers"
+        description="View accounts, roles, and suspension status."
+        meta={!loading ? `${customers.length} total customers` : undefined}
+      >
+        <div className="relative max-w-sm">
+          <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
           <input
@@ -158,10 +155,10 @@ export default function CustomersPage() {
             placeholder="Search customers…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] pl-9 pr-4 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--border)]"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-main)] py-2.5 pl-9 pr-4 text-sm focus:border-[var(--color-primary)] focus:outline-none"
           />
         </div>
-      </div>
+      </PageHeader>
 
       {/* Role filter pills */}
       <div className="mb-6 flex flex-wrap gap-2">
@@ -373,6 +370,7 @@ export default function CustomersPage() {
             </p>
           </div>
         )}
+      </div>
       </div>
     </section>
   );

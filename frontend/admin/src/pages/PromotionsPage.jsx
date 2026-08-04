@@ -17,6 +17,7 @@ import {
   updateBannerActive,
   deleteBanner,
 } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 const FILTERS = [
   { id: "all", label: "All" },
@@ -142,16 +143,15 @@ export default function PromotionsPage() {
   };
 
   return (
-    <section className="min-h-screen bg-[var(--bg-main)] px-6 pb-16 pt-8 text-[var(--text-primary)] md:px-10">
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight">Promotions</h1>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              Review vendor-submitted promotion banners before they go live on the homepage.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-1">
+        <PageHeader
+          eyebrow="Marketing"
+          title="Promotions"
+          description="Review vendor-submitted promotion banners before they go live on the homepage."
+          meta={`${banners.length} banners`}
+        >
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-1">
             {FILTERS.map((f) => (
               <button
                 key={f.id}
@@ -160,7 +160,7 @@ export default function PromotionsPage() {
                 className={`rounded-lg px-3.5 py-1.5 text-sm font-semibold transition ${
                   filter === f.id
                     ? "bg-[var(--color-primary)] text-white"
-                    : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+                    : "text-[var(--text-secondary)] hover:bg-[var(--bg-muted)]"
                 }`}
               >
                 {f.label}
@@ -168,7 +168,7 @@ export default function PromotionsPage() {
               </button>
             ))}
           </div>
-        </div>
+        </PageHeader>
 
         {error && (
           <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700">

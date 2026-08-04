@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { getProducts, deleteProduct } from "../services/productService";
+import PageHeader from "../components/shared/PageHeader";
 
 const getProductImage = (product) =>
   product?.images?.[0] ||
@@ -72,43 +74,38 @@ export default function ProductsPage() {
   );
 
   return (
-    <section className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] px-6 md:px-10 pt-8 pb-16">
-
-      {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <p className="text-xs font-semibold tracking-widest uppercase text-[var(--color-primary)] mb-1">
-            Inventory
-          </p>
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-        </div>
-
-        <Link
-          to="/products/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-primary)] text-white text-sm font-semibold shadow-lg shadow-[var(--color-primary)]/20 hover:opacity-90 active:scale-95 transition-all duration-150 self-start sm:self-auto"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Add Product
-        </Link>
-      </div>
-
-      {/* ── Search bar ── */}
-      {!loading && products.length > 0 && (
-        <div className="relative mb-6 max-w-sm">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search products…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 transition"
-          />
-        </div>
-      )}
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Inventory"
+        title="Products"
+        description="Browse, search, and manage the product catalog."
+        meta={!loading ? `${filtered.length} items` : undefined}
+        actions={
+          <Link
+            to="/products/new"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90"
+          >
+            <Plus size={18} />
+            Add Product
+          </Link>
+        }
+      >
+        {!loading && products.length > 0 && (
+          <div className="relative max-w-sm">
+            <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search products…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-main)] py-2.5 pl-9 pr-4 text-sm focus:border-[var(--color-primary)] focus:outline-none"
+            />
+          </div>
+        )}
+      </PageHeader>
 
       {/* ── Error banner ── */}
       {error && (
@@ -254,6 +251,7 @@ export default function ProductsPage() {
           </div>
         </div>
       )}
+      </div>
     </section>
   );
 }

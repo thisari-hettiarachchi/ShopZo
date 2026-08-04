@@ -13,6 +13,7 @@ import {
   Legend,
 } from "recharts";
 import { getAnalytics } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState(null);
@@ -35,8 +36,14 @@ export default function AnalyticsPage() {
   }, []);
 
   return (
-    <section className="px-6 md:px-10 pt-8 pb-10 bg-[var(--bg-main)] text-[var(--text-primary)] min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Analytics</h1>
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Performance Insights"
+        title="Analytics"
+        description="Track sales, orders, customers, and category mix across the platform."
+        meta={analytics ? `${analytics.stats?.orders || 0} orders` : undefined}
+      />
 
       {error && <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">{error}</div>}
 
@@ -134,6 +141,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
       )}
+      </div>
     </section>
   );
 }

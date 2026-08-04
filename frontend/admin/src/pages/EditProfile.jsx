@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Mail, Save, User } from "lucide-react";
 import { getAdminProfile, updateAdminProfile } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
+
+const inputClass =
+  "w-full rounded-xl border border-[var(--border)] bg-[var(--bg-main)] py-2.5 pl-10 pr-3 text-sm focus:border-[var(--color-primary)] focus:outline-none";
 
 export default function EditProfilePage() {
   const navigate = useNavigate();
@@ -50,44 +55,102 @@ export default function EditProfilePage() {
   };
 
   return (
-    <section className="px-6 md:px-10 pt-8 pb-10 bg-[var(--bg-main)] text-[var(--text-primary)] min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Edit Profile</h1>
+    <div className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+        <PageHeader
+          eyebrow="Account"
+          title="Edit Profile"
+          description="Update your admin name and login email."
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={() => navigate("/profile")}
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)]"
+              >
+                <ArrowLeft size={16} />
+                Back
+              </button>
+              <button
+                type="submit"
+                form="edit-admin-profile-form"
+                disabled={saving || loading}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90 disabled:opacity-50"
+              >
+                <Save size={18} />
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            </>
+          }
+        />
 
-      {error && <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">{error}</div>}
-
-      <form
-        onSubmit={onSubmit}
-        className="max-w-xl rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 space-y-4"
-      >
-        {loading ? (
-          <p className="text-[var(--text-secondary)]">Loading profile...</p>
-        ) : (
-          <>
-            <div>
-              <label className="block text-sm mb-1 text-[var(--text-secondary)]">Name</label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-main)] border border-[var(--border)]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1 text-[var(--text-secondary)]">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-main)] border border-[var(--border)]"
-              />
-            </div>
-
-            <button disabled={saving} className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white font-semibold disabled:opacity-60">
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-          </>
+        {error && (
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
+          </div>
         )}
-      </form>
-    </section>
+
+        <form
+          id="edit-admin-profile-form"
+          onSubmit={onSubmit}
+          className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_20px_50px_-34px_var(--shadow)] md:p-6"
+        >
+          {loading ? (
+            <p className="text-sm text-[var(--text-secondary)]">Loading profile...</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium">Name</label>
+                  <div className="relative">
+                    <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+                    <input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className={inputClass}
+                      placeholder="Admin name"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium">Email</label>
+                  <div className="relative">
+                    <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className={inputClass}
+                      placeholder="admin@shopzo.com"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-[var(--border)] pt-6">
+                <button
+                  type="button"
+                  onClick={() => navigate("/profile")}
+                  className="rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm font-medium transition hover:bg-[var(--bg-muted)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90 disabled:opacity-60"
+                >
+                  <Save size={18} />
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </>
+          )}
+        </form>
+      </div>
+    </div>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Trash2 } from "lucide-react";
 import { deleteReview, getAllReviews, getReviews } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 const StarRating = ({ rating }) => {
   const filled = Math.round(Number(rating || 0));
@@ -101,35 +102,14 @@ export default function ReviewsPage() {
       : "—";
 
   return (
-    <section className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] px-6 md:px-10 pt-8 pb-12">
-
-      {/* Header */}
-      <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)] mb-1">
-            Admin Panel
-          </p>
-          <h1 className="text-3xl font-bold tracking-tight">Product Reviews</h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            Monitor ratings and customer feedback across your catalog.
-          </p>
-        </div>
-
-        {/* Stats pill */}
-        {!loading && !error && reviews.length > 0 && (
-          <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-5 py-3 self-start sm:self-auto">
-            <div className="text-center">
-              <p className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)]">Products</p>
-              <p className="text-xl font-bold text-[var(--color-primary)]">{reviews.length}</p>
-            </div>
-            <div className="h-8 w-px bg-[var(--border)]" />
-            <div className="text-center">
-              <p className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)]">Avg Rating</p>
-              <p className="text-xl font-bold">{avgRating}</p>
-            </div>
-          </div>
-        )}
-      </div>
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Feedback Center"
+        title="Reviews"
+        description="Monitor ratings and customer feedback across your catalog."
+        meta={!loading && !error ? `${reviews.length} products · ${avgRating} avg` : undefined}
+      />
 
       {/* Error */}
       {error && (
@@ -285,6 +265,7 @@ export default function ReviewsPage() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </section>
   );

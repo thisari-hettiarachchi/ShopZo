@@ -7,6 +7,7 @@ import {
   updateCategory,
   deleteCategory,
 } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 const EMPTY_FORM = { name: "", image: "" };
 
@@ -129,36 +130,35 @@ export default function CategoriesPage() {
   };
 
   return (
-    <section className="min-h-screen bg-[var(--bg-main)] px-6 pb-16 pt-8 text-[var(--text-primary)] md:px-10">
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight">Categories</h1>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              Manage the categories shown in "Shop by Category" and offered to vendors when adding products.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-              <input
-                type="text"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search category..."
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] py-2 pl-9 pr-4 text-sm outline-none sm:w-64"
-              />
-            </div>
+        <PageHeader
+          eyebrow="Catalog Structure"
+          title="Categories"
+          description='Manage the categories shown in "Shop by Category" and offered to vendors when adding products.'
+          meta={`${filtered.length} categories`}
+          actions={
             <button
               type="button"
               onClick={openAddForm}
-              className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90"
             >
               <Plus size={16} />
               Add Category
             </button>
+          }
+        >
+          <div className="relative max-w-sm">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search category..."
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-main)] py-2.5 pl-9 pr-4 text-sm focus:border-[var(--color-primary)] focus:outline-none"
+            />
           </div>
-        </div>
+        </PageHeader>
 
         {error && (
           <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700">

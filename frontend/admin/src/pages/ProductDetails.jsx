@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { ArrowLeft, Edit } from "lucide-react";
 import { getProductById } from "../services/productService";
+import PageHeader from "../components/shared/PageHeader";
 
 const getProductImage = (product) =>
   product?.images?.[0] ||
@@ -79,43 +81,33 @@ export default function ProductDetailsPage() {
       : { label: `In Stock (${product.stock})`, color: "#34d399", bg: "#34d39918" };
 
   return (
-    <section className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] px-6 md:px-10 pt-8 pb-16">
-
-      {/* ── Breadcrumb / Back ── */}
-      <div className="flex items-center gap-2 mb-6 text-sm text-[var(--text-secondary)]">
-        <Link to="/products" className="hover:text-[var(--text-primary)] transition-colors flex items-center gap-1">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Products
-        </Link>
-        <span>/</span>
-        <span className="truncate max-w-xs">
-          {loading ? "Loading…" : product?.name || "Details"}
-        </span>
-      </div>
-
-      {/* ── Page heading ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <p className="text-xs font-semibold tracking-widest uppercase text-[var(--color-primary)] mb-1">
-            Inventory
-          </p>
-          <h1 className="text-3xl font-bold tracking-tight">Product Details</h1>
-        </div>
-
-        {product && (
-          <Link
-            to={`/products/edit/${product._id}`}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-primary)] text-white text-sm font-semibold shadow-lg shadow-[var(--color-primary)]/20 hover:opacity-90 active:scale-95 transition-all duration-150 self-start sm:self-auto"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 3.487a2.25 2.25 0 1 1 3.182 3.182L7.5 19.213l-4.5 1.25 1.25-4.5L16.862 3.487z" />
-            </svg>
-            Edit Product
-          </Link>
-        )}
-      </div>
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Inventory"
+        title="Product Details"
+        description={loading ? "Loading product…" : product?.name || "View product information."}
+        actions={
+          <>
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)]"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </Link>
+            {product && (
+              <Link
+                to={`/products/edit/${product._id}`}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_var(--shadow)] transition hover:opacity-90"
+              >
+                <Edit size={18} />
+                Edit Product
+              </Link>
+            )}
+          </>
+        }
+      />
 
       {/* ── Error banner ── */}
       {error && (
@@ -238,6 +230,7 @@ export default function ProductDetailsPage() {
 
           </div>
         )}
+      </div>
       </div>
     </section>
   );

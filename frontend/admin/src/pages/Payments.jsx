@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { CreditCard, Truck, RotateCcw, Wallet, Undo2 } from "lucide-react";
 import { getPayments, refundOrder } from "../services/adminService";
+import PageHeader from "../components/shared/PageHeader";
 
 const STATUS_STYLES = {
   paid: "bg-emerald-50 text-emerald-700 ring-emerald-200",
@@ -74,13 +75,14 @@ export default function PaymentsPage() {
   }, [orders, filter]);
 
   return (
-    <section className="px-6 md:px-10 pt-8 pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Payments</h1>
-        <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
-          Track Stripe collections, cash on delivery, and issue refunds.
-        </p>
-      </div>
+    <section className="min-h-screen bg-[var(--bg-main)] px-5 pb-10 pt-8 text-[var(--text-primary)] md:px-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <PageHeader
+        eyebrow="Finance"
+        title="Payments"
+        description="Track Stripe collections, cash on delivery, and issue refunds."
+        meta={stats ? `Rs. ${Number(stats.totalCollected || 0).toLocaleString()} collected` : undefined}
+      />
 
       {stats && (
         <div className="grid gap-4 sm:grid-cols-3 mb-8">
@@ -183,6 +185,7 @@ export default function PaymentsPage() {
           })}
         </div>
       )}
+      </div>
     </section>
   );
 }
