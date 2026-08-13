@@ -55,3 +55,33 @@ export const unfollowVendorApi = async (id) => {
   if (!res.ok) throw new Error(data?.message || "Failed to unfollow vendor");
   return data;
 };
+
+export const fetchVendorReviews = async (id) => {
+  const res = await fetch(`${BASE}/${id}/reviews`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Failed to load vendor reviews");
+  return data;
+};
+
+export const fetchVendorReviewEligibility = async (id) => {
+  const res = await fetch(`${BASE}/${id}/review-eligibility`, {
+    headers: authHeaders(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Failed to check eligibility");
+  return data;
+};
+
+export const postVendorReview = async (id, payload) => {
+  const res = await fetch(`${BASE}/${id}/reviews`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Failed to submit rating");
+  return data;
+};

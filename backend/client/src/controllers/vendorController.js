@@ -2,6 +2,8 @@ import Vendor from "../models/Vendor.js";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
 import ChatMessage from "../models/ChatMessage.js";
+import VendorReview from "../models/VendorReview.js";
+import mongoose from "mongoose";
 
 const isApprovedVendor = (vendor) => {
   const status = vendor.accountStatus || (vendor.isApproved ? "approved" : "pending");
@@ -172,7 +174,7 @@ export const getVendorById = async (req, res) => {
   try {
     const { id } = req.params;
     const vendor = await Vendor.findById(id).select(
-      "storeName email description phone address profileImage isApproved accountStatus followersCount createdAt updatedAt"
+      "storeName email description phone address profileImage isApproved accountStatus followersCount rating ratingCount createdAt updatedAt"
     );
     if (!vendor || !isApprovedVendor(vendor)) {
       return res.status(404).json({ message: "Vendor not found" });
@@ -184,6 +186,8 @@ export const getVendorById = async (req, res) => {
 
     const stats = await buildVendorStats(id, products);
     const joined = formatJoinedYears(vendor.createdAt);
+    const shopRating = Number(vendor.rating || 0);
+    const shopRatingCount = Number(vendor.ratingCount || 0);
 
     res.json({
       vendor: {
@@ -196,12 +200,19 @@ export const getVendorById = async (req, res) => {
         profileImage: vendor.profileImage,
         isApproved: vendor.isApproved,
         followersCount: Number(vendor.followersCount || 0),
+        rating: shopRating,
+        ratingCount: shopRatingCount,
         createdAt: vendor.createdAt,
       },
       stats: {
         ...stats,
         joined,
         followersCount: Number(vendor.followersCount || 0),
+        shopRating,
+        shopRatingCount,
+        // Prefer shop ratings for store score; fall back to product averages
+        avgRating: shopRatingCount > 0 ? shopRating : stats.avgRating,
+        reviewCount: shopRatingCount > 0 ? shopRatingCount : stats.reviewCount,
       },
     });
   } catch (error) {
@@ -305,5 +316,117 @@ export const unfollowVendor = async (req, res) => {
     res.json({ followed: false, followersCount: Number(vendor.followersCount || 0) });
   } catch (error) {
     res.status(500).json({ message: "Failed to unfollow vendor" });
+  }
+};
+
+const hasPurchasedFromVendor = async (userId, vendorId) => {
+  return Order.exists({
+    user: userId,
+    vendor: vendorId,
+    status: { $nin: ["Cancelled", "canceled", "cancelled"] },
+  });
+};
+
+const refreshVendorRating = async (vendorId) => {
+  const stats = await VendorReview.aggregate([
+    { $match: { vendor: new mongoose.Types.ObjectId(vendorId) } },
+    { $group: { _id: "$vendor", avgRating: { $avg: "$rating" }, count: { $sum: 1 } } },
+  ]);
+
+  if (stats[0]) {
+    await Vendor.findByIdAndUpdate(vendorId, {
+      rating: Number(stats[0].avgRating.toFixed(1)),
+      ratingCount: stats[0].count,
+    });
+    return {
+      rating: Number(stats[0].avgRating.toFixed(1)),
+      ratingCount: stats[0].count,
+    };
+  }
+
+  await Vendor.findByIdAndUpdate(vendorId, { rating: 0, ratingCount: 0 });
+  return { rating: 0, ratingCount: 0 };
+};
+
+export const getVendorReviews = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vendor = await Vendor.findById(id).select("isApproved accountStatus rating ratingCount");
+    if (!vendor || !isApprovedVendor(vendor)) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    const reviews = await VendorReview.find({ vendor: id })
+      .sort({ createdAt: -1 })
+      .populate("user", "name")
+      .lean();
+
+    res.json({
+      reviews,
+      rating: Number(vendor.rating || 0),
+      ratingCount: Number(vendor.ratingCount || reviews.length || 0),
+    });
+  } catch (error) {
+    console.error("getVendorReviews error:", error);
+    res.status(500).json({ message: "Failed to fetch vendor reviews" });
+  }
+};
+
+export const getVendorReviewEligibility = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const purchased = await hasPurchasedFromVendor(req.user._id, id);
+    res.json({ canReview: Boolean(purchased) });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to check review eligibility" });
+  }
+};
+
+export const addVendorReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating } = req.body;
+    const userId = req.user._id;
+
+    if (!rating) {
+      return res.status(400).json({ message: "Rating is required" });
+    }
+
+    const vendor = await Vendor.findById(id);
+    if (!vendor || !isApprovedVendor(vendor)) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    const purchased = await hasPurchasedFromVendor(userId, id);
+    if (!purchased) {
+      return res.status(403).json({
+        message: "Only customers who purchased from this seller can rate the shop",
+      });
+    }
+
+    const review = await VendorReview.findOneAndUpdate(
+      { vendor: id, user: userId },
+      {
+        vendor: id,
+        user: userId,
+        rating: Number(rating),
+        title: "",
+        comment: "",
+        verifiedBuyer: true,
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
+    const ratingStats = await refreshVendorRating(id);
+    const populated = await review.populate("user", "name");
+
+    res.status(201).json({
+      review: populated,
+      rating: ratingStats.rating,
+      ratingCount: ratingStats.ratingCount,
+    });
+  } catch (error) {
+    console.error("addVendorReview error:", error);
+    res.status(500).json({ message: "Failed to submit vendor review" });
   }
 };

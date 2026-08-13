@@ -9,17 +9,22 @@ import {
   MapPin,
   MessageCircle,
   Package,
+  Plus,
   Star,
   Store,
   Truck,
   UserPlus,
   Users,
+  X,
 } from "lucide-react";
 import {
   fetchVendorById,
   fetchVendorFollowStatus,
   fetchVendorProducts,
+  fetchVendorReviewEligibility,
+  fetchVendorReviews,
   followVendorApi,
+  postVendorReview,
   unfollowVendorApi,
 } from "../../api/vendorApi";
 import ProductCard from "../../components/sections/product/ProductCard";
@@ -69,6 +74,13 @@ export default function VendorStorePage() {
   const [followed, setFollowed] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
+  const [shopRating, setShopRating] = useState(0);
+  const [shopRatingCount, setShopRatingCount] = useState(0);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [canRateShop, setCanRateShop] = useState(false);
+  const [vendorReviews, setVendorReviews] = useState([]);
+  const [reviewForm, setReviewForm] = useState({ rating: 5 });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   useEffect(() => {
     setActiveTab(tabParam);
@@ -90,6 +102,10 @@ export default function VendorStorePage() {
         setVendor(profile.vendor);
         setStats(profile.stats);
         setFollowersCount(Number(profile.stats?.followersCount || profile.vendor?.followersCount || 0));
+        setShopRating(Number(profile.stats?.shopRating ?? profile.vendor?.rating ?? 0));
+        setShopRatingCount(
+          Number(profile.stats?.shopRatingCount ?? profile.vendor?.ratingCount ?? 0)
+        );
         setProducts(Array.isArray(vendorProducts) ? vendorProducts : []);
       } catch (err) {
         if (!cancelled) {
@@ -150,6 +166,72 @@ export default function VendorStorePage() {
       toast.error(err.message || "Failed to update follow");
     } finally {
       setFollowLoading(false);
+    }
+  };
+
+  const openRatingModal = async () => {
+    if (!id) return;
+    setIsRatingModalOpen(true);
+    setReviewForm({ rating: 5 });
+
+    try {
+      const reviewsData = await fetchVendorReviews(id);
+      setVendorReviews(Array.isArray(reviewsData?.reviews) ? reviewsData.reviews : []);
+      if (typeof reviewsData?.rating === "number") setShopRating(reviewsData.rating);
+      if (typeof reviewsData?.ratingCount === "number") setShopRatingCount(reviewsData.ratingCount);
+    } catch {
+      setVendorReviews([]);
+    }
+
+    if (!localStorage.getItem("token")) {
+      setCanRateShop(false);
+      return;
+    }
+
+    try {
+      const eligibility = await fetchVendorReviewEligibility(id);
+      setCanRateShop(Boolean(eligibility?.canReview));
+    } catch {
+      setCanRateShop(false);
+    }
+  };
+
+  const closeRatingModal = () => {
+    if (isSubmittingReview) return;
+    setIsRatingModalOpen(false);
+  };
+
+  const handleSubmitShopReview = async (e) => {
+    e.preventDefault();
+    if (!localStorage.getItem("token")) {
+      toast.error("Please login to rate this shop");
+      navigate("/auth");
+      return;
+    }
+    if (!canRateShop) {
+      toast.error("Only customers who purchased from this seller can rate the shop");
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    try {
+      const data = await postVendorReview(id, { rating: reviewForm.rating });
+      if (typeof data?.rating === "number") setShopRating(data.rating);
+      if (typeof data?.ratingCount === "number") setShopRatingCount(data.ratingCount);
+      if (data?.review) {
+        setVendorReviews((prev) => {
+          const withoutMine = prev.filter(
+            (r) => String(r.user?._id || r.user) !== String(data.review.user?._id || data.review.user)
+          );
+          return [data.review, ...withoutMine];
+        });
+      }
+      setReviewForm({ rating: 5 });
+      toast.success("Shop rating submitted");
+    } catch (err) {
+      toast.error(err.message || "Failed to submit rating");
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -242,7 +324,8 @@ export default function VendorStorePage() {
               </span>
               <span className="inline-flex items-center gap-1">
                 <Star size={14} className="fill-amber-400 text-amber-400" />
-                {stats?.avgRating ?? 0} ({stats?.reviewCount ?? 0} reviews)
+                {shopRatingCount > 0 ? shopRating : stats?.avgRating ?? 0}{" "}
+                ({shopRatingCount} {shopRatingCount === 1 ? "rating" : "ratings"})
               </span>
             </p>
             {vendor.address && (
@@ -274,6 +357,14 @@ export default function VendorStorePage() {
             >
               <MessageCircle size={16} />
               Chat
+            </button>
+            <button
+              type="button"
+              onClick={openRatingModal}
+              className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--color-primary)]/40"
+            >
+              <Plus size={16} />
+              Ratings
             </button>
           </div>
         </div>
@@ -333,6 +424,12 @@ export default function VendorStorePage() {
                 label="Active in"
                 value={stats?.lastActiveLabel || "No data"}
               />
+              <StatCard
+                icon={Star}
+                label="Shop ratings"
+                value={shopRatingCount > 0 ? String(shopRating) : "—"}
+                sub={`${shopRatingCount} ${shopRatingCount === 1 ? "rating" : "ratings"}`}
+              />
             </div>
 
             <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_12px_28px_-24px_var(--shadow)]">
@@ -345,6 +442,7 @@ export default function VendorStorePage() {
                 {[
                   { label: "Store name", value: storeName },
                   { label: "Followers", value: String(followersCount) },
+                  { label: "Shop ratings", value: `${shopRating} (${shopRatingCount})` },
                   { label: "Products listed", value: String(stats?.productCount ?? products.length) },
                   {
                     label: "Member since",
@@ -416,6 +514,138 @@ export default function VendorStorePage() {
           </div>
         )}
       </div>
+
+      {isRatingModalOpen && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={closeRatingModal}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="vendor-rating-modal-title"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.45)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-card)] px-5 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
+                  Shop rating
+                </p>
+                <h3
+                  id="vendor-rating-modal-title"
+                  className="mt-1 text-lg font-bold text-[var(--text-primary)]"
+                >
+                  Rate {storeName}
+                </h3>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                  {shopRatingCount > 0
+                    ? `${shopRating} / 5 · ${shopRatingCount} ${shopRatingCount === 1 ? "rating" : "ratings"}`
+                    : "No ratings yet"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeRatingModal}
+                disabled={isSubmittingReview}
+                className="rounded-full border border-[var(--border)] p-2 text-[var(--text-secondary)] transition hover:bg-[var(--bg-muted)] disabled:opacity-50"
+                aria-label="Close rating modal"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitShopReview} className="space-y-4 border-b border-[var(--border)] px-5 py-5">
+              {!localStorage.getItem("token") ? (
+                <p className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text-secondary)]">
+                  Login to rate this shop.
+                </p>
+              ) : !canRateShop ? (
+                <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                  Only customers who purchased from this seller can submit a shop rating.
+                </p>
+              ) : null}
+
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium">Your star rating</span>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((stars) => (
+                    <button
+                      key={stars}
+                      type="button"
+                      disabled={!canRateShop || isSubmittingReview}
+                      onClick={() => setReviewForm({ rating: stars })}
+                      className="rounded-lg p-1 transition hover:bg-[var(--bg-muted)] disabled:opacity-50"
+                      aria-label={`${stars} stars`}
+                    >
+                      <Star
+                        className={`h-7 w-7 ${
+                          stars <= reviewForm.rating
+                            ? "fill-[var(--color-primary)] text-[var(--color-primary)]"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </label>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeRatingModal}
+                  disabled={isSubmittingReview}
+                  className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-medium disabled:opacity-50"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  disabled={!canRateShop || isSubmittingReview}
+                  className="rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  {isSubmittingReview ? "Submitting..." : "Submit rating"}
+                </button>
+              </div>
+            </form>
+
+            <div className="px-5 py-4">
+              <h4 className="mb-3 text-sm font-bold text-[var(--text-primary)]">
+                Recent ratings ({vendorReviews.length})
+              </h4>
+              {vendorReviews.length === 0 ? (
+                <p className="text-sm text-[var(--text-secondary)]">No shop ratings yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {vendorReviews.slice(0, 8).map((review) => (
+                    <div
+                      key={review._id}
+                      className="flex items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2.5"
+                    >
+                      <p className="text-sm font-semibold text-[var(--text-primary)]">
+                        {review.user?.name || "Customer"}
+                      </p>
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            size={14}
+                            className={
+                              s <= Number(review.rating || 0)
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-gray-300"
+                            }
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
