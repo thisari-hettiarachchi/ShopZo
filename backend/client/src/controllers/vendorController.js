@@ -4,6 +4,7 @@ import Order from "../models/Order.js";
 import ChatMessage from "../models/ChatMessage.js";
 import VendorReview from "../models/VendorReview.js";
 import mongoose from "mongoose";
+import { PRODUCT_CARD_SELECT, toProductCard } from "../utils/productPayload.js";
 
 const isApprovedVendor = (vendor) => {
   const status = vendor.accountStatus || (vendor.isApproved ? "approved" : "pending");
@@ -229,7 +230,7 @@ export const getVendorProducts = async (req, res) => {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
-    const limit = Math.min(Number(req.query.limit) || 100, 200);
+    const limit = Math.min(Number(req.query.limit) || 48, 60);
     const category = req.query.category;
 
     const filter = { vendor: id };
@@ -238,11 +239,15 @@ export const getVendorProducts = async (req, res) => {
     }
 
     const products = await Product.find(filter)
+      .select(PRODUCT_CARD_SELECT)
+      .slice("images", 1)
       .sort({ createdAt: -1 })
       .limit(limit)
-      .populate("vendor", "storeName profileImage isApproved");
+      .populate("vendor", "storeName isApproved")
+      .lean();
 
-    res.json(products);
+    res.set("Cache-Control", "public, max-age=30");
+    res.json(products.map(toProductCard));
   } catch (error) {
     console.error("getVendorProducts error:", error);
     res.status(500).json({ message: "Failed to fetch vendor products" });

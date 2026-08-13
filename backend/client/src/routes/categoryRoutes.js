@@ -5,7 +5,8 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const categories = await Category.find({});
+    const categories = await Category.find({}).select("name image").lean();
+    res.set("Cache-Control", "public, max-age=120");
     res.json(categories);
   } catch (error) {
     console.error(error);

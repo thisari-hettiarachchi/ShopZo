@@ -5,11 +5,10 @@ import { toast } from "react-toastify";
 import { addToCartApi } from "../../../api/cartApi";
 import {
   addToWishlistApi,
-  fetchWishlistApi,
   removeFromWishlistApi,
 } from "../../../api/wishlistApi";
-
 import { capitalizeText } from "../../../utils/productHelpers";
+import { getWishlistIdSet, invalidateWishlistIdsCache } from "../../../utils/wishlistCache";
 
 export default function NewArrivalCard({ product }) {
   const navigate = useNavigate();
@@ -17,11 +16,17 @@ export default function NewArrivalCard({ product }) {
   const [wishlisted, setWishlisted] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
-    fetchWishlistApi(token).then((data) => {
-      const exists = data.items?.some((item) => item.product._id === product._id);
-      setWishlisted(Boolean(exists));
+    if (!token) {
+      setWishlisted(false);
+      return;
+    }
+    let cancelled = false;
+    getWishlistIdSet(token).then((ids) => {
+      if (!cancelled) setWishlisted(ids.has(String(product._id)));
     });
+    return () => {
+      cancelled = true;
+    };
   }, [product._id, token]);
 
   const discount = product.oldPrice
@@ -93,6 +98,7 @@ export default function NewArrivalCard({ product }) {
         await addToWishlistApi(product._id, token);
         setWishlisted(true);
       }
+      invalidateWishlistIdsCache();
     } catch (err) {
       console.error(err);
     }

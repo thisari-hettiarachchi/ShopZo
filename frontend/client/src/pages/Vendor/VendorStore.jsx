@@ -95,7 +95,7 @@ export default function VendorStorePage() {
         setError("");
         const [profile, vendorProducts] = await Promise.all([
           fetchVendorById(id),
-          fetchVendorProducts(id, { limit: 100 }),
+          fetchVendorProducts(id, { limit: 48 }),
         ]);
         if (cancelled) return;
         setVendor(profile.vendor);

@@ -2,6 +2,7 @@ import Product from "../models/Product.js";
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
 import Settings from "../models/Settings.js";
+import { PRODUCT_CARD_SELECT, toProductCard } from "../utils/productPayload.js";
 
 // GET all products
 export const getProducts = async (req, res) => {
@@ -15,7 +16,8 @@ export const getProducts = async (req, res) => {
       category,
       vendor,
       sort = "latest",
-      limit = 50,
+      limit = 24,
+      page = 1,
     } = req.query;
 
     const filter = {};
@@ -58,26 +60,42 @@ export const getProducts = async (req, res) => {
       popularity: { ratingCount: -1, rating: -1 },
     };
 
-    const products = await Product.find(filter)
-      .sort(sortMap[sort] || sortMap.latest)
-      .limit(Math.min(Number(limit) || 50, 100))
-      .populate("vendor", "storeName description isApproved");
+    const safeLimit = Math.min(Math.max(Number(limit) || 24, 1), 60);
+    const safePage = Math.max(Number(page) || 1, 1);
+    const skip = (safePage - 1) * safeLimit;
 
-    res.json(products);
+    const products = await Product.find(filter)
+      .select(PRODUCT_CARD_SELECT)
+      .slice("images", 1)
+      .sort(sortMap[sort] || sortMap.latest)
+      .skip(skip)
+      .limit(safeLimit)
+      .populate("vendor", "storeName isApproved")
+      .lean();
+
+    res.set("Cache-Control", "public, max-age=30");
+    res.json(products.map(toProductCard));
   } catch (error) {
+    console.error("getProducts error:", error);
     res.status(500).json({ message: "Failed to fetch products" });
   }
 };
 
 // GET single product
 export const getProductById = async (req, res) => {
-  const products = await Product.findById(req.params.id).populate("vendor");
+  try {
+    const product = await Product.findById(req.params.id)
+      .populate("vendor", "storeName description isApproved profileImage createdAt followersCount rating ratingCount")
+      .lean();
 
-  if (!products) {
-    return res.status(404).json({ message: "Product not found" });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch product" });
   }
-
-  res.json(products);
 };
 
 export const getProductSuggestions = async (req, res) => {
@@ -92,12 +110,22 @@ export const getProductSuggestions = async (req, res) => {
           { category: { $regex: q, $options: "i" } },
         ],
       },
-      { name: 1, category: 1, images: 1, price: 1 }
+      { name: 1, category: 1, price: 1, images: { $slice: 1 } }
     )
       .limit(8)
-      .sort({ rating: -1, createdAt: -1 });
+      .sort({ rating: -1, createdAt: -1 })
+      .lean();
 
-    res.json(products);
+    res.set("Cache-Control", "public, max-age=30");
+    res.json(
+      products.map((p) => ({
+        _id: p._id,
+        name: p.name,
+        category: p.category,
+        price: p.price,
+        images: Array.isArray(p.images) ? p.images.slice(0, 1) : [],
+      }))
+    );
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch suggestions" });
   }
@@ -189,16 +217,20 @@ export const addProductReview = async (req, res) => {
 
 export const getFlashSaleProducts = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ key: "global" });
+    const settings = await Settings.findOne({ key: "global" }).lean();
     if (!settings?.flashSaleEnabled) {
       return res.status(200).json([]);
     }
 
-    const products = await Product.find({
-      isFlashSale: true,
-    }).limit(50);
+    const products = await Product.find({ isFlashSale: true })
+      .select(PRODUCT_CARD_SELECT)
+      .slice("images", 1)
+      .limit(24)
+      .populate("vendor", "storeName isApproved")
+      .lean();
 
-    res.status(200).json(products);
+    res.set("Cache-Control", "public, max-age=30");
+    res.status(200).json(products.map(toProductCard));
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch flash sale products" });
   }

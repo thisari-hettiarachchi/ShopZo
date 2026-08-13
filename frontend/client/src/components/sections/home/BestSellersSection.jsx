@@ -7,6 +7,7 @@ import { addToCartApi } from "../../../api/cartApi";
 import { addToWishlistApi, removeFromWishlistApi } from "../../../api/wishlistApi";
 import ScrollReveal, { scrollViewport } from "../../shared/ScrollReveal";
 import { capitalizeText, filterBestSellers } from "../../../utils/productHelpers";
+import { invalidateWishlistIdsCache } from "../../../utils/wishlistCache";
 
 function BestSellerCard({ product, index }) {
   const navigate = useNavigate();
@@ -53,6 +54,7 @@ function BestSellerCard({ product, index }) {
         await addToWishlistApi(product._id, token);
         setWishlisted(true);
       }
+      invalidateWishlistIdsCache();
     } catch (err) {
       console.error(err);
     }

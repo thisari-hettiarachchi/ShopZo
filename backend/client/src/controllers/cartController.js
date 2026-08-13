@@ -1,5 +1,14 @@
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
+import { slimCart } from "../utils/productPayload.js";
+
+const cartProductPopulate = {
+  path: "items.product",
+  select:
+    "name price oldPrice discount rating ratingCount category images stock vendor sizes colors description isFlashSale createdAt",
+  options: { slice: { images: 1 } },
+  populate: { path: "vendor", select: "storeName isApproved" },
+};
 
 const normalizeSelectedColor = (color) => {
   if (!color) return { name: "", hex: "" };
@@ -25,13 +34,15 @@ const sameVariant = (item, productId, selectedSize, selectedColor) => {
   );
 };
 
+const respondWithCart = async (res, cartId) => {
+  const populatedCart = await Cart.findById(cartId).populate(cartProductPopulate);
+  res.json(slimCart(populatedCart));
+};
+
 export const getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ user: req.user._id }).populate({
-      path: "items.product",
-      populate: { path: "vendor" },
-    });
-    res.json(cart || { items: [] });
+    const cart = await Cart.findOne({ user: req.user._id }).populate(cartProductPopulate);
+    res.json(slimCart(cart));
   } catch (error) {
     console.error("Error fetching cart:", error);
     res.status(500).json({ message: "Failed to fetch cart" });
@@ -44,7 +55,9 @@ export const addToCart = async (req, res) => {
     const selectedSize = String(req.body.selectedSize || "").trim();
     const selectedColor = normalizeSelectedColor(req.body.selectedColor);
 
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).select(
+      "price sizes colors"
+    );
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -98,11 +111,7 @@ export const addToCart = async (req, res) => {
     });
 
     await cart.save();
-    const populatedCart = await Cart.findById(cart._id).populate({
-      path: "items.product",
-      populate: { path: "vendor" },
-    });
-    res.json(populatedCart);
+    await respondWithCart(res, cart._id);
   } catch (error) {
     console.error("Error adding to cart:", error);
     res.status(500).json({ message: "Failed to add item to cart" });
@@ -125,12 +134,7 @@ export const updateCartItem = async (req, res) => {
 
     item.qty = qty;
     await cart.save();
-
-    const populatedCart = await Cart.findById(cart._id).populate({
-      path: "items.product",
-      populate: { path: "vendor" },
-    });
-    res.json(populatedCart);
+    await respondWithCart(res, cart._id);
   } catch (error) {
     console.error("Error updating cart item:", error);
     res.status(500).json({ message: "Failed to update cart item" });
@@ -153,12 +157,7 @@ export const removeCartItem = async (req, res) => {
 
     item.deleteOne();
     await cart.save();
-
-    const populatedCart = await Cart.findById(cart._id).populate({
-      path: "items.product",
-      populate: { path: "vendor" },
-    });
-    res.json(populatedCart);
+    await respondWithCart(res, cart._id);
   } catch (error) {
     console.error("Error removing cart item:", error);
     res.status(500).json({ message: "Failed to remove item from cart" });

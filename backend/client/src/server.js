@@ -4,6 +4,7 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import connectCloudinary from "./config/cloudinary.js";
@@ -26,6 +27,8 @@ import { stripeWebhook } from "./controllers/checkoutController.js";
 connectCloudinary();
 
 const app = express();
+
+app.use(compression());
 
 const configuredOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")

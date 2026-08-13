@@ -5,10 +5,10 @@ import { toast } from "react-toastify";
 import { addToCartApi } from "../../../api/cartApi";
 import {
   addToWishlistApi,
-  fetchWishlistApi,
   removeFromWishlistApi,
 } from "../../../api/wishlistApi";
 import { capitalizeText, isNewArrival } from "../../../utils/productHelpers";
+import { getWishlistIdSet, invalidateWishlistIdsCache } from "../../../utils/wishlistCache";
 
 export default function ProductCard({ product, token: propToken, onCartUpdate }) {
   const navigate = useNavigate();
@@ -16,11 +16,17 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
-    fetchWishlistApi(token).then((data) => {
-      const exists = data.items?.some((item) => item.product._id === product._id);
-      setIsWishlisted(Boolean(exists));
+    if (!token) {
+      setIsWishlisted(false);
+      return;
+    }
+    let cancelled = false;
+    getWishlistIdSet(token).then((ids) => {
+      if (!cancelled) setIsWishlisted(ids.has(String(product._id)));
     });
+    return () => {
+      cancelled = true;
+    };
   }, [product._id, token]);
 
   const discount = product.oldPrice
@@ -94,6 +100,7 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
         await addToWishlistApi(product._id, token);
         setIsWishlisted(true);
       }
+      invalidateWishlistIdsCache();
     } catch (err) {
       console.error("Wishlist error:", err);
     }

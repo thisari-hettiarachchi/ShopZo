@@ -10,6 +10,13 @@ export const fetchWishlistApi = async (token) => {
   return res.data;
 };
 
+export const fetchWishlistIdsApi = async (token) => {
+  const res = await axios.get(`${API_URL}/ids`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
 export const addToWishlistApi = async (productId, token) => {
   const res = await axios.post(
     `${API_URL}/add`,

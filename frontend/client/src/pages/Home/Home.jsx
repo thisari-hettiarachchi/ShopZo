@@ -42,7 +42,7 @@ export default function Home() {
 
   useEffect(() => {
     axios
-      .get(`${API_BASE_URL}/products`, { params: { limit: 100 } })
+      .get(`${API_BASE_URL}/products`, { params: { limit: 24 } })
       .then((response) => setProducts(Array.isArray(response.data) ? response.data : []))
       .catch(console.error);
   }, []);
