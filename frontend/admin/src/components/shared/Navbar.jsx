@@ -5,7 +5,6 @@ import {
   Menu,
   X,
   Home,
-  Package,
   Info,
   Phone,
   Moon,
@@ -40,7 +39,6 @@ export default function Navbar() {
 
   const mainMenuItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/' },
-    { id: 'products', label: 'Products', icon: Package, path: '/products' },
     { id: 'about', label: 'About', icon: Info, path: '/about' },
     { id: 'contact', label: 'Contact', icon: Phone, path: '/contact' }
   ]

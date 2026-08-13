@@ -1,21 +1,7 @@
 import api from "./api";
 
-export const getProducts = async () => {
-  const { data } = await api.get("/api/admin/products");
-  return data;
-};
-
-export const getProductById = async (id) => {
-  const { data } = await api.get(`/api/admin/products/${id}`);
-  return data;
-};
-
+/** Used by Flash Sale to toggle product flashSale flags. */
 export const updateProduct = async (id, payload) => {
   const { data } = await api.put(`/api/admin/products/${id}`, payload);
-  return data;
-};
-
-export const deleteProduct = async (id) => {
-  const { data } = await api.delete(`/api/admin/products/${id}`);
   return data;
 };
