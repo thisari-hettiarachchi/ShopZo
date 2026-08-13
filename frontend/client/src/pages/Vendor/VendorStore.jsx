@@ -1,854 +1,418 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { API_BASE_URL, authHeaders } from "../../api/base";
-import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  Clock,
+  FolderOpen,
+  MapPin,
+  MessageCircle,
+  Package,
+  Star,
+  Store,
+  Truck,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import {
+  fetchVendorById,
+  fetchVendorFollowStatus,
+  fetchVendorProducts,
+  followVendorApi,
+  unfollowVendorApi,
+} from "../../api/vendorApi";
+import ProductCard from "../../components/sections/product/ProductCard";
 
-const fallbackVendor = {
-  storeName: "Vendor",
-  description: "No description available yet.",
-  email: "",
-  phone: "",
-  address: "",
-  isApproved: false,
-  createdAt: null,
-};
+const FONT_STYLE = `
+  .shopzo-root { font-family: 'DM Sans', sans-serif; }
+  .shopzo-root .display-font { font-family: 'Playfair Display', serif; }
+`;
 
-const StarRating = ({ rating, size = "sm" }) => {
-  const stars = [];
-  for (let i = 1; i <= 5; i++) {
-    stars.push(
-      <span
-        key={i}
-        style={{
-          color: i <= Math.floor(rating) ? "var(--color-highlight)" : "var(--border)",
-          fontSize: size === "sm" ? "12px" : "16px",
-        }}
-      >
-        ★
-      </span>
-    );
-  }
-  return <span>{stars}</span>;
-};
+if (typeof document !== "undefined" && !document.getElementById("shopzo-fonts")) {
+  const link = document.createElement("link");
+  link.id = "shopzo-fonts";
+  link.rel = "stylesheet";
+  link.href =
+    "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap";
+  document.head.appendChild(link);
+}
 
-const badgeColors = {
-  "Best Seller": { bg: "rgba(249,115,22,0.15)", color: "#f97316", border: "rgba(249,115,22,0.4)" },
-  New: { bg: "rgba(34,211,238,0.15)", color: "#22d3ee", border: "rgba(34,211,238,0.4)" },
-  Premium: { bg: "rgba(250,204,21,0.15)", color: "#ca8a04", border: "rgba(250,204,21,0.4)" },
-  "Eco Pick": { bg: "rgba(34,197,94,0.15)", color: "#16a34a", border: "rgba(34,197,94,0.4)" },
-};
+function StatCard({ icon: Icon, label, value, sub }) {
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-4 shadow-[0_12px_28px_-24px_var(--shadow)]">
+      <div className="mb-3 flex items-center gap-2 text-[var(--text-secondary)]">
+        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--bg-muted)] text-[var(--color-primary)]">
+          <Icon size={16} />
+        </span>
+        <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
+      </div>
+      <p className="text-xl font-bold text-[var(--text-primary)]">{value}</p>
+      {sub ? <p className="mt-1 text-xs text-[var(--text-secondary)]">{sub}</p> : null}
+    </div>
+  );
+}
 
-const vendorBadgeColors = {
-  "Top Seller": { bg: "rgba(249,115,22,0.12)", color: "#f97316" },
-  "Fast Shipper": { bg: "rgba(34,211,238,0.12)", color: "#22d3ee" },
-  "Eco-Friendly": { bg: "rgba(34,197,94,0.12)", color: "#16a34a" },
-};
-
-export default function VendorProfile() {
+export default function VendorStorePage() {
   const { id } = useParams();
-  const [activeTab, setActiveTab] = useState("products");
-  const [followed, setFollowed] = useState(false);
-  const [followLoading, setFollowLoading] = useState(false);
-  const [followersCount, setFollowersCount] = useState(0);
-  const [activeCategory, setActiveCategory] = useState("All");
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab") === "profile" ? "profile" : "products";
+
+  const [activeTab, setActiveTab] = useState(tabParam);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [vendor, setVendor] = useState(fallbackVendor);
+  const [vendor, setVendor] = useState(null);
+  const [stats, setStats] = useState(null);
   const [products, setProducts] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [followed, setFollowed] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
 
-  const navigate = useNavigate();
-
-  const tabs = ["products", "reviews", "about"];
+  useEffect(() => {
+    setActiveTab(tabParam);
+  }, [tabParam]);
 
   useEffect(() => {
     if (!id) return;
-
     let cancelled = false;
 
-    const loadVendorStore = async () => {
+    const load = async () => {
       try {
         setLoading(true);
         setError("");
-
-        const [vendorsRes, productsRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/vendors`),
-          fetch(`${API_BASE_URL}/products?limit=100`),
+        const [profile, vendorProducts] = await Promise.all([
+          fetchVendorById(id),
+          fetchVendorProducts(id, { limit: 100 }),
         ]);
-
-        if (!vendorsRes.ok || !productsRes.ok) {
-          throw new Error("Failed to load vendor store details");
-        }
-
-        const [vendorsData, productsData] = await Promise.all([
-          vendorsRes.json(),
-          productsRes.json(),
-        ]);
-
-        const vendorMatch = (Array.isArray(vendorsData) ? vendorsData : []).find(
-          (item) => String(item?._id || item?.id) === String(id)
-        );
-
-        if (!vendorMatch) {
-          throw new Error("Vendor not found");
-        }
-
-        const vendorProducts = (Array.isArray(productsData) ? productsData : []).filter((product) => {
-          const vendorId =
-            typeof product?.vendor === "string"
-              ? product.vendor
-              : product?.vendor?._id || product?.vendor?.id;
-          return String(vendorId) === String(id);
-        });
-
-        if (!cancelled) {
-          setVendor({ ...fallbackVendor, ...vendorMatch });
-          setFollowersCount(Number(vendorMatch?.followersCount || 0));
-          setProducts(vendorProducts);
-        }
+        if (cancelled) return;
+        setVendor(profile.vendor);
+        setStats(profile.stats);
+        setFollowersCount(Number(profile.stats?.followersCount || profile.vendor?.followersCount || 0));
+        setProducts(Array.isArray(vendorProducts) ? vendorProducts : []);
       } catch (err) {
         if (!cancelled) {
-          setError(err.message || "Failed to load vendor data");
-          setVendor(fallbackVendor);
+          setError(err.message || "Failed to load vendor");
+          setVendor(null);
           setProducts([]);
         }
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     };
 
-    loadVendorStore();
-
+    load();
     return () => {
       cancelled = true;
     };
   }, [id]);
 
   useEffect(() => {
-    const loadFollowStatus = async () => {
-      if (!id || !localStorage.getItem("token")) return;
-
-      try {
-        const res = await fetch(`${API_BASE_URL}/vendors/${id}/follow-status`, {
-          headers: authHeaders(),
-        });
-
-        if (!res.ok) return;
-        const data = await res.json();
-        setFollowed(Boolean(data?.followed));
-        if (typeof data?.followersCount === "number") {
-          setFollowersCount(data.followersCount);
-        }
-      } catch {
-        // ignore follow status failure
-      }
-    };
-
-    loadFollowStatus();
+    if (!id || !localStorage.getItem("token")) return;
+    fetchVendorFollowStatus(id)
+      .then((data) => {
+        setFollowed(Boolean(data.followed));
+        if (typeof data.followersCount === "number") setFollowersCount(data.followersCount);
+      })
+      .catch(() => {});
   }, [id]);
 
-  const handleFollowToggle = async () => {
-    if (!id) return;
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Please login to follow vendors");
-      navigate("/auth");
-      return;
-    }
-
-    setFollowLoading(true);
-    try {
-      const endpoint = `${API_BASE_URL}/vendors/${id}/follow`;
-      const response = await fetch(endpoint, {
-        method: followed ? "DELETE" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...authHeaders(),
-        },
-      });
-
-      const data = response.ok ? await response.json() : null;
-      if (!response.ok) throw new Error(data?.message || "Failed to update follow status");
-
-      setFollowed(Boolean(data?.followed));
-      if (typeof data?.followersCount === "number") {
-        setFollowersCount(data.followersCount);
-      }
-    } catch (error) {
-      toast.error(error.message || "Failed to update follow status");
-    } finally {
-      setFollowLoading(false);
-    }
-  };
-
-  const averageRating = useMemo(() => {
-    if (!products.length) return 0;
-    const total = products.reduce((sum, product) => sum + Number(product.rating || 0), 0);
-    return total / products.length;
-  }, [products]);
-
-  const totalReviews = useMemo(
-    () => products.reduce((sum, product) => sum + Number(product.ratingCount || 0), 0),
-    [products]
-  );
-
   const categories = useMemo(() => {
-    const list = products.map((product) => product.category).filter(Boolean);
+    const list = products.map((p) => p.category).filter(Boolean);
     return Array.from(new Set(list));
   }, [products]);
 
   const visibleProducts = useMemo(() => {
     if (activeCategory === "All") return products;
-    return products.filter((product) => product.category === activeCategory);
+    return products.filter((p) => p.category === activeCategory);
   }, [products, activeCategory]);
 
-  const vendorData = {
-    id: vendor._id,
-    name: vendor.storeName || "Vendor",
-    handle: `@${String(vendor.storeName || "vendor").toLowerCase().replace(/\s+/g, "")}`,
-    avatar:
-      vendor.profileImage ||
-      `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(vendor.storeName || "V")}&backgroundColor=f97316&textColor=ffffff`,
-    coverGradient: "linear-gradient(135deg, #f97316 0%, #fb923c 45%, #22d3ee 100%)",
-    tagline: vendor.isApproved ? "Approved store on ShopZo" : "Pending store approval",
-    description: vendor.description || fallbackVendor.description,
-    location: vendor.address || "Location not set",
-    joined: vendor.createdAt ? new Date(vendor.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long" }) : "-",
-    rating: Number(averageRating.toFixed(1)),
-    reviewCount: totalReviews,
-    verified: Boolean(vendor.isApproved),
-    badges: [vendor.isApproved ? "Approved" : "Pending Approval", "Trusted Seller"],
-    categories,
-    stats: [
-      { label: "Products", value: String(products.length) },
-      { label: "Rating", value: `${Number(averageRating || 0).toFixed(1)}★` },
-      { label: "Reviews", value: String(totalReviews) },
-      { label: "Followers", value: String(followersCount) },
-    ],
-    products: visibleProducts.map((product) => ({
-      id: product._id,
-      name: product.name,
-      price: `LKR ${Number(product.price || 0).toLocaleString()}`,
-      originalPrice: product.oldPrice ? `LKR ${Number(product.oldPrice).toLocaleString()}` : "",
-      image: product.images?.[0] || "https://placehold.co/600x600?text=Product",
-      rating: Number(product.rating || 0),
-      sold: Number(product.ratingCount || 0),
-      badge: Number(product.discount || 0) > 0 ? `${product.discount}% OFF` : "",
-    })),
+  const changeTab = (tab) => {
+    setActiveTab(tab);
+    setSearchParams(tab === "profile" ? { tab: "profile" } : {});
+  };
+
+  const handleFollowToggle = async () => {
+    if (!id) return;
+    if (!localStorage.getItem("token")) {
+      toast.error("Please login to follow vendors");
+      navigate("/auth");
+      return;
+    }
+    setFollowLoading(true);
+    try {
+      const data = followed ? await unfollowVendorApi(id) : await followVendorApi(id);
+      setFollowed(Boolean(data.followed));
+      if (typeof data.followersCount === "number") setFollowersCount(data.followersCount);
+      toast.success(data.followed ? "Following seller" : "Unfollowed seller");
+    } catch (err) {
+      toast.error(err.message || "Failed to update follow");
+    } finally {
+      setFollowLoading(false);
+    }
   };
 
   if (loading) {
-    return <div style={{ minHeight: "60vh", display: "grid", placeItems: "center" }}>Loading vendor store...</div>;
+    return (
+      <div className="shopzo-root flex min-h-[60vh] items-center justify-center bg-[var(--bg-main)]">
+        <style>{FONT_STYLE}</style>
+        <p className="text-sm text-[var(--text-secondary)]">Loading store...</p>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div style={{ minHeight: "60vh", display: "grid", placeItems: "center", color: "#ef4444" }}>{error}</div>;
+  if (error || !vendor) {
+    return (
+      <div className="shopzo-root flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-[var(--bg-main)] px-4">
+        <style>{FONT_STYLE}</style>
+        <p className="text-sm text-red-500">{error || "Vendor not found"}</p>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-medium"
+        >
+          Go back
+        </button>
+      </div>
+    );
   }
+
+  const storeName = vendor.storeName || "Vendor";
+  const avatar =
+    vendor.profileImage ||
+    `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(storeName)}&backgroundColor=f97316&textColor=ffffff`;
+  const joinedValue = stats?.joined?.value || "—";
+  const joinedUnit = stats?.joined?.unit || "";
+  const shipped =
+    stats?.shippedOnTimePercent == null ? "No data" : `${stats.shippedOnTimePercent}%`;
+  const chatRate =
+    stats?.chatResponseRate == null ? "No data" : `${stats.chatResponseRate}%`;
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "var(--bg-main)",
-        color: "var(--text-primary)",
-        fontFamily: "'Manrope', sans-serif",
-      }}
-    >
-      {/* Cover */}
-      <div
-        style={{
-          height: 220,
-          background: vendorData.coverGradient,
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Decorative circles */}
-        {[...Array(4)].map((_, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              borderRadius: "50%",
-              border: "2px solid rgba(255,255,255,0.15)",
-              width: `${120 + i * 80}px`,
-              height: `${120 + i * 80}px`,
-              right: `-${20 + i * 30}px`,
-              top: `-${30 + i * 20}px`,
-            }}
-          />
-        ))}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 60,
-            background: "linear-gradient(to top, var(--bg-main), transparent)",
-          }}
-        />
+    <div className="shopzo-root min-h-screen bg-[var(--bg-main)]">
+      <style>{FONT_STYLE}</style>
+
+      <div className="relative">
+        <div className="relative h-36 overflow-hidden bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-secondary)] to-sky-400 md:h-44">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.25),transparent_45%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[var(--bg-main)] to-transparent" />
+        </div>
+
+        <div className="absolute left-4 top-4 z-20 md:left-6 md:top-5">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/35 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-black/50"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </button>
+        </div>
       </div>
 
-      {/* Profile Header */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 20,
-            alignItems: "flex-end",
-            marginTop: -56,
-            marginBottom: 28,
-            position: "relative",
-            zIndex: 2,
-          }}
-        >
-          {/* Avatar */}
-          <div
-            style={{
-              width: 108,
-              height: 108,
-              borderRadius: 24,
-              overflow: "hidden",
-              border: "4px solid var(--bg-main)",
-              boxShadow: "var(--shadow)",
-              flexShrink: 0,
-              background: "var(--bg-card)",
-            }}
-          >
-            <img
-              src={vendorData.avatar}
-              alt={vendorData.name}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          </div>
+      <div className="relative z-10 mx-auto -mt-12 max-w-7xl px-4 pb-12 md:-mt-14">
+        <div className="mb-6 flex flex-col gap-5 rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_20px_50px_-34px_var(--shadow)] md:flex-row md:items-end md:p-6">
+          <img
+            src={avatar}
+            alt={storeName}
+            className="h-24 w-24 rounded-2xl border-4 border-[var(--bg-card)] object-cover shadow-md md:h-28 md:w-28"
+          />
 
-          {/* Info */}
-          <div style={{ flex: 1, minWidth: 220 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: 26,
-                  fontWeight: 800,
-                  fontFamily: "'Sora', sans-serif",
-                  letterSpacing: "-0.02em",
-                  color: "var(--text-primary)",
-                }}
-              >
-                {vendorData.name}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="display-font text-2xl font-bold text-[var(--text-primary)] md:text-3xl">
+                {storeName}
               </h1>
-              {vendorData.verified && (
-                <span
-                  style={{
-                    background: "linear-gradient(135deg, var(--color-primary), var(--color-accent))",
-                    color: "white",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    padding: "3px 10px",
-                    borderRadius: 999,
-                    letterSpacing: "0.04em",
-                  }}
-                >
-                  ✓ VERIFIED
+              {vendor.isApproved && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-primary)]/10 px-2.5 py-1 text-[11px] font-bold text-[var(--color-primary)]">
+                  <BadgeCheck size={12} />
+                  Verified
                 </span>
               )}
             </div>
-            <div style={{ color: "var(--text-muted)", fontSize: 14, marginTop: 2 }}>
-              {vendorData.handle} · {vendorData.location}
-            </div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-              {vendorData.badges.map((b) => (
-                <span
-                  key={b}
-                  style={{
-                    background: vendorBadgeColors[b]?.bg || "var(--bg-muted)",
-                    color: vendorBadgeColors[b]?.color || "var(--text-secondary)",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    padding: "3px 10px",
-                    borderRadius: 999,
-                  }}
-                >
-                  {b}
-                </span>
-              ))}
-            </div>
+            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--text-secondary)]">
+              <span className="inline-flex items-center gap-1">
+                <Users size={14} />
+                {followersCount} follower{followersCount === 1 ? "" : "s"}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Package size={14} />
+                {stats?.productCount ?? products.length} products
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Star size={14} className="fill-amber-400 text-amber-400" />
+                {stats?.avgRating ?? 0} ({stats?.reviewCount ?? 0} reviews)
+              </span>
+            </p>
+            {vendor.address && (
+              <p className="mt-1 flex items-center gap-1 text-xs text-[var(--text-secondary)]">
+                <MapPin size={12} />
+                {vendor.address}
+              </p>
+            )}
           </div>
 
-          {/* Action Buttons */}
-          <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+          <div className="flex flex-wrap gap-2">
             <button
+              type="button"
               onClick={handleFollowToggle}
               disabled={followLoading}
-              style={{
-                padding: "10px 22px",
-                borderRadius: 12,
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: followLoading ? "not-allowed" : "pointer",
-                border: followed ? "2px solid var(--color-primary)" : "none",
-                background: followed
-                  ? "transparent"
-                  : "linear-gradient(90deg, var(--color-primary), var(--color-secondary))",
-                color: followed ? "var(--color-primary)" : "white",
-                boxShadow: followed ? "none" : "0 8px 20px rgba(249,115,22,0.28)",
-                opacity: followLoading ? 0.7 : 1,
-                transition: "all 0.22s ease",
-              }}
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:opacity-60 ${
+                followed
+                  ? "border-2 border-[var(--color-primary)] text-[var(--color-primary)]"
+                  : "bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white shadow-[0_12px_24px_-14px_var(--shadow)]"
+              }`}
             >
-              {followLoading ? "Updating..." : followed ? "✓ Following" : "+ Follow"}
+              <UserPlus size={16} />
+              {followLoading ? "Updating..." : followed ? "Following" : "Follow"}
             </button>
             <button
-              onClick={() => navigate(`/messages/${vendorData.id}`)}
-              style={{
-                padding: "10px 18px",
-                borderRadius: 12,
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: "pointer",
-                border: "1px solid var(--border)",
-                background: "var(--bg-card)",
-                color: "var(--text-secondary)",
-              }}
+              type="button"
+              onClick={() => navigate(`/messages/${id}`)}
+              className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--color-primary)]/40"
             >
-              💬 Message
+              <MessageCircle size={16} />
+              Chat
             </button>
           </div>
         </div>
 
-        {/* Stats Strip */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: 14,
-            marginBottom: 28,
-          }}
-        >
-          {vendorData.stats.map((s) => (
-            <div
-              key={s.label}
-              style={{
-                background: "var(--bg-card)",
-                border: "1px solid var(--border)",
-                borderRadius: 16,
-                padding: "16px 14px",
-                textAlign: "center",
-                boxShadow: "var(--shadow)",
-                backdropFilter: "blur(14px)",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 800,
-                  fontFamily: "'Sora', sans-serif",
-                  background: "linear-gradient(90deg, var(--color-primary), var(--color-accent))",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                {s.value}
-              </div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500, marginTop: 2 }}>
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Tabs */}
-        <div
-          style={{
-            display: "flex",
-            gap: 4,
-            marginBottom: 24,
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
-            borderRadius: 14,
-            padding: 5,
-            width: "fit-content",
-          }}
-        >
-          {tabs.map((tab) => (
+        <div className="mb-6 inline-flex rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-1.5">
+          {[
+            { id: "products", label: "Products" },
+            { id: "profile", label: "Profile" },
+          ].map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{
-                padding: "9px 22px",
-                borderRadius: 10,
-                fontWeight: 700,
-                fontSize: 13,
-                cursor: "pointer",
-                border: "none",
-                textTransform: "capitalize",
-                background:
-                  activeTab === tab
-                    ? "linear-gradient(90deg, var(--color-primary), var(--color-secondary))"
-                    : "transparent",
-                color: activeTab === tab ? "white" : "var(--text-muted)",
-                boxShadow: activeTab === tab ? "0 4px 14px rgba(249,115,22,0.25)" : "none",
-                transition: "all 0.22s ease",
-              }}
+              key={tab.id}
+              type="button"
+              onClick={() => changeTab(tab.id)}
+              className={`rounded-xl px-5 py-2 text-sm font-semibold capitalize transition ${
+                activeTab === tab.id
+                  ? "bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
             >
-              {tab === "products" ? "🛍 Products" : tab === "reviews" ? "⭐ Reviews" : "ℹ About"}
+              {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Products Tab */}
+        {activeTab === "profile" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <StatCard
+                icon={FolderOpen}
+                label="Main Category"
+                value={stats?.mainCategory || "No data"}
+              />
+              <StatCard
+                icon={Clock}
+                label="Joined"
+                value={joinedValue}
+                sub={joinedUnit ? `+ ${joinedUnit}` : undefined}
+              />
+              <StatCard icon={Truck} label="Shipped on Time" value={shipped} />
+              <StatCard
+                icon={MessageCircle}
+                label="Chat Response Rate"
+                value={chatRate}
+                sub={
+                  stats?.chatResponseRate == null
+                    ? "No data"
+                    : `${stats.chatResponseTime} average reply`
+                }
+              />
+              <StatCard
+                icon={Clock}
+                label="Chat response time"
+                value={stats?.chatResponseTime || "No data"}
+              />
+              <StatCard
+                icon={Store}
+                label="Active in"
+                value={stats?.lastActiveLabel || "No data"}
+              />
+            </div>
+
+            <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[0_12px_28px_-24px_var(--shadow)]">
+              <h2 className="mb-3 text-lg font-bold text-[var(--text-primary)]">About this store</h2>
+              <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
+                {vendor.description?.trim() || "This seller hasn’t added a store description yet."}
+              </p>
+
+              <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {[
+                  { label: "Store name", value: storeName },
+                  { label: "Followers", value: String(followersCount) },
+                  { label: "Products listed", value: String(stats?.productCount ?? products.length) },
+                  {
+                    label: "Member since",
+                    value: vendor.createdAt
+                      ? new Date(vendor.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                        })
+                      : "—",
+                  },
+                  { label: "Phone", value: vendor.phone || "Not provided" },
+                  { label: "Email", value: vendor.email || "Not provided" },
+                ].map((row) => (
+                  <div
+                    key={row.label}
+                    className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-4 py-3"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+                      {row.label}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">{row.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === "products" && (
-          <>
-            {/* Category filter */}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 22 }}>
-              {["All", ...vendorData.categories].map((cat) => (
+          <div>
+            <div className="mb-5 flex flex-wrap gap-2">
+              {["All", ...categories].map((cat) => (
                 <button
                   key={cat}
+                  type="button"
                   onClick={() => setActiveCategory(cat)}
-                  style={{
-                    padding: "7px 16px",
-                    borderRadius: 999,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    border: activeCategory === cat ? "none" : "1px solid var(--border)",
-                    background:
-                      activeCategory === cat
-                        ? "linear-gradient(90deg, var(--color-primary), var(--color-secondary))"
-                        : "var(--bg-card)",
-                    color: activeCategory === cat ? "white" : "var(--text-secondary)",
-                    boxShadow:
-                      activeCategory === cat ? "0 4px 12px rgba(249,115,22,0.22)" : "none",
-                    transition: "all 0.2s ease",
-                  }}
+                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
+                    activeCategory === cat
+                      ? "bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white"
+                      : "border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[var(--color-primary)]/40"
+                  }`}
                 >
                   {cat}
                 </button>
               ))}
             </div>
 
-            {/* Products Grid */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                gap: 18,
-                marginBottom: 40,
-              }}
-            >
-              {vendorData.products.map((p) => (
-                <div
-                  key={p.id}
-                  style={{
-                    background: "var(--bg-card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 18,
-                    overflow: "hidden",
-                    boxShadow: "var(--shadow)",
-                    backdropFilter: "blur(14px)",
-                    cursor: "pointer",
-                    transition: "transform 0.22s ease, box-shadow 0.22s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-4px)";
-                    e.currentTarget.style.boxShadow = "0 20px 50px rgba(15,23,42,0.14)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "var(--shadow)";
-                  }}
+            {visibleProducts.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-[var(--border)] bg-[var(--bg-card)] px-6 py-16 text-center">
+                <Store className="mx-auto mb-3 text-[var(--text-secondary)]" size={36} />
+                <p className="font-semibold text-[var(--text-primary)]">No products yet</p>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                  This seller hasn’t listed products in this category.
+                </p>
+                <Link
+                  to="/products"
+                  className="mt-4 inline-flex text-sm font-semibold text-[var(--color-primary)]"
                 >
-                  <div style={{ position: "relative", height: 180 }}>
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                    {p.badge && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: 10,
-                          left: 10,
-                          background: badgeColors[p.badge]?.bg || "var(--bg-muted)",
-                          color: badgeColors[p.badge]?.color || "var(--text-secondary)",
-                          border: `1px solid ${badgeColors[p.badge]?.border || "var(--border)"}`,
-                          fontSize: 10,
-                          fontWeight: 700,
-                          padding: "3px 9px",
-                          borderRadius: 999,
-                          backdropFilter: "blur(8px)",
-                        }}
-                      >
-                        {p.badge}
-                      </span>
-                    )}
-                    <button
-                      style={{
-                        position: "absolute",
-                        top: 10,
-                        right: 10,
-                        width: 32,
-                        height: 32,
-                        borderRadius: 999,
-                        border: "1px solid var(--border)",
-                        background: "rgba(255,255,255,0.7)",
-                        backdropFilter: "blur(8px)",
-                        cursor: "pointer",
-                        fontSize: 14,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      ♡
-                    </button>
-                  </div>
-                  <div style={{ padding: "14px 14px 16px" }}>
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        fontSize: 14,
-                        color: "var(--text-primary)",
-                        marginBottom: 4,
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {p.name}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 8 }}>
-                      <StarRating rating={p.rating} />
-                      <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                        ({p.sold} sold)
-                      </span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span
-                        style={{
-                          fontWeight: 800,
-                          fontSize: 16,
-                          fontFamily: "'Sora', sans-serif",
-                          background:
-                            "linear-gradient(90deg, var(--color-primary), var(--color-secondary))",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
-                        }}
-                      >
-                        {p.price}
-                      </span>
-                      {p.originalPrice && (
-                        <span
-                          style={{
-                            fontSize: 12,
-                            color: "var(--text-muted)",
-                            textDecoration: "line-through",
-                          }}
-                        >
-                          {p.originalPrice}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      style={{
-                        width: "100%",
-                        marginTop: 10,
-                        padding: "8px 0",
-                        borderRadius: 10,
-                        fontWeight: 700,
-                        fontSize: 13,
-                        cursor: "pointer",
-                        border: "none",
-                        background:
-                          "linear-gradient(90deg, var(--color-primary), var(--color-secondary))",
-                        color: "white",
-                        boxShadow: "0 4px 14px rgba(249,115,22,0.22)",
-                      }}
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Reviews Tab */}
-        {activeTab === "reviews" && (
-          <div style={{ marginBottom: 40 }}>
-            {/* Summary */}
-            <div
-              style={{
-                background: "var(--bg-card)",
-                border: "1px solid var(--border)",
-                borderRadius: 20,
-                padding: 24,
-                display: "flex",
-                gap: 32,
-                alignItems: "center",
-                marginBottom: 24,
-                boxShadow: "var(--shadow)",
-                flexWrap: "wrap",
-              }}
-            >
-              <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: 52,
-                    fontWeight: 800,
-                    fontFamily: "'Sora', sans-serif",
-                    background:
-                      "linear-gradient(135deg, var(--color-primary), var(--color-accent))",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                    lineHeight: 1,
-                  }}
-                >
-                  {vendorData.rating}
-                </div>
-                <StarRating rating={vendorData.rating} size="lg" />
-                <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
-                  {vendorData.reviewCount.toLocaleString()} reviews
-                </div>
+                  Browse all products
+                </Link>
               </div>
-              <div style={{ flex: 1, minWidth: 200 }}>
-                {[5, 4, 3, 2, 1].map((star) => {
-                  const pct = star === 5 ? 72 : star === 4 ? 18 : star === 3 ? 7 : star === 2 ? 2 : 1;
-                  return (
-                    <div
-                      key={star}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        marginBottom: 6,
-                      }}
-                    >
-                      <span style={{ fontSize: 12, color: "var(--text-muted)", width: 16 }}>
-                        {star}★
-                      </span>
-                      <div
-                        style={{
-                          flex: 1,
-                          height: 7,
-                          borderRadius: 999,
-                          background: "var(--bg-muted)",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: `${pct}%`,
-                            height: "100%",
-                            background:
-                              "linear-gradient(90deg, var(--color-primary), var(--color-secondary))",
-                            borderRadius: 999,
-                          }}
-                        />
-                      </div>
-                      <span style={{ fontSize: 12, color: "var(--text-muted)", width: 30 }}>
-                        {pct}%
-                      </span>
-                    </div>
-                  );
-                })}
+            ) : (
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {visibleProducts.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
               </div>
-            </div>
-
-            {/* Review cards */}
-            <div
-              style={{
-                background: "var(--bg-card)",
-                border: "1px solid var(--border)",
-                borderRadius: 18,
-                padding: 20,
-                marginBottom: 14,
-                boxShadow: "var(--shadow)",
-                backdropFilter: "blur(14px)",
-              }}
-            >
-              <p style={{ margin: 0, fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>
-                Review details are not available on this public endpoint yet. Rating summary above is calculated from vendor products.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* About Tab */}
-        {activeTab === "about" && (
-          <div style={{ marginBottom: 40 }}>
-            <div
-              style={{
-                background: "var(--bg-card)",
-                border: "1px solid var(--border)",
-                borderRadius: 20,
-                padding: 28,
-                boxShadow: "var(--shadow)",
-                marginBottom: 18,
-              }}
-            >
-              <h2
-                style={{
-                  margin: "0 0 12px",
-                  fontFamily: "'Sora', sans-serif",
-                  fontSize: 18,
-                  fontWeight: 700,
-                }}
-              >
-                About this store
-              </h2>
-              <p style={{ color: "var(--text-secondary)", lineHeight: 1.7, margin: 0 }}>
-                {vendorData.description}
-              </p>
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                gap: 14,
-              }}
-            >
-              {[
-                { icon: "📍", label: "Address", value: vendor.address || "Not provided" },
-                { icon: "🗓", label: "Member since", value: vendorData.joined },
-                { icon: "📞", label: "Phone", value: vendor.phone || "Not provided" },
-                { icon: "✉", label: "Email", value: vendor.email || "Not provided" },
-                { icon: "✅", label: "Approval", value: vendor.isApproved ? "Approved" : "Pending Approval" },
-                { icon: "⭐", label: "Average rating", value: `${vendorData.rating} / 5.0` },
-              ].map((info) => (
-                <div
-                  key={info.label}
-                  style={{
-                    background: "var(--bg-card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 16,
-                    padding: "18px 20px",
-                    boxShadow: "var(--shadow)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 14,
-                  }}
-                >
-                  <span style={{ fontSize: 26 }}>{info.icon}</span>
-                  <div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
-                      {info.label}
-                    </div>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "var(--text-primary)" }}>
-                      {info.value}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            )}
           </div>
         )}
       </div>

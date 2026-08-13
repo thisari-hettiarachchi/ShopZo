@@ -817,10 +817,18 @@ export default function ProductDetails() {
 
               <div className="mb-4 flex items-center gap-3">
                 <Store className="text-[var(--color-primary)]" size={32} />
-                <div>
-                  <p className="font-bold text-[var(--text-primary)]">
+                <div className="min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const vendorId = product.vendor?._id || product.vendor?.id;
+                      if (!vendorId) return toast.error("Vendor profile unavailable");
+                      navigate(`/vendors/${vendorId}`);
+                    }}
+                    className="text-left font-bold text-[var(--text-primary)] transition hover:text-[var(--color-primary)]"
+                  >
                     {product.vendor?.storeName || product.vendor?.name || "Vendor"}
-                  </p>
+                  </button>
                   <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
                     <Star size={12} className="fill-amber-400 text-amber-400" />
                     <span className="font-semibold text-gray-700">
@@ -828,6 +836,17 @@ export default function ProductDetails() {
                     </span>
                     <span>({product.ratingCount ?? 0} reviews)</span>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const vendorId = product.vendor?._id || product.vendor?.id;
+                      if (!vendorId) return toast.error("Vendor profile unavailable");
+                      navigate(`/vendors/${vendorId}`);
+                    }}
+                    className="mt-2 text-xs font-semibold text-[var(--color-primary)] hover:underline"
+                  >
+                    Visit store
+                  </button>
                 </div>
               </div>
 

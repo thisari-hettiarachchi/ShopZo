@@ -7,18 +7,16 @@ import DarkHero from "./hero-dark.png";
 import Contact from "./contact.jpg";
 import about from "./about.jpg";
 
-
-export default { 
-    logo, 
-    favicon, 
-    payment, 
-    download, 
-    LightHero, 
-    DarkHero,
-    lap, 
-    lap1, 
-    Contact, 
-    about,
-    flashSale,
-    newArrival
+export default {
+  logo,
+  favicon,
+  payment,
+  download,
+  LightHero,
+  DarkHero,
+  Contact,
+  about,
+  // Fallbacks for promo banners when API has no image
+  flashSale: LightHero,
+  newArrival: DarkHero,
 };

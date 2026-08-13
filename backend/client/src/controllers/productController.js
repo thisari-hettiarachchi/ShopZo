@@ -13,11 +13,16 @@ export const getProducts = async (req, res) => {
       rating,
       location,
       category,
+      vendor,
       sort = "latest",
       limit = 50,
     } = req.query;
 
     const filter = {};
+
+    if (vendor) {
+      filter.vendor = vendor;
+    }
 
     if (q) {
       filter.$or = [
