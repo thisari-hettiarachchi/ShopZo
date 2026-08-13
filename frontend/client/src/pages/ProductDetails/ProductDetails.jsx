@@ -15,6 +15,8 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
+  Plus,
+  X,
 } from "lucide-react";
 import {
   fetchProductById,
@@ -361,6 +363,16 @@ export default function ProductDetails() {
   }
 
   const reviewDisabled = !token || !canReview;
+  const ratingCount = Number(product.ratingCount ?? reviews.length ?? 0);
+  const averageRating =
+    Number(product.rating) ||
+    (reviews.length
+      ? reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length
+      : 0);
+  const ratingBreakdown = [1, 2, 3, 4, 5].reduce((acc, stars) => {
+    acc[stars] = reviews.filter((review) => Number(review.rating) === stars).length;
+    return acc;
+  }, {});
 
   return (
     <div className="shopzo-root min-h-screen bg-[var(--bg-main)]">
@@ -528,15 +540,18 @@ export default function ProductDetails() {
                 <Star
                   key={i}
                   className={`h-5 w-5 ${
-                    i < Math.round(product.rating || 0)
+                    i < Math.round(averageRating || 0)
                       ? "fill-[var(--color-primary)] text-[var(--color-primary)]"
                       : "text-gray-300"
                   }`}
                 />
               ))}
-              <span className="ml-2 text-sm text-[var(--text-secondary)]">
-                ({product.ratingCount ?? reviews.length ?? 0} Ratings)
-              </span>
+              <a
+                href="#reviews"
+                className="ml-2 text-sm text-[var(--text-secondary)] transition hover:text-[var(--color-primary)] hover:underline"
+              >
+                ({ratingCount} Ratings)
+              </a>
               <span className="mx-2 text-[var(--border)]">|</span>
               <Link
                 to={`/products?category=${encodeURIComponent(product.category || "")}`}
@@ -602,109 +617,6 @@ export default function ProductDetails() {
               <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
                 {product.description}
               </p>
-            </div>
-
-            <div
-              id="reviews"
-              ref={reviewsSectionRef}
-              className="mt-8 scroll-mt-24 border-t border-[var(--border)] pt-6"
-            >
-              <h3 className="mb-3 font-semibold">Ratings & Reviews</h3>
-
-              <form
-                onSubmit={handleSubmitReview}
-                className="mb-5 grid grid-cols-1 gap-2 md:grid-cols-4"
-              >
-                <select
-                  value={reviewForm.rating}
-                  disabled={reviewDisabled}
-                  onChange={(e) =>
-                    setReviewForm((prev) => ({ ...prev, rating: Number(e.target.value) }))
-                  }
-                  className="rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {[5, 4, 3, 2, 1].map((r) => (
-                    <option key={r} value={r}>
-                      {r} Stars
-                    </option>
-                  ))}
-                </select>
-                <input
-                  value={reviewForm.title}
-                  disabled={reviewDisabled}
-                  onChange={(e) =>
-                    setReviewForm((prev) => ({ ...prev, title: e.target.value }))
-                  }
-                  placeholder="Review title"
-                  className="rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
-                />
-                <input
-                  value={reviewForm.comment}
-                  disabled={reviewDisabled}
-                  onChange={(e) =>
-                    setReviewForm((prev) => ({ ...prev, comment: e.target.value }))
-                  }
-                  placeholder="Your feedback"
-                  className="rounded-lg border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60 md:col-span-2"
-                />
-                <button
-                  type="submit"
-                  disabled={reviewDisabled}
-                  className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-45 md:col-span-4"
-                >
-                  Submit Review
-                </button>
-                <p className="text-xs text-[var(--text-secondary)] md:col-span-4">
-                  {!token
-                    ? "Login and purchase this product to leave a review."
-                    : canReview
-                      ? "You purchased this item — share your experience."
-                      : "Purchase this product to unlock reviews."}
-                </p>
-              </form>
-
-              <div className="space-y-3">
-                {reviews.map((review) => (
-                  <div
-                    key={review._id}
-                    className="rounded-xl border border-[var(--border)] p-3"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold">
-                        {review.user?.name || "Customer"}
-                      </p>
-                      <p className="text-xs text-[var(--text-secondary)]">
-                        {review.verifiedBuyer ? "Verified Buyer" : "Buyer"}
-                      </p>
-                    </div>
-                    <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                      {"★".repeat(review.rating)}
-                      {"☆".repeat(Math.max(0, 5 - review.rating))}
-                    </p>
-                    {review.title && (
-                      <p className="mt-1 text-sm font-semibold">{review.title}</p>
-                    )}
-                    {review.comment && (
-                      <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                        {review.comment}
-                      </p>
-                    )}
-                    {review.reply?.text && (
-                      <div className="mt-2 rounded-lg border border-[var(--border)] bg-[var(--bg-main)] p-2.5">
-                        <p className="text-xs font-semibold text-[var(--color-primary)]">
-                          Seller response
-                        </p>
-                        <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-                          {review.reply.text}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {reviews.length === 0 && (
-                  <p className="text-sm text-[var(--text-secondary)]">No reviews yet.</p>
-                )}
-              </div>
             </div>
           </div>
 
@@ -806,6 +718,187 @@ export default function ProductDetails() {
             </div>
           </div>
         </div>
+
+        {/* -------- Ratings & Reviews (separate section under product) -------- */}
+        <section
+          id="reviews"
+          ref={reviewsSectionRef}
+          className="mx-auto mt-10 max-w-7xl scroll-mt-24"
+        >
+          <div className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_24px_60px_-40px_var(--shadow)]">
+            <div className="border-b border-[var(--border)] px-6 py-6 md:px-8">
+              <p className="section-eyebrow">Customer feedback</p>
+              <h2 className="display-font mt-2 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl">
+                Ratings & Reviews
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm text-[var(--text-secondary)]">
+                See what buyers think about this product, and share your experience after purchase.
+              </p>
+            </div>
+
+            <div className="grid gap-8 px-6 py-8 md:grid-cols-[260px_1fr] md:px-8">
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+                  Overall rating
+                </p>
+                <p className="mt-3 text-5xl font-black tracking-tight text-[var(--text-primary)]">
+                  {Number(averageRating || 0).toFixed(1)}
+                </p>
+                <div className="mt-2 flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${
+                        i < Math.round(averageRating || 0)
+                          ? "fill-[var(--color-primary)] text-[var(--color-primary)]"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                  Based on {ratingCount} {ratingCount === 1 ? "rating" : "ratings"}
+                </p>
+
+                <div className="mt-5 space-y-2">
+                  {[5, 4, 3, 2, 1].map((stars) => {
+                    const count = ratingBreakdown[stars] || 0;
+                    const pct = ratingCount > 0 ? Math.round((count / ratingCount) * 100) : 0;
+                    return (
+                      <div key={stars} className="flex items-center gap-2 text-xs">
+                        <span className="w-6 tabular-nums text-[var(--text-secondary)]">{stars}★</span>
+                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--bg-muted)]">
+                          <div
+                            className="h-full rounded-full bg-[var(--color-primary)]"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="w-8 text-right tabular-nums text-[var(--text-secondary)]">
+                          {count}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <form
+                  onSubmit={handleSubmitReview}
+                  className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4 md:p-5"
+                >
+                  <h3 className="mb-3 text-sm font-semibold text-[var(--text-primary)]">
+                    Write a review
+                  </h3>
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+                    <select
+                      value={reviewForm.rating}
+                      disabled={reviewDisabled}
+                      onChange={(e) =>
+                        setReviewForm((prev) => ({ ...prev, rating: Number(e.target.value) }))
+                      }
+                      className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-3 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {[5, 4, 3, 2, 1].map((r) => (
+                        <option key={r} value={r}>
+                          {r} Stars
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      value={reviewForm.title}
+                      disabled={reviewDisabled}
+                      onChange={(e) =>
+                        setReviewForm((prev) => ({ ...prev, title: e.target.value }))
+                      }
+                      placeholder="Review title"
+                      className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-3 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                    />
+                    <input
+                      value={reviewForm.comment}
+                      disabled={reviewDisabled}
+                      onChange={(e) =>
+                        setReviewForm((prev) => ({ ...prev, comment: e.target.value }))
+                      }
+                      placeholder="Your feedback"
+                      className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-3 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60 md:col-span-2"
+                    />
+                    <button
+                      type="submit"
+                      disabled={reviewDisabled}
+                      className="rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-45 md:col-span-4"
+                    >
+                      Submit Review
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                    {!token
+                      ? "Login and purchase this product to leave a review."
+                      : canReview
+                        ? "You purchased this item — share your experience."
+                        : "Purchase this product to unlock reviews."}
+                  </p>
+                </form>
+
+                <div className="space-y-3">
+                  {reviews.map((review) => (
+                    <div
+                      key={review._id}
+                      className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-semibold">
+                          {review.user?.name || "Customer"}
+                        </p>
+                        <p className="text-xs text-[var(--text-secondary)]">
+                          {review.verifiedBuyer ? "Verified Buyer" : "Buyer"}
+                        </p>
+                      </div>
+                      <div className="mt-1 flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3.5 w-3.5 ${
+                              i < review.rating
+                                ? "fill-[var(--color-primary)] text-[var(--color-primary)]"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      {review.title && (
+                        <p className="mt-2 text-sm font-semibold">{review.title}</p>
+                      )}
+                      {review.comment && (
+                        <p className="mt-1 text-sm leading-relaxed text-[var(--text-secondary)]">
+                          {review.comment}
+                        </p>
+                      )}
+                      {review.reply?.text && (
+                        <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-3">
+                          <p className="text-xs font-semibold text-[var(--color-primary)]">
+                            Seller response
+                          </p>
+                          <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                            {review.reply.text}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {reviews.length === 0 && (
+                    <div className="rounded-2xl border border-dashed border-[var(--border)] px-4 py-10 text-center">
+                      <p className="text-sm font-medium text-[var(--text-primary)]">No reviews yet</p>
+                      <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                        Be the first to rate this product after purchasing.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
       <SimilarProductsSection
