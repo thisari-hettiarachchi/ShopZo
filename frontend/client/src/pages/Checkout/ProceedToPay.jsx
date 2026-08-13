@@ -92,7 +92,11 @@ export default function ProceedToPay() {
           items,
           shippingAddress: address,
           couponCode,
+          deliveryFee,
         });
+        if (!session?.url) {
+          throw new Error("Stripe did not return a checkout URL");
+        }
         window.location.href = session.url;
         return;
       }

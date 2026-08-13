@@ -3,10 +3,10 @@ import { API_BASE_URL, authHeaders } from "../api/base";
 
 const CHECKOUT_URL = `${API_BASE_URL}/checkout`;
 
-export const createCheckoutSession = async ({ items, shippingAddress, couponCode }) => {
+export const createCheckoutSession = async ({ items, shippingAddress, couponCode, deliveryFee }) => {
   const res = await axios.post(
     `${CHECKOUT_URL}/create-session`,
-    { items, shippingAddress, couponCode },
+    { items, shippingAddress, couponCode, deliveryFee },
     { headers: authHeaders() }
   );
   return res.data;

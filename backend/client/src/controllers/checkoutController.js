@@ -1,4 +1,9 @@
-import stripe, { STRIPE_CURRENCY, CLIENT_FRONTEND_URL } from "../config/stripe.js";
+import stripe, {
+  STRIPE_CURRENCY,
+  CLIENT_FRONTEND_URL,
+  toStripeUnitAmount,
+  fromStripeUnitAmount,
+} from "../config/stripe.js";
 import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
@@ -49,6 +54,12 @@ const findActiveCoupon = async (code, subtotal) => {
   return { coupon, discountAmount: Math.round(discount * 100) / 100 };
 };
 
+const resolveVendorId = (value) => {
+  if (!value) return null;
+  if (typeof value === "object") return value._id || value.id || null;
+  return value;
+};
+
 // POST /api/checkout/validate-coupon
 export const validateCoupon = async (req, res) => {
   try {
@@ -76,6 +87,13 @@ export const validateCoupon = async (req, res) => {
 export const createCheckoutSession = async (req, res) => {
   try {
     const { items, shippingAddress, couponCode } = req.body;
+    const deliveryFee = Math.max(Number(req.body.deliveryFee) || 0, 0);
+
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return res.status(500).json({
+        message: "Stripe is not configured. Set STRIPE_SECRET_KEY in the client backend .env file.",
+      });
+    }
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: "No items to checkout" });
@@ -84,13 +102,47 @@ export const createCheckoutSession = async (req, res) => {
       return res.status(400).json({ message: "A shipping address is required" });
     }
 
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const normalizedItems = [];
+    for (const item of items) {
+      const productId = item.product?._id || item.product;
+      const vendorId = resolveVendorId(item.vendor) || resolveVendorId(item.product?.vendor);
+      const qty = Number(item.qty) || 1;
+      const price = Number(item.price);
 
+      if (!productId) {
+        return res.status(400).json({ message: "Each checkout item must include a product id." });
+      }
+      if (!vendorId) {
+        return res.status(400).json({
+          message: "One or more cart items are missing a vendor. Please remove them and add the products again.",
+        });
+      }
+      if (!Number.isFinite(price) || price < 0 || qty < 1) {
+        return res.status(400).json({ message: "Invalid item price or quantity." });
+      }
+
+      normalizedItems.push({
+        product: productId,
+        vendor: vendorId,
+        name: item.name || item.product?.name || "ShopZo product",
+        qty,
+        price,
+      });
+    }
+
+    const subtotal = normalizedItems.reduce((sum, item) => sum + item.price * item.qty, 0);
     const { coupon: appliedCoupon, discountAmount } = await findActiveCoupon(couponCode, subtotal);
-    const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;
+    const payableBeforeDelivery = Math.max(subtotal - discountAmount, 0);
+    const grandTotal = payableBeforeDelivery + deliveryFee;
 
-    const vendorMap = groupItemsByVendor(items);
+    if (grandTotal <= 0) {
+      return res.status(400).json({ message: "Order total must be greater than zero." });
+    }
+
+    const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;
+    const vendorMap = groupItemsByVendor(normalizedItems);
     const vendorIds = Object.keys(vendorMap);
+    const deliveryPerVendor = deliveryFee / vendorIds.length;
 
     const ordersToInsert = vendorIds.map((vid) => {
       const vendorDiscount = Math.round(vendorMap[vid].total * discountRatio * 100) / 100;
@@ -98,7 +150,7 @@ export const createCheckoutSession = async (req, res) => {
         user: req.user._id,
         vendor: vid,
         products: vendorMap[vid].products,
-        total: Math.max(vendorMap[vid].total - vendorDiscount, 0),
+        total: Math.max(vendorMap[vid].total - vendorDiscount + deliveryPerVendor, 0),
         status: "Pending",
         statusHistory: [{ status: "Placed", at: new Date() }],
         shippingAddress,
@@ -111,14 +163,25 @@ export const createCheckoutSession = async (req, res) => {
 
     const draftOrders = await Order.insertMany(ordersToInsert);
 
-    const lineItems = items.map((item) => ({
+    const lineItems = normalizedItems.map((item) => ({
       price_data: {
         currency: STRIPE_CURRENCY,
-        product_data: { name: item.name || "ShopZo product" },
-        unit_amount: Math.round(item.price * 100),
+        product_data: { name: item.name },
+        unit_amount: toStripeUnitAmount(item.price),
       },
       quantity: item.qty,
     }));
+
+    if (deliveryFee > 0) {
+      lineItems.push({
+        price_data: {
+          currency: STRIPE_CURRENCY,
+          product_data: { name: "Delivery fee" },
+          unit_amount: toStripeUnitAmount(deliveryFee),
+        },
+        quantity: 1,
+      });
+    }
 
     const sessionParams = {
       mode: "payment",
@@ -130,15 +193,16 @@ export const createCheckoutSession = async (req, res) => {
       metadata: {
         userId: String(req.user._id),
         orderIds: draftOrders.map((order) => String(order._id)).join(","),
+        deliveryFee: String(deliveryFee),
       },
     };
 
     if (discountAmount > 0) {
       const stripeCoupon = await stripe.coupons.create({
-        amount_off: Math.round(discountAmount * 100),
+        amount_off: toStripeUnitAmount(discountAmount),
         currency: STRIPE_CURRENCY,
         duration: "once",
-        name: appliedCoupon.code,
+        name: appliedCoupon?.code || "SHOPZO",
       });
       sessionParams.discounts = [{ coupon: stripeCoupon.id }];
     }
@@ -153,12 +217,16 @@ export const createCheckoutSession = async (req, res) => {
     res.json({ url: session.url, sessionId: session.id });
   } catch (error) {
     console.error("Error creating checkout session:", error);
-    res.status(500).json({ message: "Failed to start checkout" });
+    const stripeMessage = error?.raw?.message || error?.message;
+    res.status(500).json({
+      message: stripeMessage
+        ? `Failed to start checkout: ${stripeMessage}`
+        : "Failed to start checkout",
+      code: error?.code,
+    });
   }
 };
 
-// Shared finalize step used by both the webhook and the success-page fallback
-// confirm endpoint, so a payment is only ever applied to orders/stock/cart once.
 const finalizeOrdersForSession = async (session) => {
   const orderIds = (session.metadata?.orderIds || "").split(",").filter(Boolean);
   if (orderIds.length === 0) return [];
@@ -175,7 +243,7 @@ const finalizeOrdersForSession = async (session) => {
       $set: {
         paymentStatus: "paid",
         stripePaymentIntentId: session.payment_intent,
-        amountPaid: (session.amount_total || 0) / 100,
+        amountPaid: fromStripeUnitAmount(session.amount_total || 0),
       },
     }
   );
@@ -208,7 +276,6 @@ const finalizeOrdersForSession = async (session) => {
   return Order.find({ _id: { $in: orderIds } });
 };
 
-// POST /api/checkout/webhook (raw body, mounted before express.json in server.js)
 export const stripeWebhook = async (req, res) => {
   const signature = req.headers["stripe-signature"];
   let event;
@@ -231,7 +298,6 @@ export const stripeWebhook = async (req, res) => {
   res.json({ received: true });
 };
 
-// GET /api/checkout/session/:id/confirm - fallback for local dev / if the webhook is delayed
 export const confirmCheckoutSession = async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.retrieve(req.params.id);

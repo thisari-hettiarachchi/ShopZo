@@ -1,6 +1,9 @@
+import dotenv from "dotenv";
+// Load env before route modules import Stripe / DB configs.
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import connectCloudinary from "./config/cloudinary.js";
@@ -20,7 +23,6 @@ import checkoutRoutes from "./routes/checkoutRoutes.js";
 import newsletterRoutes from "./routes/newsletterRoutes.js";
 import { stripeWebhook } from "./controllers/checkoutController.js";
 
-dotenv.config();
 connectCloudinary();
 
 const app = express();

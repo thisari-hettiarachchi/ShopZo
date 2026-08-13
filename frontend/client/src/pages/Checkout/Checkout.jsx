@@ -71,10 +71,11 @@ export default function CheckoutPage() {
               name: product.name,
               image: product.image,
               images: product.image ? [product.image] : product.images,
+              vendor: product.vendor,
             },
             price: product.price,
             qty: product.quantity || 1,
-            vendor: product.vendor,
+            vendor: typeof product.vendor === "object" ? product.vendor?._id || product.vendor?.id : product.vendor,
           }));
           setCartItems(buyNowProducts);
         } else {
