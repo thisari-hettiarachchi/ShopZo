@@ -22,7 +22,6 @@ import {
   fetchVendorFollowStatus,
   fetchVendorProducts,
   fetchVendorReviewEligibility,
-  fetchVendorReviews,
   followVendorApi,
   postVendorReview,
   unfollowVendorApi,
@@ -78,7 +77,6 @@ export default function VendorStorePage() {
   const [shopRatingCount, setShopRatingCount] = useState(0);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [canRateShop, setCanRateShop] = useState(false);
-  const [vendorReviews, setVendorReviews] = useState([]);
   const [reviewForm, setReviewForm] = useState({ rating: 5 });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
@@ -174,15 +172,6 @@ export default function VendorStorePage() {
     setIsRatingModalOpen(true);
     setReviewForm({ rating: 5 });
 
-    try {
-      const reviewsData = await fetchVendorReviews(id);
-      setVendorReviews(Array.isArray(reviewsData?.reviews) ? reviewsData.reviews : []);
-      if (typeof reviewsData?.rating === "number") setShopRating(reviewsData.rating);
-      if (typeof reviewsData?.ratingCount === "number") setShopRatingCount(reviewsData.ratingCount);
-    } catch {
-      setVendorReviews([]);
-    }
-
     if (!localStorage.getItem("token")) {
       setCanRateShop(false);
       return;
@@ -218,14 +207,6 @@ export default function VendorStorePage() {
       const data = await postVendorReview(id, { rating: reviewForm.rating });
       if (typeof data?.rating === "number") setShopRating(data.rating);
       if (typeof data?.ratingCount === "number") setShopRatingCount(data.ratingCount);
-      if (data?.review) {
-        setVendorReviews((prev) => {
-          const withoutMine = prev.filter(
-            (r) => String(r.user?._id || r.user) !== String(data.review.user?._id || data.review.user)
-          );
-          return [data.review, ...withoutMine];
-        });
-      }
       setReviewForm({ rating: 5 });
       toast.success("Shop rating submitted");
     } catch (err) {
@@ -524,7 +505,7 @@ export default function VendorStorePage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="vendor-rating-modal-title"
-            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.45)]"
+            className="w-full max-w-lg overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.45)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-card)] px-5 py-4">
@@ -555,7 +536,7 @@ export default function VendorStorePage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmitShopReview} className="space-y-4 border-b border-[var(--border)] px-5 py-5">
+            <form onSubmit={handleSubmitShopReview} className="space-y-4 px-5 py-5">
               {!localStorage.getItem("token") ? (
                 <p className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text-secondary)]">
                   Login to rate this shop.
@@ -608,41 +589,6 @@ export default function VendorStorePage() {
                 </button>
               </div>
             </form>
-
-            <div className="px-5 py-4">
-              <h4 className="mb-3 text-sm font-bold text-[var(--text-primary)]">
-                Recent ratings ({vendorReviews.length})
-              </h4>
-              {vendorReviews.length === 0 ? (
-                <p className="text-sm text-[var(--text-secondary)]">No shop ratings yet.</p>
-              ) : (
-                <div className="space-y-2">
-                  {vendorReviews.slice(0, 8).map((review) => (
-                    <div
-                      key={review._id}
-                      className="flex items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2.5"
-                    >
-                      <p className="text-sm font-semibold text-[var(--text-primary)]">
-                        {review.user?.name || "Customer"}
-                      </p>
-                      <div className="flex items-center gap-0.5">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <Star
-                            key={s}
-                            size={14}
-                            className={
-                              s <= Number(review.rating || 0)
-                                ? "fill-amber-400 text-amber-400"
-                                : "text-gray-300"
-                            }
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         </div>
       )}
