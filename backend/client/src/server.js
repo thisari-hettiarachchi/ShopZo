@@ -17,6 +17,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import checkoutRoutes from "./routes/checkoutRoutes.js";
+import newsletterRoutes from "./routes/newsletterRoutes.js";
 import { stripeWebhook } from "./controllers/checkoutController.js";
 
 dotenv.config();
@@ -76,6 +77,7 @@ app.use("/api/user", orderRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/user/notifications", notificationRoutes);
 app.use("/api/checkout", checkoutRoutes);
+app.use("/api/newsletter", newsletterRoutes);
 
 app.get("/", (req, res) => res.send("ShopZo API running 🚀"));
 

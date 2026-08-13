@@ -17,6 +17,7 @@ import OrderDetails from '../pages/Orders/OrderDetails';
 import VendorStorePage from '../pages/Vendor/VendorStore';
 import MessagePage from '../pages/Vendor/VendorMessage';
 import FlashSalePage from '../pages/FlashSale/FlashSale';
+import NewsletterUnsubscribe from '../pages/Newsletter/Unsubscribe';
 
 export default function AppRoutes() {
   return (
@@ -39,6 +40,7 @@ export default function AppRoutes() {
       <Route path='/order/cancel' element={<OrderCancel />} />
       <Route path='/messages/:id' element={<MessagePage />} />
       <Route path='/flashsale' element={<FlashSalePage />} />
+      <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
     </Routes>
   );
 }

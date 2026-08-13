@@ -1,3 +1,7 @@
+import Product from "../models/Product.js";
+import Settings from "../models/Settings.js";
+import { queueProductNewsletterAlerts } from "../services/newsletterAlertService.js";
+
 // Get a single product for the logged-in vendor
 export const getVendorProductById = async (req, res) => {
   try {
@@ -14,8 +18,6 @@ export const getVendorProductById = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch product" });
   }
 };
-import Product from "../models/Product.js";
-import Settings from "../models/Settings.js";
 
 const requireApprovedVendor = (req, res) => {
   const accountStatus = req.user?.accountStatus || "pending";
@@ -114,6 +116,7 @@ export const addVendorProduct = async (req, res) => {
     });
 
     await newProduct.save();
+    queueProductNewsletterAlerts({ type: "new_product", product: newProduct });
     res.status(201).json(newProduct);
   } catch (error) {
     console.error("Error adding product:", error);
@@ -132,6 +135,12 @@ export const updateVendorProduct = async (req, res) => {
 
     const product = await Product.findOne({ _id: id, vendor: vendorId });
     if (!product) return res.status(404).json({ message: "Product not found or unauthorized" });
+
+    const previousProduct = {
+      price: product.price,
+      discount: product.discount,
+      isFlashSale: product.isFlashSale,
+    };
 
     const { name, price, description, stock, category, images, sizes, oldPrice, discount, isFlashSale } = req.body;
 
@@ -164,6 +173,7 @@ export const updateVendorProduct = async (req, res) => {
     }
 
     await product.save();
+    queueProductNewsletterAlerts({ type: "update", product, previousProduct });
     res.json(product);
   } catch (error) {
     console.error("Error updating product:", error);

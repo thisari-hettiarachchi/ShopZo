@@ -1,9 +1,36 @@
-import React from 'react';
-import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube, Loader2 } from 'lucide-react';
 import Assets from '../../assets/assets'
+import { subscribeNewsletter } from '../../api/newsletterApi'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState('');
+  const [subscribing, setSubscribing] = useState(false);
+
+  const handleSubscribe = async (event) => {
+    event.preventDefault();
+    const trimmed = email.trim();
+    if (!trimmed) {
+      toast.error('Please enter your email');
+      return;
+    }
+
+    setSubscribing(true);
+    try {
+      const data = await subscribeNewsletter(trimmed, 'footer');
+      toast.success(data.message || 'Subscribed successfully');
+      if (!data.alreadySubscribed) {
+        setEmail('');
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Failed to subscribe');
+    } finally {
+      setSubscribing(false);
+    }
+  };
 
   return (
     <footer className="bg-[var(--bg-card)] border-t-2 border-[var(--border)] mt-16">
@@ -20,37 +47,48 @@ export default function Footer() {
                 <span className="italic text-[var(--color-primary)]">every deal</span>
               </h2>
               <p className="mt-3 max-w-lg text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
-                Get curated picks, flash-sale alerts, and exclusive ShopZo offers delivered weekly — no spam, just value.
+                Get new product alerts, price-drop notices, and discount emails from ShopZo — unsubscribe anytime.
               </p>
             </div>
 
             <div className="w-full max-w-md">
               <form
                 className="flex flex-col gap-2 sm:flex-row"
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={handleSubscribe}
               >
                 <label className="flex h-12 flex-1 items-center gap-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] px-3.5 transition focus-within:border-[var(--color-primary)]">
                   <Mail size={16} className="shrink-0 text-[var(--color-primary)]" />
                   <input
                     type="email"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={subscribing}
                     placeholder="Enter your email"
-                    className="h-full w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
+                    className="h-full w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] disabled:opacity-60"
                   />
                 </label>
                 <button
                   type="submit"
-                  className="h-12 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-6 text-sm font-bold text-white shadow-[0_14px_28px_-16px_var(--shadow)] transition hover:opacity-90"
+                  disabled={subscribing}
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-6 text-sm font-bold text-white shadow-[0_14px_28px_-16px_var(--shadow)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Subscribe
+                  {subscribing ? <Loader2 size={16} className="animate-spin" /> : null}
+                  {subscribing ? 'Subscribing…' : 'Subscribe'}
                 </button>
               </form>
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
-                {["No spam, ever", "Unsubscribe anytime", "Weekly digest"].map((item) => (
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                {["No spam, ever", "New products & deals", "Unsubscribe anytime"].map((item) => (
                   <span key={item} className="text-xs text-[var(--text-secondary)]">
                     {item}
                   </span>
                 ))}
+                <Link
+                  to="/newsletter/unsubscribe"
+                  className="text-xs font-semibold text-[var(--color-primary)] hover:underline"
+                >
+                  Unsubscribe
+                </Link>
               </div>
             </div>
           </div>
