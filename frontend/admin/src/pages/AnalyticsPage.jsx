@@ -55,7 +55,7 @@ export default function AnalyticsPage() {
         <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             {[
-              ["Sales", `$${Number(analytics.stats.sales || 0).toFixed(2)}`],
+              ["Sales", `LKR ${Number(analytics.stats.sales || 0).toFixed(2)}`],
               ["Orders", analytics.stats.orders || 0],
               ["Customers", analytics.stats.customers || 0],
               ["Products", analytics.stats.products || 0],
@@ -85,7 +85,7 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="day" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(value) => [`$${Number(value).toFixed(2)}`, "Revenue"]} />
+                    <Tooltip formatter={(value) => [`LKR ${Number(value).toFixed(2)}`, "Revenue"]} />
                     <Area type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} fill="url(#revenueFill)" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -133,7 +133,7 @@ export default function AnalyticsPage() {
                       <p className="font-medium">Order #{order._id.slice(-6).toUpperCase()}</p>
                       <p className="text-sm text-[var(--text-secondary)]">{order.user?.name || "Unknown customer"}</p>
                     </div>
-                    <span className="font-semibold">${Number(order.total || 0).toFixed(2)}</span>
+                    <span className="font-semibold">LKR {Number(order.total || 0).toFixed(2)}</span>
                   </div>
                 ))
               )}

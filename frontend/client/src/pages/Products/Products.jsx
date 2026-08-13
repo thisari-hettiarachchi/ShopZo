@@ -457,7 +457,7 @@ export default function Products() {
               ))}
               {(filters.price.min || filters.price.max) && (
                 <FilterChip
-                  label={`Rs. ${filters.price.min || "0"} – ${filters.price.max || "∞"}`}
+                  label={`LKR ${filters.price.min || "0"} – ${filters.price.max || "∞"}`}
                   onRemove={() => removeFilter("price")}
                 />
               )}

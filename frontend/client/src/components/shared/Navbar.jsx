@@ -376,7 +376,7 @@ export default function Navbar() {
                       }}
                     >
                       <p className="text-sm font-semibold">{item.name}</p>
-                      <p className="text-xs text-[var(--text-secondary)]">Rs. {item.price} • {item.category}</p>
+                      <p className="text-xs text-[var(--text-secondary)]">LKR {item.price} • {item.category}</p>
                     </button>
                   ))}
                 </div>

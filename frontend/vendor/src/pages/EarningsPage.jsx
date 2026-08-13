@@ -19,7 +19,7 @@ import {
 import { getDashboardAnalytics, getVendorEarnings } from "../services/analyticsService";
 import PageHeader from "../components/shared/PageHeader";
 
-const currency = (value) => `Rs. ${Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+const currency = (value) => `LKR ${Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 const formatDate = (value) =>
   value
     ? new Date(value).toLocaleDateString(undefined, {

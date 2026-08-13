@@ -166,7 +166,7 @@ export default function CheckoutPage() {
       const result = await validateCoupon(promoCode.trim(), itemsTotal);
       setDiscount(result);
       setIsPromoApplied(true);
-      toast.success(`Coupon "${result.code}" applied - Rs. ${result.discountAmount} off`);
+      toast.success(`Coupon "${result.code}" applied - LKR ${result.discountAmount} off`);
     } catch (err) {
       setDiscount(null);
       setIsPromoApplied(false);
@@ -459,7 +459,7 @@ export default function CheckoutPage() {
                   <div>
                     <p className="font-semibold text-[var(--color-primary)]">{discount?.code}</p>
                     <p className="text-sm text-[var(--text-secondary)]">
-                      You saved Rs. {discountAmount.toLocaleString("en-LK")}
+                      You saved LKR {discountAmount.toLocaleString("en-LK")}
                     </p>
                   </div>
                   <button
@@ -530,7 +530,7 @@ export default function CheckoutPage() {
                           : ""}
                       </p>
                       <p className="mt-1 text-sm font-semibold text-[var(--color-primary)]">
-                        Rs. {(item.price * item.qty).toLocaleString("en-LK")}
+                        LKR {(item.price * item.qty).toLocaleString("en-LK")}
                       </p>
                     </div>
                   </div>
@@ -541,22 +541,22 @@ export default function CheckoutPage() {
             <div className="space-y-2 border-t border-[var(--border)] pt-4 text-sm">
               <div className="flex justify-between text-[var(--text-secondary)]">
                 <span>Items total</span>
-                <span>Rs. {itemsTotal.toLocaleString("en-LK")}</span>
+                <span>LKR {itemsTotal.toLocaleString("en-LK")}</span>
               </div>
               <div className="flex justify-between text-[var(--text-secondary)]">
                 <span>Delivery</span>
-                <span>Rs. {deliveryFee.toLocaleString("en-LK")}</span>
+                <span>LKR {deliveryFee.toLocaleString("en-LK")}</span>
               </div>
               {discountAmount > 0 && (
                 <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                   <span>Coupon discount</span>
-                  <span>- Rs. {discountAmount.toLocaleString("en-LK")}</span>
+                  <span>- LKR {discountAmount.toLocaleString("en-LK")}</span>
                 </div>
               )}
               <div className="flex justify-between border-t border-[var(--border)] pt-3 text-lg font-bold text-[var(--text-primary)]">
                 <span>Total</span>
                 <span className="text-[var(--color-primary)]">
-                  Rs. {total.toLocaleString("en-LK")}
+                  LKR {total.toLocaleString("en-LK")}
                 </span>
               </div>
             </div>

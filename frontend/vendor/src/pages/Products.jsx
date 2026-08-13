@@ -202,7 +202,7 @@ export default function ProductsPage() {
                   <span className="text-sm text-[var(--text-secondary)]">• {product.sales || 0} sold</span>
                 </div>
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-2xl font-bold text-[var(--color-primary)]">${product.price}</span>
+                  <span className="text-2xl font-bold text-[var(--color-primary)]">LKR {product.price}</span>
                   <span className="text-sm text-[var(--text-secondary)]">Stock: {product.stock}</span>
                 </div>
                 <div className="flex gap-2">

@@ -70,7 +70,7 @@ export default function OrdersPage() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
-                  <span className="font-bold text-lg">${order.total}</span>
+                  <span className="font-bold text-lg">LKR {order.total}</span>
                   <select
                     value={order.status}
                     onChange={(e) => handleStatusChange(order._id, e.target.value)}
@@ -114,7 +114,7 @@ export default function OrdersPage() {
                           <div>
                             <div className="font-semibold text-base">{item.product?.name || "Product"}</div>
                             <div className="text-xs text-[var(--text-secondary)]">
-                              x{item.quantity || 0} (${item.product?.price || 0} each)
+                              x{item.quantity || 0} (LKR {item.product?.price || 0} each)
                             </div>
                           </div>
                         </li>
@@ -122,7 +122,7 @@ export default function OrdersPage() {
                     </ul>
                   </div>
                   <div className="mb-3">
-                    <span className="font-semibold">Total:</span> ${order.total}
+                    <span className="font-semibold">Total:</span> LKR {order.total}
                   </div>
                   <div>
                     <span className="font-semibold">Status:</span> {order.status}

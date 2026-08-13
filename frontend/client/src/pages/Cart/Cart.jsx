@@ -246,7 +246,7 @@ export default function Cart() {
 
                           <div className="flex items-end justify-between mt-3">
                             <p className="font-bold text-lg text-[var(--color-primary)]">
-                              Rs. {item.price}
+                              LKR {item.price}
                             </p>
 
                             {/* Actions */}
@@ -296,7 +296,7 @@ export default function Cart() {
 
               <div className="flex justify-between text-sm text-[var(--text-secondary)]">
                 <span>Subtotal</span>
-                <span>Rs. {subtotal}</span>
+                <span>LKR {subtotal}</span>
               </div>
 
               <div className="flex justify-between text-sm text-[var(--text-secondary)]">
@@ -309,7 +309,7 @@ export default function Cart() {
               <div className="flex justify-between text-lg font-bold text-[var(--text-primary)]">
                 <span>Total</span>
                 <span className="text-[var(--color-primary)]">
-                  Rs. {subtotal}
+                  LKR {subtotal}
                 </span>
               </div>
 

@@ -36,7 +36,7 @@ function formatOrderId(id = "") {
 }
 
 function formatMoney(amount) {
-  return `Rs. ${(Number(amount) || 0).toLocaleString("en-LK")}`;
+  return `LKR ${(Number(amount) || 0).toLocaleString("en-LK")}`;
 }
 
 function formatDateTime(date) {

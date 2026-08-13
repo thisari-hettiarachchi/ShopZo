@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 import {
   TrendingUp,
-  TrendingDown,
   ShoppingBag,
   Users,
-  Star,
+  Package,
   Loader,
   AlertTriangle,
   TicketPercent,
@@ -32,6 +32,23 @@ import { getDashboardAnalytics, getVendorEarnings } from "../services/analyticsS
 import { getLowStockAlerts, getVendorNotifications, sendApprovalRequest } from "../services/featureService";
 import { getVendorProfile } from "../services/vendorService";
 import { readVendorSession, saveVendorSession } from "../utils/authStorage";
+
+function StatCard({ title, value, icon: Icon, tone }) {
+  return (
+    <div className="group relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[0_18px_60px_-35px_var(--shadow)] backdrop-blur-xl transition-transform duration-200 hover:-translate-y-1">
+      <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${tone}`} />
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--text-secondary)]">{title}</p>
+          <p className="mt-3 text-3xl font-black tracking-tight text-[var(--text-primary)]">{value}</p>
+        </div>
+        <div className={`rounded-2xl bg-gradient-to-br ${tone} p-3 text-white shadow-lg`}>
+          <Icon size={22} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -153,12 +170,12 @@ export default function Dashboard() {
   const { stats, revenueData, categoryData, recentOrders } = data;
 
   const displayStats = [
-    { title: "Sales", value: `$${stats.sales.toFixed(2)}`, change: "--", up: true, bg: "bg-yellow-100", icon: TrendingUp, iconColor: "text-yellow-500" },
-    { title: "Orders", value: stats.orders, change: "--", up: true, bg: "bg-red-100", icon: ShoppingBag, iconColor: "text-red-500" },
-    { title: "Customers", value: stats.customers, change: "--", up: true, bg: "bg-green-100", icon: Users, iconColor: "text-green-500" },
-    { title: "Products", value: stats.products, change: "--", up: true, bg: "bg-blue-100", icon: Star, iconColor: "text-blue-500" },
-    { title: "Active Coupons", value: stats.activeCoupons || 0, change: "--", up: true, bg: "bg-purple-100", icon: TicketPercent, iconColor: "text-purple-500" },
-    { title: "Low Stock Alerts", value: stats.lowStock || 0, change: "--", up: false, bg: "bg-rose-100", icon: AlertTriangle, iconColor: "text-rose-500" },
+    { title: "Sales", value: `LKR ${Number(stats.sales || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`, icon: TrendingUp, tone: "from-orange-500 to-amber-400" },
+    { title: "Orders", value: Number(stats.orders || 0).toLocaleString(), icon: ShoppingBag, tone: "from-slate-900 to-slate-700" },
+    { title: "Customers", value: Number(stats.customers || 0).toLocaleString(), icon: Users, tone: "from-emerald-500 to-teal-400" },
+    { title: "Products", value: Number(stats.products || 0).toLocaleString(), icon: Package, tone: "from-blue-500 to-indigo-500" },
+    { title: "Active Coupons", value: Number(stats.activeCoupons || 0).toLocaleString(), icon: TicketPercent, tone: "from-amber-500 to-orange-500" },
+    { title: "Low Stock Alerts", value: Number(stats.lowStock || 0).toLocaleString(), icon: AlertTriangle, tone: "from-rose-500 to-pink-500" },
   ];
 
   return (
@@ -273,28 +290,16 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-          {displayStats.map((stat, i) => (
-            <div
-              key={i}
-              className="bg-[var(--bg-card)] p-6 rounded-3xl shadow-lg border border-[var(--border)] hover:shadow-2xl transition-all duration-200 group"
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {displayStats.map((stat, index) => (
+            <motion.div
+              key={stat.title}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="text-sm text-[var(--text-secondary)] mb-1">{stat.title}</p>
-                  <h3 className="text-2xl font-extrabold mb-2 group-hover:text-[var(--color-primary)] transition-colors">{stat.value}</h3>
-                  <div className="flex items-center gap-1">
-                    {stat.up ? <TrendingUp size={14} className="text-green-600" /> : <TrendingDown size={14} className="text-red-600" />}
-                    <span className={`text-xs font-medium ${stat.up ? "text-green-600" : "text-red-600"}`}>
-                      {stat.change}
-                    </span>
-                  </div>
-                </div>
-                <div className={`p-3 rounded-2xl ${stat.bg} shadow-md group-hover:scale-110 transition-transform`}>
-                  <stat.icon className={stat.iconColor} size={24} />
-                </div>
-              </div>
-            </div>
+              <StatCard title={stat.title} value={stat.value} icon={stat.icon} tone={stat.tone} />
+            </motion.div>
           ))}
         </div>
 
@@ -391,7 +396,7 @@ export default function Dashboard() {
                     <p className="text-sm font-medium truncate">Order #{order._id.slice(-6).toUpperCase()}</p>
                     <p className="text-xs text-[var(--text-secondary)]">{order.user?.name || "Unknown Customer"}</p>
                   </div>
-                  <span className="text-sm font-semibold">${order.total}</span>
+                  <span className="text-sm font-semibold">LKR {order.total}</span>
                 </div>
               ))}
             </div>
@@ -473,7 +478,7 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-[var(--text-secondary)]">Commission owed</p>
                 <p className="mt-1 text-xl font-black text-[var(--text-primary)]">
-                  Rs. {Number(commissionSummary.commission || 0).toLocaleString()}
+                  LKR {Number(commissionSummary.commission || 0).toLocaleString()}
                 </p>
               </div>
               <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-4">
@@ -482,7 +487,7 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-[var(--text-secondary)]">Net earnings</p>
                 <p className="mt-1 text-xl font-black text-[var(--text-primary)]">
-                  Rs. {Number(commissionSummary.netEarnings || 0).toLocaleString()}
+                  LKR {Number(commissionSummary.netEarnings || 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -491,7 +496,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between gap-3 text-sm">
                 <span className="text-[var(--text-secondary)]">Gross settled sales</span>
                 <span className="font-semibold text-[var(--text-primary)]">
-                  Rs. {Number(commissionSummary.grossSettled || 0).toLocaleString()}
+                  LKR {Number(commissionSummary.grossSettled || 0).toLocaleString()}
                 </span>
               </div>
               <div className="mt-2 flex items-center justify-between gap-3 text-sm">
@@ -503,7 +508,7 @@ export default function Dashboard() {
               <div className="mt-2 flex items-center justify-between gap-3 text-sm">
                 <span className="text-[var(--text-secondary)]">Pending settlement</span>
                 <span className="font-semibold text-[var(--text-primary)]">
-                  Rs. {Number(commissionSummary.pendingAmount || 0).toLocaleString()}
+                  LKR {Number(commissionSummary.pendingAmount || 0).toLocaleString()}
                 </span>
               </div>
             </div>

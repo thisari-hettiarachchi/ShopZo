@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const formatCurrency = (value) => `$${Number(value || 0).toFixed(2)}`;
+const formatCurrency = (value) => `LKR ${Number(value || 0).toFixed(2)}`;
 
 export const downloadReportPdf = (insights) => {
 	const doc = new jsPDF();

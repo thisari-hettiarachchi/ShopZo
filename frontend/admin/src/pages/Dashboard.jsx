@@ -44,7 +44,7 @@ const SEVERITY_STYLES = {
 	danger: "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-200",
 };
 
-const currency = (value) => `$${Number(value || 0).toFixed(2)}`;
+const currency = (value) => `LKR ${Number(value || 0).toFixed(2)}`;
 const formatDate = (value) =>
 	value ? new Date(value).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "-";
 

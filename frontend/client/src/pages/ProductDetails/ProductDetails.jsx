@@ -548,11 +548,11 @@ export default function ProductDetails() {
 
             <div className="my-6">
               <p className="text-3xl font-bold text-[var(--color-primary)]">
-                Rs. {product.price}
+                LKR {product.price}
               </p>
               {product.oldPrice && (
                 <p className="mt-1 text-sm text-gray-400 line-through">
-                  Rs. {product.oldPrice}
+                  LKR {product.oldPrice}
                 </p>
               )}
             </div>
@@ -724,7 +724,7 @@ export default function ProductDetails() {
                     <p className="text-sm font-medium">Standard Delivery</p>
                     <p className="text-xs text-gray-500">3 - 5 working days</p>
                   </div>
-                  <span className="ml-auto text-sm font-bold">Rs. 286</span>
+                  <span className="ml-auto text-sm font-bold">LKR 286</span>
                 </div>
 
                 <div className="flex gap-3 border-t border-gray-100 pt-3">

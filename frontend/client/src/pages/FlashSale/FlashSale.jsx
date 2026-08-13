@@ -205,13 +205,13 @@ export default function FlashSalePage({ products = [], token }) {
               <div className="flex gap-4">
                 <div className="text-right">
                   <p className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Total Savings</p>
-                  <p className="text-lg font-black text-green-500">Rs. {totalSavings.toLocaleString()}</p>
+                  <p className="text-lg font-black text-green-500">LKR {totalSavings.toLocaleString()}</p>
                 </div>
                 {topSaving && (
                   <div className="text-right border-l border-[var(--border)] pl-4">
                     <p className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Biggest Deal</p>
                     <p className="text-lg font-black text-[var(--color-primary)]">
-                      Rs. {(topSaving.oldPrice - topSaving.price).toLocaleString()} off
+                      LKR {(topSaving.oldPrice - topSaving.price).toLocaleString()} off
                     </p>
                   </div>
                 )}
@@ -282,7 +282,7 @@ export default function FlashSalePage({ products = [], token }) {
                 {/* price range */}
                 <div className="flex-1 min-w-[200px]">
                   <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">
-                    Max Price: Rs. {maxPrice.toLocaleString()}
+                    Max Price: LKR {maxPrice.toLocaleString()}
                   </p>
                   <input
                     type="range"
@@ -294,7 +294,7 @@ export default function FlashSalePage({ products = [], token }) {
                     className="w-full accent-orange-500 cursor-pointer"
                   />
                   <div className="flex justify-between text-[11px] text-[var(--text-muted)] mt-1">
-                    <span>Rs. 500</span><span>Rs. 1,00,000</span>
+                    <span>LKR 500</span><span>LKR 1,00,000</span>
                   </div>
                 </div>
 
@@ -304,7 +304,7 @@ export default function FlashSalePage({ products = [], token }) {
                     Quick Filters
                   </p>
                   <div className="flex gap-2 flex-wrap">
-                    {["50%+ off", "Under Rs. 1000", "Top Rated", "New Arrivals"].map((tag) => (
+                    {["50%+ off", "Under LKR 1000", "Top Rated", "New Arrivals"].map((tag) => (
                       <span key={tag} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full border border-[var(--border)] text-[var(--text-secondary)] cursor-pointer hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition">
                         <Tag className="h-3 w-3" />{tag}
                       </span>

@@ -50,7 +50,7 @@ function StatusBadge({ status }) {
   );
 }
 
-const money = (value) => `Rs. ${Number(value || 0).toLocaleString()}`;
+const money = (value) => `LKR ${Number(value || 0).toLocaleString()}`;
 
 export default function CommissionPage() {
   const [stats, setStats] = useState(null);

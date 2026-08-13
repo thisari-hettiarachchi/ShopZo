@@ -270,7 +270,7 @@ export default function ProceedToPay() {
                     </p>
                     <p className="text-xs text-[var(--text-muted)]">Qty: {item.qty}</p>
                     <p className="mt-1 text-sm font-semibold text-[var(--color-primary)]">
-                      Rs. {(item.price * item.qty).toLocaleString("en-LK")}
+                      LKR {(item.price * item.qty).toLocaleString("en-LK")}
                     </p>
                   </div>
                 </div>
@@ -280,22 +280,22 @@ export default function ProceedToPay() {
             <div className="space-y-2 border-t border-[var(--border)] pt-4 text-sm">
               <div className="flex justify-between text-[var(--text-secondary)]">
                 <span>Items total</span>
-                <span>Rs. {itemsTotal.toLocaleString("en-LK")}</span>
+                <span>LKR {itemsTotal.toLocaleString("en-LK")}</span>
               </div>
               <div className="flex justify-between text-[var(--text-secondary)]">
                 <span>Delivery</span>
-                <span>Rs. {deliveryFee.toLocaleString("en-LK")}</span>
+                <span>LKR {deliveryFee.toLocaleString("en-LK")}</span>
               </div>
               {discountAmount > 0 && (
                 <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                   <span>Coupon ({couponCode})</span>
-                  <span>- Rs. {discountAmount.toLocaleString("en-LK")}</span>
+                  <span>- LKR {discountAmount.toLocaleString("en-LK")}</span>
                 </div>
               )}
               <div className="flex justify-between border-t border-[var(--border)] pt-3 text-lg font-bold text-[var(--text-primary)]">
                 <span>Total</span>
                 <span className="text-[var(--color-primary)]">
-                  Rs. {total.toLocaleString("en-LK")}
+                  LKR {total.toLocaleString("en-LK")}
                 </span>
               </div>
             </div>

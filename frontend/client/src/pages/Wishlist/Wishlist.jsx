@@ -185,7 +185,7 @@ export default function Wishlist() {
                         {item.product.name}
                       </h3>
                       <p className="mt-1 font-bold text-[var(--color-primary)]">
-                        Rs. {item.product.price}
+                        LKR {item.product.price}
                       </p>
                     </div>
                   </div>

@@ -85,11 +85,11 @@ function BestSellerCard({ product, index }) {
           </h3>
           <div className="mt-1.5 flex items-center gap-2">
             <span className="text-lg font-extrabold text-[var(--color-primary)]">
-              Rs. {product.price}
+              LKR {product.price}
             </span>
             {product.oldPrice && (
               <span className="text-sm text-[var(--text-muted)] line-through">
-                Rs. {product.oldPrice}
+                LKR {product.oldPrice}
               </span>
             )}
           </div>

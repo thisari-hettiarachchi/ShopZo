@@ -73,7 +73,7 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
       <div className="relative bg-[linear-gradient(160deg,var(--bg-muted),var(--bg-card))] p-5">
         {product.oldPrice && (
           <span className="absolute left-3 top-3 z-10 rounded-full bg-slate-950/80 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur dark:bg-white/90 dark:text-slate-900">
-            Save Rs. {Math.max(product.oldPrice - product.price, 0)}
+            Save LKR {Math.max(product.oldPrice - product.price, 0)}
           </span>
         )}
         <img
@@ -118,11 +118,11 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
 
         <div className="flex items-end justify-between gap-2">
           <span className="text-xl font-bold text-[var(--color-primary)]">
-            Rs. {product.price}
+            LKR {product.price}
           </span>
           {product.oldPrice && (
             <span className="line-through text-sm text-[var(--text-muted)]">
-              Rs. {product.oldPrice}
+              LKR {product.oldPrice}
             </span>
           )}
         </div>

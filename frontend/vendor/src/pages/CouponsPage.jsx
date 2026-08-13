@@ -149,7 +149,7 @@ export default function CouponsPage() {
                     </div>
                     <p className="mt-1 text-sm text-[var(--text-secondary)]">{coupon.description || "No description"}</p>
                     <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--text-secondary)]">
-                      <span>Value: {coupon.type === "percentage" ? `${coupon.value}%` : `$${coupon.value}`}</span>
+                      <span>Value: {coupon.type === "percentage" ? `${coupon.value}%` : `LKR ${coupon.value}`}</span>
                       <span>Used: {coupon.usedCount}</span>
                       {coupon.expiresAt && <span>Expires: {new Date(coupon.expiresAt).toLocaleDateString()}</span>}
                     </div>

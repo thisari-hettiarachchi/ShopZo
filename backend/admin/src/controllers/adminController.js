@@ -138,7 +138,7 @@ const buildAdminInsights = async () => {
 			id: `order-${order._id}`,
 			type: "order",
 			title: `New order #${String(order._id).slice(-6).toUpperCase()}`,
-			description: `${order.user?.name || "Unknown customer"} placed an order worth $${toNumber(order.total).toFixed(2)}`,
+			description: `${order.user?.name || "Unknown customer"} placed an order worth LKR ${toNumber(order.total).toFixed(2)}`,
 			severity: "info",
 			createdAt: order.createdAt,
 		})),

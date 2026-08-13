@@ -125,11 +125,11 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
 
         <div className="mt-2 flex items-baseline gap-2">
           <span className="text-lg font-extrabold text-[var(--color-primary)]">
-            Rs. {product.price}
+            LKR {product.price}
           </span>
           {product.oldPrice ? (
             <span className="text-xs text-[var(--text-muted)] line-through">
-              Rs. {product.oldPrice}
+              LKR {product.oldPrice}
             </span>
           ) : null}
         </div>

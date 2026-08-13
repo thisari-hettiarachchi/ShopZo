@@ -156,9 +156,9 @@ export default function FlashSalePage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold">{product.name}</p>
                     <p className="text-xs text-[var(--text-secondary)]">
-                      {product.vendor?.storeName || "Vendor"} · Rs. {product.price}
+                      {product.vendor?.storeName || "Vendor"} · LKR {product.price}
                       {product.oldPrice ? (
-                        <span className="ml-1 text-[var(--text-muted)] line-through">Rs. {product.oldPrice}</span>
+                        <span className="ml-1 text-[var(--text-muted)] line-through">LKR {product.oldPrice}</span>
                       ) : null}
                     </p>
                   </div>

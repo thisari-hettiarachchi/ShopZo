@@ -73,7 +73,7 @@ export default function ProductDetailsPage() {
           <h2 className="text-3xl font-extrabold mb-4 text-[var(--color-primary)]">{product.name}</h2>
           <p className="mb-4 text-[var(--text-secondary)] text-lg">{product.description}</p>
           <div className="flex flex-wrap gap-6 mb-4">
-            <span className="text-2xl font-bold text-[var(--color-primary)]">${product.price}</span>
+            <span className="text-2xl font-bold text-[var(--color-primary)]">LKR {product.price}</span>
             <span className="text-base text-[var(--text-secondary)]">Stock: {product.stock}</span>
             <span className="text-base text-[var(--text-secondary)]">Status: {getStockStatus(product.stock || 0)}</span>
           </div>

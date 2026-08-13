@@ -39,7 +39,7 @@ const findActiveCoupon = async (code, subtotal) => {
     return { coupon: null, discountAmount: 0, error: "Coupon usage limit reached" };
   }
   if (subtotal < (coupon.minOrderAmount || 0)) {
-    return { coupon: null, discountAmount: 0, error: `Minimum order amount of Rs. ${coupon.minOrderAmount} required` };
+    return { coupon: null, discountAmount: 0, error: `Minimum order amount of LKR ${coupon.minOrderAmount} required` };
   }
 
   let discount = coupon.type === "percentage" ? (subtotal * coupon.value) / 100 : coupon.value;
