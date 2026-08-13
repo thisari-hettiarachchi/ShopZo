@@ -10,6 +10,11 @@ import {
   getSizeFieldLabel,
   getSizeOptionsForCategory,
 } from "../utils/productSizeOptions";
+import {
+  PRODUCT_COLOR_OPTIONS,
+  MAX_COLOR_IMAGES,
+  normalizeColors,
+} from "../utils/productColorOptions";
 import PageHeader from "../components/shared/PageHeader";
 
 const MAX_IMAGES = 5;
@@ -27,6 +32,7 @@ export default function EditProductPage() {
     description: "",
     category: "",
     sizes: [],
+    colors: [],
     isFlashSale: false,
   });
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -94,6 +100,7 @@ export default function EditProductPage() {
             product.sizes && product.sizes.length > 0
               ? product.sizes
               : getDefaultSizesForCategory(product.category || ""),
+          colors: normalizeColors(product.colors),
           isFlashSale: Boolean(product.isFlashSale),
         });
         const existingImages = Array.isArray(product.images)
@@ -138,6 +145,18 @@ export default function EditProductPage() {
     });
   };
 
+  const toggleColor = (color) => {
+    setForm((prev) => {
+      const exists = prev.colors.some(
+        (item) => item.hex.toLowerCase() === color.hex.toLowerCase()
+      );
+      const colors = exists
+        ? prev.colors.filter((item) => item.hex.toLowerCase() !== color.hex.toLowerCase())
+        : [...prev.colors, { ...color, images: [] }];
+      return { ...prev, colors };
+    });
+  };
+
   const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -145,6 +164,53 @@ export default function EditProductPage() {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  };
+
+  const onColorFileChange = async (hex, e) => {
+    const incoming = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!incoming.length) return;
+
+    const current =
+      form.colors.find((c) => c.hex.toLowerCase() === hex.toLowerCase())?.images || [];
+    const remaining = MAX_COLOR_IMAGES - current.length;
+    if (remaining <= 0) {
+      toast.error(`Max ${MAX_COLOR_IMAGES} photos per color.`);
+      return;
+    }
+
+    const filesToAdd = incoming.slice(0, remaining);
+    if (incoming.length > remaining) {
+      toast.info(`Only ${remaining} more photo${remaining === 1 ? "" : "s"} for this color.`);
+    }
+
+    try {
+      const base64s = await Promise.all(filesToAdd.map(fileToBase64));
+      setForm((prev) => ({
+        ...prev,
+        colors: prev.colors.map((c) =>
+          c.hex.toLowerCase() === hex.toLowerCase()
+            ? {
+                ...c,
+                images: [...(c.images || []), ...base64s].slice(0, MAX_COLOR_IMAGES),
+              }
+            : c
+        ),
+      }));
+    } catch {
+      toast.error("Failed to read color images");
+    }
+  };
+
+  const removeColorImage = (hex, index) => {
+    setForm((prev) => ({
+      ...prev,
+      colors: prev.colors.map((c) =>
+        c.hex.toLowerCase() === hex.toLowerCase()
+          ? { ...c, images: (c.images || []).filter((_, i) => i !== index) }
+          : c
+      ),
+    }));
   };
 
   const onFileChange = (e) => {
@@ -203,6 +269,7 @@ export default function EditProductPage() {
         images: imagesToSend.slice(0, MAX_IMAGES),
         category: form.category,
         sizes: Array.isArray(form.sizes) ? form.sizes : [],
+        colors: normalizeColors(form.colors),
         isFlashSale: flashSaleEnabled ? Boolean(form.isFlashSale) : false,
         description: form.description || "No description provided.",
       };
@@ -386,7 +453,7 @@ export default function EditProductPage() {
             <div>
               <div className="mb-2 flex items-center justify-between gap-2">
                 <label className="block text-sm font-medium text-[var(--text-primary)]">
-                  Product Images
+                  Default product images
                 </label>
                 <span className="text-xs font-semibold text-[var(--text-secondary)]">
                   {imagePreviews.length}/{MAX_IMAGES}
@@ -404,7 +471,7 @@ export default function EditProductPage() {
                     : "Click to add more images"}
                 </span>
                 <span className="text-[10px] text-[var(--text-secondary)]">
-                  PNG, JPG — up to {MAX_IMAGES}
+                  PNG, JPG — up to {MAX_IMAGES}. Used when a color has no photos.
                 </span>
                 <input
                   type="file"
@@ -420,7 +487,7 @@ export default function EditProductPage() {
                   {imagePreviews.map((img, idx) => (
                     <div key={`${img}-${idx}`} className="relative">
                       <img
-                        src={img || "https://placehold.co/100x100?text=No+Image"}
+                        src={img}
                         alt={`Preview ${idx + 1}`}
                         className="h-16 w-16 rounded-xl border border-[var(--border)] object-cover"
                       />
@@ -439,6 +506,130 @@ export default function EditProductPage() {
                       )}
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">
+                Colors
+              </label>
+              <div className="flex flex-wrap gap-2.5">
+                {PRODUCT_COLOR_OPTIONS.map((color) => {
+                  const checked = form.colors.some(
+                    (item) => item.hex.toLowerCase() === color.hex.toLowerCase()
+                  );
+                  return (
+                    <button
+                      key={color.hex}
+                      type="button"
+                      title={color.name}
+                      onClick={() => toggleColor(color)}
+                      className={`relative h-9 w-9 rounded-full border-2 transition ${
+                        checked
+                          ? "border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/30"
+                          : "border-[var(--border)] hover:border-[var(--color-primary)]/50"
+                      }`}
+                      style={{ backgroundColor: color.hex }}
+                      aria-pressed={checked}
+                    >
+                      {checked && (
+                        <span
+                          className={`absolute inset-0 flex items-center justify-center text-xs font-bold ${
+                            color.hex.toLowerCase() === "#ffffff" || color.hex.toLowerCase() === "#d6c3a5"
+                              ? "text-gray-800"
+                              : "text-white"
+                          }`}
+                        >
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1.5 text-xs text-[var(--text-secondary)]">
+                Optional — tick the color circles customers can choose from.
+                {form.colors.length > 0 ? ` Selected: ${form.colors.map((c) => c.name).join(", ")}` : ""}
+              </p>
+
+              {form.colors.length > 0 && (
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">
+                      Photos by color
+                    </p>
+                    <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                      Add photos for each color so shoppers see that look when they select it.
+                    </p>
+                  </div>
+                  {form.colors.map((color) => {
+                    const colorImages = color.images || [];
+                    return (
+                      <div
+                        key={color.hex}
+                        className="rounded-xl border border-[var(--border)] bg-[var(--bg-main)] p-3"
+                      >
+                        <div className="mb-2 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="h-5 w-5 rounded-full border border-[var(--border)]"
+                              style={{ backgroundColor: color.hex }}
+                            />
+                            <span className="text-sm font-medium text-[var(--text-primary)]">
+                              {color.name}
+                            </span>
+                          </div>
+                          <span className="text-xs text-[var(--text-secondary)]">
+                            {colorImages.length}/{MAX_COLOR_IMAGES}
+                          </span>
+                        </div>
+                        <label
+                          className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--border)] px-3 py-2 text-xs transition hover:border-[var(--color-primary)] ${
+                            colorImages.length >= MAX_COLOR_IMAGES
+                              ? "pointer-events-none opacity-60"
+                              : ""
+                          }`}
+                        >
+                          <ImagePlus size={14} className="text-[var(--color-primary)]" />
+                          <span>
+                            {colorImages.length >= MAX_COLOR_IMAGES
+                              ? "Maximum reached"
+                              : `Upload ${color.name} photos`}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            disabled={colorImages.length >= MAX_COLOR_IMAGES}
+                            onChange={(e) => onColorFileChange(color.hex, e)}
+                          />
+                        </label>
+                        {colorImages.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {colorImages.map((img, idx) => (
+                              <div key={`${color.hex}-${idx}`} className="relative">
+                                <img
+                                  src={img}
+                                  alt={`${color.name} ${idx + 1}`}
+                                  className="h-14 w-14 rounded-lg object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeColorImage(color.hex, idx)}
+                                  className="absolute -right-1.5 -top-1.5 rounded-full bg-red-500 p-0.5 text-white"
+                                  aria-label="Remove"
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

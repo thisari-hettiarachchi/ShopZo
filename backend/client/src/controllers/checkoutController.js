@@ -21,6 +21,13 @@ const groupItemsByVendor = (items) => {
       product: item.product,
       quantity: item.qty,
       price: item.price,
+      selectedSize: item.selectedSize || "",
+      selectedColor: item.selectedColor
+        ? {
+            name: item.selectedColor.name || "",
+            hex: item.selectedColor.hex || "",
+          }
+        : { name: "", hex: "" },
     });
     vendorMap[vid].total += item.price * item.qty;
   });
@@ -127,6 +134,13 @@ export const createCheckoutSession = async (req, res) => {
         name: item.name || item.product?.name || "ShopZo product",
         qty,
         price,
+        selectedSize: item.selectedSize || "",
+        selectedColor: item.selectedColor
+          ? {
+              name: item.selectedColor.name || "",
+              hex: item.selectedColor.hex || "",
+            }
+          : { name: "", hex: "" },
       });
     }
 
@@ -163,14 +177,22 @@ export const createCheckoutSession = async (req, res) => {
 
     const draftOrders = await Order.insertMany(ordersToInsert);
 
-    const lineItems = normalizedItems.map((item) => ({
-      price_data: {
-        currency: STRIPE_CURRENCY,
-        product_data: { name: item.name },
-        unit_amount: toStripeUnitAmount(item.price),
-      },
-      quantity: item.qty,
-    }));
+    const lineItems = normalizedItems.map((item) => {
+      const variantBits = [
+        item.selectedSize ? `Size ${item.selectedSize}` : "",
+        item.selectedColor?.name ? `Color ${item.selectedColor.name}` : "",
+      ].filter(Boolean);
+      return {
+        price_data: {
+          currency: STRIPE_CURRENCY,
+          product_data: {
+            name: variantBits.length ? `${item.name} (${variantBits.join(", ")})` : item.name,
+          },
+          unit_amount: toStripeUnitAmount(item.price),
+        },
+        quantity: item.qty,
+      };
+    });
 
     if (deliveryFee > 0) {
       lineItems.push({

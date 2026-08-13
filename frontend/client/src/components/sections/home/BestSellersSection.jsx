@@ -22,6 +22,14 @@ function BestSellerCard({ product, index }) {
   const handleAddToCart = async (e) => {
     e.stopPropagation();
     if (!token) return toast.error("You must be logged in to add to cart");
+    const hasVariants =
+      (Array.isArray(product.sizes) && product.sizes.length > 0) ||
+      (Array.isArray(product.colors) && product.colors.length > 0);
+    if (hasVariants) {
+      toast.info("Choose size/color on the product page");
+      navigate(`/products/${product._id}`);
+      return;
+    }
     try {
       const updatedCart = await addToCartApi(product._id, 1, token);
       if (updatedCart?.message) toast.info(updatedCart.message);

@@ -114,7 +114,23 @@ export default function OrdersPage() {
                           <div>
                             <div className="font-semibold text-base">{item.product?.name || "Product"}</div>
                             <div className="text-xs text-[var(--text-secondary)]">
-                              x{item.quantity || 0} (LKR {item.product?.price || 0} each)
+                              x{item.quantity || 0} (LKR {item.price || item.product?.price || 0} each)
+                              {(item.selectedSize || item.selectedColor?.name) && (
+                                <span className="mt-1 flex items-center gap-1.5">
+                                  {item.selectedColor?.hex && (
+                                    <span
+                                      className="inline-block h-3 w-3 rounded-full border border-[var(--border)]"
+                                      style={{ backgroundColor: item.selectedColor.hex }}
+                                    />
+                                  )}
+                                  {[
+                                    item.selectedSize ? `Size: ${item.selectedSize}` : "",
+                                    item.selectedColor?.name ? `Color: ${item.selectedColor.name}` : "",
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" · ")}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </li>

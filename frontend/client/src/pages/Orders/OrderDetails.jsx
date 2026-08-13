@@ -19,6 +19,7 @@ import {
   fetchReturns,
   requestReturn,
 } from "../../api/ordersApi";
+import { formatVariantLabel } from "../../utils/productVariants";
 
 const STATUS_STYLES = {
   Delivered: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
@@ -429,6 +430,7 @@ export default function OrderDetails() {
                           </p>
                           <p className="text-xs text-[var(--text-muted)]">
                             Qty: {item?.quantity || 1}
+                            {formatVariantLabel(item) ? ` · ${formatVariantLabel(item)}` : ""}
                           </p>
                           <p className="text-sm font-semibold text-[var(--color-primary)]">
                             {formatMoney(item?.price || 0)}

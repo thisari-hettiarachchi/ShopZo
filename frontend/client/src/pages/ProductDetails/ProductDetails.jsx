@@ -33,7 +33,7 @@ import {
   fetchWishlistApi,
 } from "../../api/wishlistApi";
 import SimilarProductsSection from "../../components/sections/product/SimilarProductsSection";
-import { formatVariantLabel, normalizeColors } from "../../utils/productVariants";
+import { formatVariantLabel, normalizeColors, getImagesForColor, toCartColor } from "../../utils/productVariants";
 
 if (typeof document !== "undefined" && !document.getElementById("shopzo-fonts")) {
   const link = document.createElement("link");
@@ -181,11 +181,7 @@ export default function ProductDetails() {
     });
   }, [product, token]);
 
-  const images = Array.isArray(product?.images)
-    ? product.images.filter(Boolean)
-    : product?.images
-      ? [product.images]
-      : [];
+  const images = getImagesForColor(product, selectedColor);
   const mainImage = images[activeImage] || images[0] || "";
 
   const handleWishlistClick = async () => {
@@ -207,6 +203,12 @@ export default function ProductDetails() {
   const availableSizes = Array.isArray(product?.sizes) ? product.sizes : [];
   const availableColors = normalizeColors(product?.colors);
 
+  const selectColor = (color) => {
+    setSelectedColor(color);
+    setActiveImage(0);
+    resetZoom();
+  };
+
   const ensureVariantSelection = () => {
     if (availableSizes.length > 0 && !selectedSize) {
       toast.error("Please select a size");
@@ -226,7 +228,7 @@ export default function ProductDetails() {
     try {
       const updatedCart = await addToCartApi(product._id, quantity, token, {
         selectedSize,
-        selectedColor,
+        selectedColor: toCartColor(selectedColor),
       });
 
       if (updatedCart?.message && !updatedCart?.items) {
@@ -330,7 +332,7 @@ export default function ProductDetails() {
             quantity: quantity,
             vendor: product.vendor,
             selectedSize,
-            selectedColor,
+            selectedColor: toCartColor(selectedColor),
           },
         ],
         quantity: quantity,
@@ -646,29 +648,39 @@ export default function ProductDetails() {
                   {availableColors.map((color) => {
                     const active =
                       selectedColor?.hex?.toLowerCase() === color.hex.toLowerCase();
+                    const thumb = color.images?.[0];
                     return (
                       <button
                         key={`${color.name}-${color.hex}`}
                         type="button"
                         title={color.name}
-                        onClick={() => setSelectedColor(color)}
-                        className={`relative h-9 w-9 rounded-full border-2 transition ${
+                        onClick={() => selectColor(color)}
+                        className={`relative h-9 w-9 overflow-hidden rounded-full border-2 transition ${
                           active
                             ? "border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/35"
                             : "border-[var(--border)] hover:border-[var(--color-primary)]/40"
                         }`}
-                        style={{ backgroundColor: color.hex }}
+                        style={
+                          thumb
+                            ? {
+                                backgroundImage: `url(${thumb})`,
+                                backgroundSize: "cover",
+                                backgroundPosition: "center",
+                              }
+                            : { backgroundColor: color.hex }
+                        }
                         aria-label={color.name}
                         aria-pressed={active}
                       >
                         {active && (
                           <span
                             className={`absolute inset-0 flex items-center justify-center text-xs font-bold ${
-                              color.hex.toLowerCase() === "#ffffff" ||
-                              color.hex.toLowerCase() === "#d6c3a5"
+                              !thumb &&
+                              (color.hex.toLowerCase() === "#ffffff" ||
+                                color.hex.toLowerCase() === "#d6c3a5")
                                 ? "text-gray-800"
                                 : "text-white"
-                            }`}
+                            } ${thumb ? "bg-black/25" : ""}`}
                           >
                             ✓
                           </span>

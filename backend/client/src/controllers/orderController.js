@@ -156,6 +156,13 @@ export const createOrder = async (req, res) => {
         product: item.product,
         quantity: item.qty,
         price: item.price,
+        selectedSize: item.selectedSize || "",
+        selectedColor: item.selectedColor
+          ? {
+              name: item.selectedColor.name || "",
+              hex: item.selectedColor.hex || "",
+            }
+          : { name: "", hex: "" },
       });
       vendorMap[vid].total += item.price * item.qty;
     });

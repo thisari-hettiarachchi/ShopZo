@@ -16,6 +16,7 @@ import { getAddresses } from "../../services/addressService";
 import { getUserProfile } from "../../services/userService";
 import { validateCoupon } from "../../services/checkoutService";
 import { useNavigate, useLocation } from "react-router-dom";
+import { formatVariantLabel } from "../../utils/productVariants";
 
 const emptyShipping = {
   fullName: "",
@@ -76,6 +77,8 @@ export default function CheckoutPage() {
             price: product.price,
             qty: product.quantity || 1,
             vendor: typeof product.vendor === "object" ? product.vendor?._id || product.vendor?.id : product.vendor,
+            selectedSize: product.selectedSize || "",
+            selectedColor: product.selectedColor || null,
           }));
           setCartItems(buyNowProducts);
         } else {
@@ -526,6 +529,7 @@ export default function CheckoutPage() {
                       </p>
                       <p className="text-xs text-[var(--text-muted)]">
                         Qty: {item.qty}
+                        {formatVariantLabel(item) ? ` · ${formatVariantLabel(item)}` : ""}
                         {item.vendor?.storeName || item.vendor?.name
                           ? ` · ${item.vendor?.storeName || item.vendor?.name}`
                           : ""}

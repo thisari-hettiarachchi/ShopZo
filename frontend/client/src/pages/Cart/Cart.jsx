@@ -8,6 +8,7 @@ import {
   clearCartApi,
 } from "../../api/cartApi";
 import { useNavigate } from "react-router-dom";
+import { formatVariantLabel } from "../../utils/productVariants";
 
 export default function Cart() {
   const token = localStorage.getItem("token");
@@ -241,6 +242,18 @@ export default function Cart() {
                             <h3 className="font-semibold text-[var(--text-primary)] leading-tight">
                               {item.product.name}
                             </h3>
+                            {formatVariantLabel(item) && (
+                              <div className="mt-1 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                                {item.selectedColor?.hex && (
+                                  <span
+                                    className="inline-block h-3.5 w-3.5 rounded-full border border-[var(--border)]"
+                                    style={{ backgroundColor: item.selectedColor.hex }}
+                                    title={item.selectedColor.name}
+                                  />
+                                )}
+                                <span>{formatVariantLabel(item)}</span>
+                              </div>
+                            )}
                             <p className="mt-1 line-clamp-1 text-xs text-[var(--text-muted)]">{item.product.description}</p>
                           </div>
 

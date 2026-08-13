@@ -16,6 +16,7 @@ import { createCheckoutSession } from "../../services/checkoutService";
 import { createOrder } from "../../services/orderService";
 import { clearCartApi } from "../../api/cartApi";
 import { useNavigate, useLocation } from "react-router-dom";
+import { formatVariantLabel } from "../../utils/productVariants";
 
 export default function ProceedToPay() {
   const navigate = useNavigate();
@@ -80,6 +81,8 @@ export default function ProceedToPay() {
       name: item.product?.name,
       qty: item.qty || 1,
       price: item.price,
+      selectedSize: item.selectedSize || "",
+      selectedColor: item.selectedColor || null,
     }));
 
   const handlePlaceOrder = async () => {
@@ -272,7 +275,10 @@ export default function ProceedToPay() {
                     <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
                       {item.product?.name}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)]">Qty: {item.qty}</p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Qty: {item.qty}
+                      {formatVariantLabel(item) ? ` · ${formatVariantLabel(item)}` : ""}
+                    </p>
                     <p className="mt-1 text-sm font-semibold text-[var(--color-primary)]">
                       LKR {(item.price * item.qty).toLocaleString("en-LK")}
                     </p>

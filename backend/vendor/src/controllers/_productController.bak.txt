@@ -1,50 +1,8 @@
-import Product from "../models/Product.js";
+﻿import Product from "../models/Product.js";
 import Settings from "../models/Settings.js";
 import { queueProductNewsletterAlerts } from "../services/newsletterAlertService.js";
 
-const MAX_COLOR_IMAGES = 4;
-
-const normalizeColorImages = (images) => {
-  if (!Array.isArray(images)) return [];
-  return images
-    .filter((img) => typeof img === "string" && img.trim())
-    .map((img) => img.trim())
-    .slice(0, MAX_COLOR_IMAGES);
-};
-
-const normalizeColors = (colors) => {
-  if (!Array.isArray(colors)) return [];
-  const seen = new Set();
-  return colors
-    .map((color) => {
-      if (!color) return null;
-      if (typeof color === "string") {
-        const value = color.trim();
-        if (!value) return null;
-        return {
-          name: value,
-          hex: value.startsWith("#") ? value : "#9CA3AF",
-          images: [],
-        };
-      }
-      const hex = String(color.hex || color.value || "").trim();
-      const name = String(color.name || color.label || hex || "").trim();
-      if (!hex && !name) return null;
-      return {
-        name: name || hex,
-        hex: hex.startsWith("#") ? hex : "#9CA3AF",
-        images: normalizeColorImages(color.images),
-      };
-    })
-    .filter(Boolean)
-    .filter((color) => {
-      const key = `${color.name.toLowerCase()}|${color.hex.toLowerCase()}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-};
-
+// Get a single product for the logged-in vendor
 export const getVendorProductById = async (req, res) => {
   try {
     const vendorId = req.user?.id;
@@ -64,9 +22,7 @@ export const getVendorProductById = async (req, res) => {
 const requireApprovedVendor = (req, res) => {
   const accountStatus = req.user?.accountStatus || "pending";
   if (accountStatus !== "approved") {
-    res.status(403).json({
-      message: "Your vendor account must be approved before you can add or manage products.",
-    });
+    res.status(403).json({ message: "Your vendor account must be approved before you can add or manage products." });
     return false;
   }
 
@@ -79,6 +35,7 @@ const resolveFlashSaleFlag = async (requestedFlag) => {
   return Boolean(settings?.flashSaleEnabled);
 };
 
+// Get all products for the logged-in vendor
 export const getVendorProducts = async (req, res) => {
   try {
     const vendorId = req.user?.id;
@@ -120,25 +77,14 @@ export const getLowStockProducts = async (req, res) => {
   }
 };
 
+// Add a new product
 export const addVendorProduct = async (req, res) => {
   try {
     const vendorId = req.user?.id;
     if (!vendorId) return res.status(401).json({ message: "Unauthorized" });
     if (!requireApprovedVendor(req, res)) return;
 
-    const {
-      name,
-      price,
-      description,
-      stock,
-      category,
-      images,
-      sizes,
-      colors,
-      oldPrice,
-      discount,
-      isFlashSale,
-    } = req.body;
+    const { name, price, description, stock, category, images, sizes, oldPrice, discount, isFlashSale } = req.body;
 
     if (images !== undefined) {
       if (!Array.isArray(images) || images.length === 0) {
@@ -162,7 +108,6 @@ export const addVendorProduct = async (req, res) => {
       category: category || "General",
       images: normalizedImages,
       sizes: Array.isArray(sizes) ? sizes : [],
-      colors: normalizeColors(colors),
       rating: 0,
       oldPrice: oldPrice || null,
       discount: discount || 0,
@@ -179,6 +124,7 @@ export const addVendorProduct = async (req, res) => {
   }
 };
 
+// Update an existing product
 export const updateVendorProduct = async (req, res) => {
   try {
     const vendorId = req.user?.id;
@@ -196,20 +142,9 @@ export const updateVendorProduct = async (req, res) => {
       isFlashSale: product.isFlashSale,
     };
 
-    const {
-      name,
-      price,
-      description,
-      stock,
-      category,
-      images,
-      sizes,
-      colors,
-      oldPrice,
-      discount,
-      isFlashSale,
-    } = req.body;
+    const { name, price, description, stock, category, images, sizes, oldPrice, discount, isFlashSale } = req.body;
 
+    // Validate required fields
     if (!images || !Array.isArray(images) || images.length === 0) {
       return res.status(400).json({ message: "Images are required and must be a non-empty array." });
     }
@@ -218,9 +153,6 @@ export const updateVendorProduct = async (req, res) => {
     }
     if (sizes !== undefined && !Array.isArray(sizes)) {
       return res.status(400).json({ message: "Sizes must be an array." });
-    }
-    if (colors !== undefined && !Array.isArray(colors)) {
-      return res.status(400).json({ message: "Colors must be an array." });
     }
     if (!category || typeof category !== "string" || category.trim() === "") {
       return res.status(400).json({ message: "Category is required." });
@@ -233,9 +165,7 @@ export const updateVendorProduct = async (req, res) => {
     product.category = category !== undefined ? category : product.category;
     product.images = images.slice(0, 5);
     product.sizes = Array.isArray(sizes) ? sizes : product.sizes;
-    if (colors !== undefined) {
-      product.colors = normalizeColors(colors);
-    }
+    // Rating is customer-driven only â€” vendors cannot set or update it.
     product.oldPrice = oldPrice !== undefined ? oldPrice : product.oldPrice;
     product.discount = discount !== undefined ? discount : product.discount;
     if (isFlashSale !== undefined) {
@@ -251,6 +181,7 @@ export const updateVendorProduct = async (req, res) => {
   }
 };
 
+// Delete a product
 export const deleteVendorProduct = async (req, res) => {
   try {
     const vendorId = req.user?.id;
@@ -268,3 +199,4 @@ export const deleteVendorProduct = async (req, res) => {
     res.status(500).json({ message: "Failed to delete product" });
   }
 };
+

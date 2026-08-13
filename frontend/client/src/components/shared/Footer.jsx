@@ -210,7 +210,7 @@ export default function Footer() {
                 <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
                 We Accept
                 </h4>
-                <img src={Assets.payment} alt="Payment Methods" className="h-14 w-auto" />
+                <img src={Assets.payment} alt="Payment Methods" className="h-25 w-auto" />
             </div>
 
             {/* Download Our App Section */}

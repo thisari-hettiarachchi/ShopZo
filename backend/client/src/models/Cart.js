@@ -7,6 +7,11 @@ const cartSchema = new mongoose.Schema({
       product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
       qty: { type: Number, default: 1 },
       price: { type: Number, required: true },
+      selectedSize: { type: String, default: "" },
+      selectedColor: {
+        name: { type: String, default: "" },
+        hex: { type: String, default: "" },
+      },
     },
   ],
 }, { timestamps: true });

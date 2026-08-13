@@ -9,14 +9,19 @@ export const fetchCart = async (token) => {
   return res.json();
 };
 
-export const addToCartApi = async (productId, qty = 1, token) => {
+export const addToCartApi = async (productId, qty = 1, token, options = {}) => {
   const res = await fetch(BASE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ productId, qty }),
+    body: JSON.stringify({
+      productId,
+      qty,
+      selectedSize: options.selectedSize || "",
+      selectedColor: options.selectedColor || null,
+    }),
   });
   return res.json();
 };

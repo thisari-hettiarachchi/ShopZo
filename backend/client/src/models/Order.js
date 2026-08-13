@@ -14,6 +14,11 @@ const orderSchema = new mongoose.Schema({
       product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
       quantity: { type: Number, required: true },
       price: Number,
+      selectedSize: { type: String, default: "" },
+      selectedColor: {
+        name: { type: String, default: "" },
+        hex: { type: String, default: "" },
+      },
     },
   ],
   vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Vendor" },
