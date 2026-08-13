@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Star, X } from "lucide-react";
 import ProductGrid from "../../components/sections/product/ProductGrid";
 import { fetchProducts } from "../../api/productApi";
 import { fetchCategories } from "../../api/categoryApi";
-import { filterBestSellers, filterNewArrivals } from "../../utils/productHelpers";
+import { capitalizeText, filterBestSellers, filterNewArrivals } from "../../utils/productHelpers";
 
 const LOCATIONS = ["Colombo", "Kandy", "Galle"];
 const RATINGS = [4, 3, 2, 1];
@@ -340,7 +340,7 @@ export default function Products() {
                           : "border border-[var(--border)] bg-[var(--bg-main)] text-[var(--text-secondary)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]"
                       }`}
                     >
-                      {name}
+                      {capitalizeText(name)}
                     </button>
                   );
                 })}

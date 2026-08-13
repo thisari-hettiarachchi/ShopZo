@@ -20,6 +20,7 @@ import {
   requestReturn,
 } from "../../api/ordersApi";
 import { formatVariantLabel } from "../../utils/productVariants";
+import { capitalizeText } from "../../utils/productHelpers";
 
 const STATUS_STYLES = {
   Delivered: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
@@ -426,7 +427,7 @@ export default function OrderDetails() {
                         />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
-                            {item?.product?.name || "Product"}
+                            {capitalizeText(item?.product?.name || "Product")}
                           </p>
                           <p className="text-xs text-[var(--text-muted)]">
                             Qty: {item?.quantity || 1}
@@ -474,7 +475,7 @@ export default function OrderDetails() {
                   <span>
                     Vendor:{" "}
                     <span className="font-semibold text-[var(--text-primary)]">
-                      {order.vendor?.storeName || order.vendor?.name || "Vendor"}
+                      {capitalizeText(order.vendor?.storeName || order.vendor?.name || "Vendor")}
                     </span>
                   </span>
                 </li>

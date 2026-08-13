@@ -9,6 +9,8 @@ import {
   removeFromWishlistApi,
 } from "../../../api/wishlistApi";
 
+import { capitalizeText } from "../../../utils/productHelpers";
+
 export default function NewArrivalCard({ product }) {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -119,14 +121,14 @@ export default function NewArrivalCard({ product }) {
 
         <img
           src={image}
-          alt={product.name}
+          alt={capitalizeText(product.name)}
           className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
         />
       </div>
 
       <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5">
         <h3 className="line-clamp-2 text-sm font-bold leading-snug text-[var(--text-primary)] sm:text-[15px]">
-          {product.name}
+          {capitalizeText(product.name)}
         </h3>
 
         <div className="mt-2 flex items-baseline gap-2">

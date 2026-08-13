@@ -1,6 +1,24 @@
 const NEW_ARRIVAL_DAYS = 5;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
+/** Title-case words for product/vendor/category display names. */
+export function capitalizeText(value) {
+  if (value == null) return "";
+  const text = String(value).trim().replace(/\s+/g, " ");
+  if (!text) return "";
+  return text
+    .split(" ")
+    .map((word) => {
+      if (!word) return word;
+      // Keep short all-caps tokens (LKR, XL) as-is
+      if (word.length <= 3 && word === word.toUpperCase() && /[A-Z]/.test(word)) {
+        return word;
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
 /** Product is a new arrival from createdAt day through the next 5 days. */
 export function isNewArrival(product, now = Date.now()) {
   const createdAt = product?.createdAt ? new Date(product.createdAt).getTime() : NaN;

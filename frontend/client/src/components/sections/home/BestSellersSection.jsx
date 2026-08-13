@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { addToCartApi } from "../../../api/cartApi";
 import { addToWishlistApi, removeFromWishlistApi } from "../../../api/wishlistApi";
 import ScrollReveal, { scrollViewport } from "../../shared/ScrollReveal";
-import { filterBestSellers } from "../../../utils/productHelpers";
+import { capitalizeText, filterBestSellers } from "../../../utils/productHelpers";
 
 function BestSellerCard({ product, index }) {
   const navigate = useNavigate();
@@ -89,7 +89,7 @@ function BestSellerCard({ product, index }) {
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-3 p-4 sm:p-5">
         <div>
           <h3 className="truncate text-base font-bold text-[var(--text-primary)] sm:text-lg">
-            {product.name}
+            {capitalizeText(product.name)}
           </h3>
           <div className="mt-1.5 flex items-center gap-2">
             <span className="text-lg font-extrabold text-[var(--color-primary)]">

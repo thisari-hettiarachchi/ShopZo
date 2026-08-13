@@ -3,6 +3,20 @@ import Vendor from "../models/Vendor.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+const capitalizeText = (value) => {
+  if (value == null) return "";
+  const text = String(value).trim().replace(/\s+/g, " ");
+  if (!text) return "";
+  return text
+    .split(" ")
+    .map((word) => {
+      if (!word) return word;
+      if (word.length <= 3 && word === word.toUpperCase() && /[A-Z]/.test(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+};
+
 export const register = async (req, res) => {
   try {
     const { storeName, email, password, documents = [] } = req.body;
@@ -23,7 +37,7 @@ export const register = async (req, res) => {
       : [];
 
     const vendor = new Vendor({
-      storeName,
+      storeName: capitalizeText(storeName),
       email,
       password: hashedPassword,
       isApproved: false,

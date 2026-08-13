@@ -20,6 +20,7 @@ import Assets from '../../assets/assets'
 import { fetchProductSuggestions } from '../../api/productApi'
 import { fetchCategories } from '../../api/categoryApi'
 import { API_BASE_URL, authHeaders } from '../../api/base'
+import { capitalizeText } from '../../utils/productHelpers'
 
 export default function Navbar() {
   const navigate = useNavigate()
@@ -375,7 +376,7 @@ export default function Navbar() {
                         navigate(`/products/${item._id}`);
                       }}
                     >
-                      <p className="text-sm font-semibold">{item.name}</p>
+                      <p className="text-sm font-semibold">{capitalizeText(item.name)}</p>
                       <p className="text-xs text-[var(--text-secondary)]">LKR {item.price} • {item.category}</p>
                     </button>
                   ))}

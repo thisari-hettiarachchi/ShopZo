@@ -34,6 +34,7 @@ import {
 } from "../../api/wishlistApi";
 import SimilarProductsSection from "../../components/sections/product/SimilarProductsSection";
 import { formatVariantLabel, normalizeColors, getImagesForColor, toCartColor } from "../../utils/productVariants";
+import { capitalizeText } from "../../utils/productHelpers";
 
 if (typeof document !== "undefined" && !document.getElementById("shopzo-fonts")) {
   const link = document.createElement("link");
@@ -586,7 +587,7 @@ export default function ProductDetails() {
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
             <div className="flex items-start justify-between gap-4">
               <h1 className="text-2xl font-bold leading-tight text-[var(--text-primary)]">
-                {product.name}
+                {capitalizeText(product.name)}
               </h1>
               <button
                 onClick={handleWishlistClick}
@@ -642,7 +643,7 @@ export default function ProductDetails() {
             {availableColors.length > 0 && (
               <div className="mb-6">
                 <p className="mb-2 text-sm font-medium text-[var(--text-secondary)]">
-                  Color{selectedColor ? `: ${selectedColor.name}` : ""}
+                  Color{selectedColor ? `: ${capitalizeText(selectedColor.name)}` : ""}
                 </p>
                 <div className="flex flex-wrap gap-2.5">
                   {availableColors.map((color) => {
@@ -827,7 +828,7 @@ export default function ProductDetails() {
                     }}
                     className="text-left font-bold text-[var(--text-primary)] transition hover:text-[var(--color-primary)]"
                   >
-                    {product.vendor?.storeName || product.vendor?.name || "Vendor"}
+                    {capitalizeText(product.vendor?.storeName || product.vendor?.name || "Vendor")}
                   </button>
                   <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
                     <Star size={12} className="fill-amber-400 text-amber-400" />
@@ -1052,7 +1053,7 @@ export default function ProductDetails() {
 
             <form onSubmit={handleSubmitReview} className="space-y-4 px-5 py-5">
               <p className="text-sm text-[var(--text-secondary)]">
-                Reviewing <span className="font-semibold text-[var(--text-primary)]">{product.name}</span>
+                Reviewing <span className="font-semibold text-[var(--text-primary)]">{capitalizeText(product.name)}</span>
               </p>
 
               <label className="block">

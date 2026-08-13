@@ -17,6 +17,7 @@ import { createOrder } from "../../services/orderService";
 import { clearCartApi } from "../../api/cartApi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { formatVariantLabel } from "../../utils/productVariants";
+import { capitalizeText } from "../../utils/productHelpers";
 
 export default function ProceedToPay() {
   const navigate = useNavigate();
@@ -268,12 +269,12 @@ export default function ProceedToPay() {
                 >
                   <img
                     src={item.product?.image || item.product?.images?.[0]}
-                    alt={item.product?.name || "Product"}
+                    alt={capitalizeText(item.product?.name) || "Product"}
                     className="h-14 w-14 rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] object-contain"
                   />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
-                      {item.product?.name}
+                      {capitalizeText(item.product?.name)}
                     </p>
                     <p className="text-xs text-[var(--text-muted)]">
                       Qty: {item.qty}

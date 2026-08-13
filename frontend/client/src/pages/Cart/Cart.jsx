@@ -9,6 +9,7 @@ import {
 } from "../../api/cartApi";
 import { useNavigate } from "react-router-dom";
 import { formatVariantLabel } from "../../utils/productVariants";
+import { capitalizeText } from "../../utils/productHelpers";
 
 export default function Cart() {
   const token = localStorage.getItem("token");
@@ -220,7 +221,7 @@ export default function Cart() {
                     <input type="checkbox" className="w-4 h-4 rounded accent-[var(--color-primary)] cursor-pointer" defaultChecked />
                     <ShoppingBag className="w-5 h-5 text-[var(--color-primary)]" />
                     <span className="text-sm font-bold uppercase tracking-wide text-[var(--text-primary)]">
-                      {vendor.name}
+                      {capitalizeText(vendor.name)}
                     </span>
                   </div>
 
@@ -233,14 +234,14 @@ export default function Cart() {
                       >
                         <img
                           src={item.product.images?.[0] || item.product.image || "/placeholder.png"} 
-                          alt={item.product.name || "Product"}
+                          alt={capitalizeText(item.product.name) || "Product"}
                           className="w-24 h-24 rounded-lg border border-[var(--border)] bg-[var(--bg-muted)] object-contain"
                         />
 
                         <div className="flex-1 flex flex-col justify-between">
                           <div>
                             <h3 className="font-semibold text-[var(--text-primary)] leading-tight">
-                              {item.product.name}
+                              {capitalizeText(item.product.name)}
                             </h3>
                             {formatVariantLabel(item) && (
                               <div className="mt-1 flex items-center gap-2 text-xs text-[var(--text-secondary)]">

@@ -33,7 +33,10 @@ export const formatVariantLabel = ({ selectedSize, selectedColor } = {}) => {
   const parts = [];
   if (selectedSize) parts.push(`Size: ${selectedSize}`);
   const color = normalizeColor(selectedColor);
-  if (color?.name) parts.push(`Color: ${color.name}`);
+  if (color?.name) {
+    const name = color.name.charAt(0).toUpperCase() + color.name.slice(1);
+    parts.push(`Color: ${name}`);
+  }
   return parts.join(" · ");
 };
 

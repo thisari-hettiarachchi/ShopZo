@@ -4,6 +4,20 @@ import { queueProductNewsletterAlerts } from "../services/newsletterAlertService
 
 const MAX_COLOR_IMAGES = 4;
 
+const capitalizeText = (value) => {
+  if (value == null) return "";
+  const text = String(value).trim().replace(/\s+/g, " ");
+  if (!text) return "";
+  return text
+    .split(" ")
+    .map((word) => {
+      if (!word) return word;
+      if (word.length <= 3 && word === word.toUpperCase() && /[A-Z]/.test(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+};
+
 const normalizeColorImages = (images) => {
   if (!Array.isArray(images)) return [];
   return images
@@ -22,7 +36,7 @@ const normalizeColors = (colors) => {
         const value = color.trim();
         if (!value) return null;
         return {
-          name: value,
+          name: capitalizeText(value),
           hex: value.startsWith("#") ? value : "#9CA3AF",
           images: [],
         };
@@ -31,7 +45,7 @@ const normalizeColors = (colors) => {
       const name = String(color.name || color.label || hex || "").trim();
       if (!hex && !name) return null;
       return {
-        name: name || hex,
+        name: capitalizeText(name || hex),
         hex: hex.startsWith("#") ? hex : "#9CA3AF",
         images: normalizeColorImages(color.images),
       };
@@ -155,11 +169,11 @@ export const addVendorProduct = async (req, res) => {
         : ["https://via.placeholder.com/150"];
 
     const newProduct = new Product({
-      name,
+      name: capitalizeText(name),
       price,
       description,
       stock,
-      category: category || "General",
+      category: capitalizeText(category || "General"),
       images: normalizedImages,
       sizes: Array.isArray(sizes) ? sizes : [],
       colors: normalizeColors(colors),
@@ -226,11 +240,11 @@ export const updateVendorProduct = async (req, res) => {
       return res.status(400).json({ message: "Category is required." });
     }
 
-    product.name = name !== undefined ? name : product.name;
+    product.name = name !== undefined ? capitalizeText(name) : product.name;
     product.price = price !== undefined ? price : product.price;
     product.description = description !== undefined ? description : product.description;
     product.stock = stock !== undefined ? stock : product.stock;
-    product.category = category !== undefined ? category : product.category;
+    product.category = category !== undefined ? capitalizeText(category) : product.category;
     product.images = images.slice(0, 5);
     product.sizes = Array.isArray(sizes) ? sizes : product.sizes;
     if (colors !== undefined) {

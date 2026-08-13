@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Package, ChevronRight } from "lucide-react";
 import { fetchOrders as fetchOrdersApi } from "../../../api/ordersApi";
 import ProfileSectionHeader from "./ProfileSectionHeader";
+import { capitalizeText } from "../../../utils/productHelpers";
 
 const STATUS_STYLES = {
   Delivered: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
@@ -121,7 +122,7 @@ export default function OrdersPage() {
                           key={`${order._id}-preview-${idx}`}
                           className="inline-flex max-w-full truncate rounded-lg bg-[var(--bg-main)] px-2.5 py-1.5 text-xs text-[var(--text-secondary)]"
                         >
-                          {item?.quantity || 1}x {item?.product?.name || "Product"}
+                          {item?.quantity || 1}x {capitalizeText(item?.product?.name || "Product")}
                         </span>
                       ))}
                       {items.length > 3 && (

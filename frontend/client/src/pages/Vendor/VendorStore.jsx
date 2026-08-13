@@ -27,6 +27,7 @@ import {
   unfollowVendorApi,
 } from "../../api/vendorApi";
 import ProductCard from "../../components/sections/product/ProductCard";
+import { capitalizeText } from "../../utils/productHelpers";
 
 const FONT_STYLE = `
   .shopzo-root { font-family: 'DM Sans', sans-serif; }
@@ -241,7 +242,7 @@ export default function VendorStorePage() {
     );
   }
 
-  const storeName = vendor.storeName || "Vendor";
+  const storeName = capitalizeText(vendor.storeName || "Vendor");
   const avatar =
     vendor.profileImage ||
     `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(storeName)}&backgroundColor=f97316&textColor=ffffff`;
@@ -376,7 +377,7 @@ export default function VendorStorePage() {
               <StatCard
                 icon={FolderOpen}
                 label="Main Category"
-                value={stats?.mainCategory || "No data"}
+                value={capitalizeText(stats?.mainCategory) || "No data"}
               />
               <StatCard
                 icon={Clock}
@@ -466,7 +467,7 @@ export default function VendorStorePage() {
                       : "border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[var(--color-primary)]/40"
                   }`}
                 >
-                  {cat}
+                  {cat === "All" ? "All" : capitalizeText(cat)}
                 </button>
               ))}
             </div>

@@ -3,6 +3,20 @@ import VendorNotification from "../models/VendorNotification.js";
 import Product from "../models/Product.js";
 import Review from "../models/Review.js";
 
+const capitalizeText = (value) => {
+  if (value == null) return "";
+  const text = String(value).trim().replace(/\s+/g, " ");
+  if (!text) return "";
+  return text
+    .split(" ")
+    .map((word) => {
+      if (!word) return word;
+      if (word.length <= 3 && word === word.toUpperCase() && /[A-Z]/.test(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+};
+
 export const getVendors = async (req, res) => {
   try {
     const vendors = await Vendor.find({
@@ -73,7 +87,7 @@ export const updateVendorProfile = async (req, res) => {
     const vendor = await Vendor.findById(vendorId);
     if (!vendor) return res.status(404).json({ message: "Vendor not found" });
 
-    vendor.storeName = storeName || vendor.storeName;
+    vendor.storeName = storeName ? capitalizeText(storeName) : vendor.storeName;
     vendor.email = email || vendor.email;
     vendor.phone = phone !== undefined ? phone : vendor.phone;
     vendor.address = address !== undefined ? address : vendor.address;

@@ -17,6 +17,7 @@ import { getUserProfile } from "../../services/userService";
 import { validateCoupon } from "../../services/checkoutService";
 import { useNavigate, useLocation } from "react-router-dom";
 import { formatVariantLabel } from "../../utils/productVariants";
+import { capitalizeText } from "../../utils/productHelpers";
 
 const emptyShipping = {
   fullName: "",
@@ -520,18 +521,18 @@ export default function CheckoutPage() {
                   >
                     <img
                       src={item.product?.image || item.product?.images?.[0]}
-                      alt={item.product?.name || "Product"}
+                      alt={capitalizeText(item.product?.name) || "Product"}
                       className="h-16 w-16 rounded-xl border border-[var(--border)] bg-[var(--bg-muted)] object-contain"
                     />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
-                        {item.product?.name}
+                        {capitalizeText(item.product?.name)}
                       </p>
                       <p className="text-xs text-[var(--text-muted)]">
                         Qty: {item.qty}
                         {formatVariantLabel(item) ? ` · ${formatVariantLabel(item)}` : ""}
                         {item.vendor?.storeName || item.vendor?.name
-                          ? ` · ${item.vendor?.storeName || item.vendor?.name}`
+                          ? ` · ${capitalizeText(item.vendor?.storeName || item.vendor?.name)}`
                           : ""}
                       </p>
                       <p className="mt-1 text-sm font-semibold text-[var(--color-primary)]">

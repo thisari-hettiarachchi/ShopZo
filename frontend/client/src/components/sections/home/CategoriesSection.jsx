@@ -2,13 +2,14 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import ScrollReveal, { scrollViewport } from "../../shared/ScrollReveal";
+import { capitalizeText } from "../../../utils/productHelpers";
 
 function CategoryImage({ cat, className }) {
   if (cat.image) {
     return (
       <img
         src={cat.image}
-        alt={cat.name}
+        alt={capitalizeText(cat.name)}
         className={`absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${className || ""}`}
       />
     );
@@ -42,7 +43,7 @@ function CatHero({ cat, index }) {
               Featured
             </span>
             <h3 className="display-font text-white text-3xl font-bold leading-tight">
-              {cat.name}
+              {capitalizeText(cat.name)}
             </h3>
             {cat.count && <p className="text-white/60 text-sm mt-1 font-light">{cat.count}+ items</p>}
           </div>
@@ -72,7 +73,7 @@ function CatPortrait({ cat, index }) {
         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
         <div className="absolute bottom-0 left-0 right-0 p-5">
           <h3 className="display-font text-white text-xl font-bold leading-snug">
-            {cat.name}
+            {capitalizeText(cat.name)}
           </h3>
           <div className="mt-2 flex items-center gap-1.5 text-[var(--color-primary)] text-xs font-semibold opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
             Shop <ArrowRight size={11} />
@@ -99,7 +100,7 @@ function CatSquare({ cat, index }) {
         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <h3 className="display-font text-white text-base font-bold leading-snug truncate">
-            {cat.name}
+            {capitalizeText(cat.name)}
           </h3>
           <div className="mt-1 flex items-center gap-1.5 text-[var(--color-primary)] text-[11px] font-semibold opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
             Shop <ArrowRight size={10} />
