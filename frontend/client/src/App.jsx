@@ -4,6 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import AppRoutes from './routes/AppRoutes';
 import Navbar from './components/shared/Navbar';
 import Footer from './components/shared/Footer';
+import ScrollToTop from './components/shared/ScrollToTop';
 import ScrollToTopButton from './components/shared/ScrollToTopButton';
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
 
   return (
     <>
+      <ScrollToTop />
       {!noHeaderFooter && <Navbar />}
       <AppRoutes />
       {!noHeaderFooter && <Footer />}
