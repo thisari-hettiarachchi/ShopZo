@@ -205,7 +205,18 @@ export default function ProductDetails() {
   const availableColors = normalizeColors(product?.colors);
 
   const selectColor = (color) => {
-    setSelectedColor(color);
+    const same =
+      selectedColor?.hex?.toLowerCase() === String(color?.hex || "").toLowerCase();
+    if (same) {
+      // Click again → back to default product images
+      setSelectedColor(null);
+    } else {
+      const full =
+        availableColors.find(
+          (item) => item.hex.toLowerCase() === String(color?.hex || "").toLowerCase()
+        ) || color;
+      setSelectedColor(full);
+    }
     setActiveImage(0);
     resetZoom();
   };
@@ -643,18 +654,23 @@ export default function ProductDetails() {
             {availableColors.length > 0 && (
               <div className="mb-6">
                 <p className="mb-2 text-sm font-medium text-[var(--text-secondary)]">
-                  Color{selectedColor ? `: ${capitalizeText(selectedColor.name)}` : ""}
+                  Color{selectedColor ? `: ${capitalizeText(selectedColor.name)}` : " (default photos)"}
                 </p>
                 <div className="flex flex-wrap gap-2.5">
                   {availableColors.map((color) => {
                     const active =
                       selectedColor?.hex?.toLowerCase() === color.hex.toLowerCase();
                     const thumb = color.images?.[0];
+                    const hasColorPhotos = Array.isArray(color.images) && color.images.length > 0;
                     return (
                       <button
                         key={`${color.name}-${color.hex}`}
                         type="button"
-                        title={color.name}
+                        title={
+                          hasColorPhotos
+                            ? `${color.name} photos`
+                            : `${color.name} (uses default photos)`
+                        }
                         onClick={() => selectColor(color)}
                         className={`relative h-9 w-9 overflow-hidden rounded-full border-2 transition ${
                           active
@@ -756,13 +772,6 @@ export default function ProductDetails() {
                 <ShoppingCart className="h-5 w-5" />
                 Add to Cart
               </button>
-            </div>
-
-            <div className="mt-8 border-t border-[var(--border)] pt-6">
-              <h3 className="mb-3 font-semibold">Product Description</h3>
-              <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
-                {product.description}
-              </p>
             </div>
           </div>
 
@@ -883,6 +892,38 @@ export default function ProductDetails() {
             </div>
           </div>
         </div>
+
+        {/* -------- Product Description (separate section under product) -------- */}
+        <section id="description" className="mx-auto mt-10 max-w-7xl scroll-mt-24">
+          <div className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_24px_60px_-40px_var(--shadow)]">
+            <div className="border-b border-[var(--border)] px-6 py-6 md:px-8">
+              <p className="section-eyebrow">About this item</p>
+              <h2 className="display-font mt-2 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl">
+                Product Description
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm text-[var(--text-secondary)]">
+                Details shared by the seller about materials, fit, features, and how to use this product.
+              </p>
+            </div>
+
+            <div className="px-6 py-8 md:px-8">
+              {product.description?.trim() ? (
+                <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-main)] p-5 md:p-6">
+                  <p className="whitespace-pre-line text-sm leading-7 text-[var(--text-secondary)] md:text-[15px]">
+                    {product.description}
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--bg-main)] px-5 py-10 text-center">
+                  <p className="font-semibold text-[var(--text-primary)]">No description yet</p>
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                    The seller hasn’t added a product description for this item.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
 
         {/* -------- Ratings & Reviews (separate section under product) -------- */}
         <section

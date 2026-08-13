@@ -47,13 +47,27 @@ export const toCartColor = (color) => {
   return { name: normalized.name, hex: normalized.hex };
 };
 
+export const getDefaultProductImages = (product) => {
+  if (Array.isArray(product?.images)) return product.images.filter(Boolean);
+  if (product?.images) return [product.images];
+  return [];
+};
+
+/**
+ * Gallery images for product details:
+ * - no color / color without photos → default product images
+ * - color with photos → those color images first, then default images
+ */
 export const getImagesForColor = (product, selectedColor) => {
-  const productImages = Array.isArray(product?.images)
-    ? product.images.filter(Boolean)
-    : product?.images
-      ? [product.images]
-      : [];
+  const productImages = getDefaultProductImages(product);
   const color = normalizeColor(selectedColor);
   const colorImages = color?.images?.filter(Boolean) || [];
-  return colorImages.length > 0 ? colorImages : productImages;
+
+  if (colorImages.length === 0) return productImages;
+
+  const merged = [...colorImages];
+  for (const img of productImages) {
+    if (!merged.includes(img)) merged.push(img);
+  }
+  return merged;
 };
