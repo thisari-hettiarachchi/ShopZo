@@ -111,7 +111,7 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
       onClick={() => navigate(`/products/${product._id}`)}
       className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[var(--bg-card)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[var(--color-primary)]/35 hover:shadow-[0_28px_50px_-32px_var(--shadow)]"
     >
-      <div className="relative h-36 overflow-hidden bg-[var(--bg-muted)] sm:h-40">
+      <div className="relative h-48 shrink-0 overflow-hidden bg-[var(--bg-muted)] sm:h-56">
         <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
           {showNewTag && (
             <span className="w-fit rounded-lg bg-[var(--text-primary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--bg-main)]">

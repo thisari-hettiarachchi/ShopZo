@@ -397,11 +397,20 @@ export default function ProductDetails() {
     });
   };
 
+  useEffect(() => {
+    const area = zoomAreaRef.current;
+    if (!area || !mainImage) return;
+
+    // React's wheel listener is passive, so cancel page scrolling natively.
+    const preventScroll = (event) => event.preventDefault();
+    area.addEventListener("wheel", preventScroll, { passive: false });
+    return () => area.removeEventListener("wheel", preventScroll);
+  }, [mainImage]);
+
   const handleZoomWheel = (e) => {
     if (!mainImage) return;
-    e.preventDefault();
     if (e.deltaY < 0) zoomIn(e.clientX, e.clientY);
-    else zoomOut();
+    else if (e.deltaY > 0) zoomOut();
   };
 
   const handleZoomDoubleClick = (e) => {

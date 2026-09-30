@@ -109,7 +109,7 @@ export default function NewArrivalCard({ product }) {
       onClick={() => navigate(`/products/${product._id}`)}
       className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[var(--bg-card)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[var(--color-primary)]/35 hover:shadow-[0_28px_50px_-32px_var(--shadow)]"
     >
-      <div className="relative h-36 overflow-hidden bg-[var(--bg-muted)] sm:h-40">
+      <div className="relative h-48 shrink-0 overflow-hidden bg-[var(--bg-muted)] sm:h-56">
         {discount ? (
           <span className="absolute left-3 top-3 z-10 rounded-lg bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
             -{discount}%

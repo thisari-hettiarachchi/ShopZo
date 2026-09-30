@@ -66,19 +66,16 @@ export const getDefaultProductImages = (product) => {
 
 /**
  * Gallery images for product details:
- * - no color / color without photos → default product images
- * - color with photos → those color images first, then default images
+ * Keep all product and color photos available, with the selected color first.
  */
 export const getImagesForColor = (product, selectedColor) => {
   const productImages = getDefaultProductImages(product);
   const color = normalizeColor(selectedColor);
   const colorImages = color?.images?.filter(Boolean) || [];
 
-  if (colorImages.length === 0) return productImages;
+  const allColorImages = normalizeColors(product?.colors).flatMap(
+    (variant) => variant.images,
+  );
 
-  const merged = [...colorImages];
-  for (const img of productImages) {
-    if (!merged.includes(img)) merged.push(img);
-  }
-  return merged;
+  return [...new Set([...colorImages, ...productImages, ...allColorImages])];
 };
