@@ -9,6 +9,7 @@ import {
   fetchWishlistApi,
 } from "../../api/wishlistApi";
 import { getVendorToken } from "../../utils/authStorage";
+import { getProductThumbnail } from "../../utils/productThumbnail";
 
 export default function ProductCard({ product, token: propToken, onCartUpdate }) {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
   const token = propToken || getVendorToken();
 
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const thumbnail = getProductThumbnail(product);
 
   useEffect(() => {
     if (!token) return;
@@ -77,7 +79,7 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
           </span>
         )}
         <img
-          src={product.images?.[0]}
+          src={thumbnail || "https://via.placeholder.com/300x200"}
           alt={product.name}
           className="h-52 w-full object-contain transition duration-500 group-hover:scale-110"
         />

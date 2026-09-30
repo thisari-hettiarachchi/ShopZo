@@ -7,7 +7,7 @@ import {
   addToWishlistApi,
   removeFromWishlistApi,
 } from "../../../api/wishlistApi";
-import { capitalizeText, isNewArrival } from "../../../utils/productHelpers";
+import { capitalizeText, getProductThumbnail, isNewArrival } from "../../../utils/productHelpers";
 import { getWishlistIdSet, invalidateWishlistIdsCache } from "../../../utils/wishlistCache";
 
 export default function ProductCard({ product, token: propToken, onCartUpdate }) {
@@ -35,7 +35,7 @@ export default function ProductCard({ product, token: propToken, onCartUpdate })
   const showNewTag = isNewArrival(product);
   const rating = Math.round(Number(product.rating || 0));
   const reviewCount = product.ratingCount ?? 0;
-  const image = product.images?.[0];
+  const image = getProductThumbnail(product);
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();

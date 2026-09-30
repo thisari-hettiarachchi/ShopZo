@@ -248,19 +248,26 @@ export default function EditProductPage() {
     setLoading(true);
     setError("");
     try {
-      if (imagePreviews.length === 0) {
-        setError("Please keep or upload at least 1 product image.");
+      const normalizedColors = normalizeColors(form.colors);
+      const hasColorPhotos = normalizedColors.some(
+        (color) => Array.isArray(color.images) && color.images.length > 0
+      );
+      if (imagePreviews.length === 0 && !hasColorPhotos) {
+        setError("Upload a default product image, or add photos to at least one color.");
         setLoading(false);
         return;
       }
 
-      const imagesToSend = await Promise.all(
-        imagePreviews.map(async (preview, index) => {
-          const file = selectedFiles[index];
-          if (file) return fileToBase64(file);
-          return preview;
-        })
-      );
+      const imagesToSend =
+        imagePreviews.length === 0
+          ? []
+          : await Promise.all(
+              imagePreviews.map(async (preview, index) => {
+                const file = selectedFiles[index];
+                if (file) return fileToBase64(file);
+                return preview;
+              })
+            );
 
       const payload = {
         ...form,
@@ -269,7 +276,7 @@ export default function EditProductPage() {
         images: imagesToSend.slice(0, MAX_IMAGES),
         category: form.category,
         sizes: Array.isArray(form.sizes) ? form.sizes : [],
-        colors: normalizeColors(form.colors),
+        colors: normalizedColors,
         isFlashSale: flashSaleEnabled ? Boolean(form.isFlashSale) : false,
         description: form.description || "No description provided.",
       };
@@ -471,7 +478,7 @@ export default function EditProductPage() {
                     : "Click to add more images"}
                 </span>
                 <span className="text-[10px] text-[var(--text-secondary)]">
-                  PNG, JPG — up to {MAX_IMAGES}. Used when a color has no photos.
+                  PNG, JPG — up to {MAX_IMAGES}. Optional if color photos are uploaded.
                 </span>
                 <input
                   type="file"

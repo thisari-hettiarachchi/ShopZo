@@ -8,8 +8,8 @@ import {
   clearCartApi,
 } from "../../api/cartApi";
 import { useNavigate } from "react-router-dom";
+import { capitalizeText, getProductThumbnail } from "../../utils/productHelpers";
 import { formatVariantLabel } from "../../utils/productVariants";
-import { capitalizeText } from "../../utils/productHelpers";
 
 export default function Cart() {
   const token = localStorage.getItem("token");
@@ -233,7 +233,7 @@ export default function Cart() {
                         className="flex gap-4 border-b border-[var(--border)] pb-4 last:border-0 last:pb-0"
                       >
                         <img
-                          src={item.product.images?.[0] || item.product.image || "/placeholder.png"} 
+                          src={getProductThumbnail(item.product) || "/placeholder.png"} 
                           alt={capitalizeText(item.product.name) || "Product"}
                           className="w-24 h-24 rounded-lg border border-[var(--border)] bg-[var(--bg-muted)] object-contain"
                         />

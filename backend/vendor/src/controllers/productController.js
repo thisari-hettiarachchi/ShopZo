@@ -26,6 +26,48 @@ const normalizeColorImages = (images) => {
     .slice(0, MAX_COLOR_IMAGES);
 };
 
+const colorsHaveImages = (colors) => {
+  if (!Array.isArray(colors)) return false;
+  return colors.some(
+    (color) => Array.isArray(color?.images) && color.images.some((img) => typeof img === "string" && img.trim())
+  );
+};
+
+const normalizeProductImages = (images) => {
+  if (!Array.isArray(images)) return [];
+  return images.filter((img) => typeof img === "string" && img.trim()).slice(0, 5);
+};
+
+const validateProductMedia = (images, colors) => {
+  const normalizedColors = normalizeColors(colors);
+  let normalizedImages = normalizeProductImages(images);
+
+  // If no default cover, use the first uploaded color photo as the card thumbnail
+  if (normalizedImages.length === 0) {
+    for (const color of normalizedColors) {
+      const colorImg = Array.isArray(color.images)
+        ? color.images.find((img) => typeof img === "string" && img.trim())
+        : null;
+      if (colorImg) {
+        normalizedImages = [colorImg];
+        break;
+      }
+    }
+  }
+
+  if (normalizedImages.length > 0) {
+    return { ok: true, images: normalizedImages, colors: normalizedColors };
+  }
+  if (colorsHaveImages(normalizedColors)) {
+    return { ok: true, images: [], colors: normalizedColors };
+  }
+  return {
+    ok: false,
+    message:
+      "Upload at least 1 default product image, or add photos to at least one color.",
+  };
+};
+
 const normalizeColors = (colors) => {
   if (!Array.isArray(colors)) return [];
   const seen = new Set();
@@ -154,19 +196,14 @@ export const addVendorProduct = async (req, res) => {
       isFlashSale,
     } = req.body;
 
-    if (images !== undefined) {
-      if (!Array.isArray(images) || images.length === 0) {
-        return res.status(400).json({ message: "Please upload at least 1 product image." });
-      }
-      if (images.length > 5) {
-        return res.status(400).json({ message: "You can upload a maximum of 5 product images." });
-      }
+    if (Array.isArray(images) && images.length > 5) {
+      return res.status(400).json({ message: "You can upload a maximum of 5 product images." });
     }
 
-    const normalizedImages =
-      Array.isArray(images) && images.length > 0
-        ? images.slice(0, 5)
-        : ["https://via.placeholder.com/150"];
+    const media = validateProductMedia(images, colors);
+    if (!media.ok) {
+      return res.status(400).json({ message: media.message });
+    }
 
     const newProduct = new Product({
       name: capitalizeText(name),
@@ -174,9 +211,9 @@ export const addVendorProduct = async (req, res) => {
       description,
       stock,
       category: capitalizeText(category || "General"),
-      images: normalizedImages,
+      images: media.images,
       sizes: Array.isArray(sizes) ? sizes : [],
-      colors: normalizeColors(colors),
+      colors: media.colors,
       rating: 0,
       oldPrice: oldPrice || null,
       discount: discount || 0,
@@ -224,10 +261,7 @@ export const updateVendorProduct = async (req, res) => {
       isFlashSale,
     } = req.body;
 
-    if (!images || !Array.isArray(images) || images.length === 0) {
-      return res.status(400).json({ message: "Images are required and must be a non-empty array." });
-    }
-    if (images.length > 5) {
+    if (Array.isArray(images) && images.length > 5) {
       return res.status(400).json({ message: "You can upload a maximum of 5 product images." });
     }
     if (sizes !== undefined && !Array.isArray(sizes)) {
@@ -240,15 +274,20 @@ export const updateVendorProduct = async (req, res) => {
       return res.status(400).json({ message: "Category is required." });
     }
 
+    const media = validateProductMedia(images, colors !== undefined ? colors : product.colors);
+    if (!media.ok) {
+      return res.status(400).json({ message: media.message });
+    }
+
     product.name = name !== undefined ? capitalizeText(name) : product.name;
     product.price = price !== undefined ? price : product.price;
     product.description = description !== undefined ? description : product.description;
     product.stock = stock !== undefined ? stock : product.stock;
     product.category = category !== undefined ? capitalizeText(category) : product.category;
-    product.images = images.slice(0, 5);
+    product.images = media.images;
     product.sizes = Array.isArray(sizes) ? sizes : product.sizes;
     if (colors !== undefined) {
-      product.colors = normalizeColors(colors);
+      product.colors = media.colors;
     }
     product.oldPrice = oldPrice !== undefined ? oldPrice : product.oldPrice;
     product.discount = discount !== undefined ? discount : product.discount;

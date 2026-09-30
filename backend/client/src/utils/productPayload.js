@@ -7,11 +7,24 @@ export const toProductCard = (doc) => {
   if (!doc) return null;
   const p = typeof doc.toObject === "function" ? doc.toObject() : { ...doc };
 
-  const images = Array.isArray(p.images)
+  let images = Array.isArray(p.images)
     ? p.images.filter(Boolean).slice(0, 1)
     : p.images
       ? [p.images]
       : [];
+
+  // Fallback thumbnail from first color photo when defaults were skipped
+  if (images.length === 0 && Array.isArray(p.colors)) {
+    for (const color of p.colors) {
+      const colorImg = Array.isArray(color?.images)
+        ? color.images.find((img) => typeof img === "string" && img.trim())
+        : null;
+      if (colorImg) {
+        images = [colorImg];
+        break;
+      }
+    }
+  }
 
   const colors = Array.isArray(p.colors)
     ? p.colors

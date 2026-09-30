@@ -7,7 +7,7 @@ import {
   addToWishlistApi,
   removeFromWishlistApi,
 } from "../../../api/wishlistApi";
-import { capitalizeText } from "../../../utils/productHelpers";
+import { capitalizeText, getProductThumbnail } from "../../../utils/productHelpers";
 import { getWishlistIdSet, invalidateWishlistIdsCache } from "../../../utils/wishlistCache";
 
 export default function NewArrivalCard({ product }) {
@@ -34,7 +34,7 @@ export default function NewArrivalCard({ product }) {
     : null;
   const rating = Math.round(Number(product.rating || 0));
   const reviewCount = product.ratingCount ?? 0;
-  const image = product.images?.[0];
+  const image = getProductThumbnail(product);
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();

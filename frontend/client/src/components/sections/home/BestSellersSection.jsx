@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { addToCartApi } from "../../../api/cartApi";
 import { addToWishlistApi, removeFromWishlistApi } from "../../../api/wishlistApi";
 import ScrollReveal, { scrollViewport } from "../../shared/ScrollReveal";
-import { capitalizeText, filterBestSellers } from "../../../utils/productHelpers";
+import { capitalizeText, filterBestSellers, getProductThumbnail } from "../../../utils/productHelpers";
 import { invalidateWishlistIdsCache } from "../../../utils/wishlistCache";
 
 function BestSellerCard({ product, index }) {
@@ -16,6 +16,7 @@ function BestSellerCard({ product, index }) {
 
   const rating = Math.round(Number(product.rating || 0));
   const reviewCount = product.ratingCount ?? product.reviews?.length ?? 0;
+  const thumbnail = getProductThumbnail(product);
   const description =
     product.description?.trim() ||
     "A customer favorite with standout quality and everyday value.";
@@ -82,8 +83,8 @@ function BestSellerCard({ product, index }) {
 
       <div className="relative w-[42%] shrink-0 self-stretch overflow-hidden bg-[var(--bg-muted)] sm:w-[38%]">
         <img
-          src={product.images?.[0]}
-          alt={product.name}
+          src={thumbnail}
+          alt={capitalizeText(product.name)}
           className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
       </div>

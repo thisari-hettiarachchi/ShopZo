@@ -246,17 +246,26 @@ export default function AddProductPage() {
       toast.error("Your vendor account must be approved before you can add products.");
       return;
     }
-    if (selectedFiles.length === 0) {
-      toast.error("Please upload at least 1 product image.");
-      return;
-    }
     if (selectedFiles.length > MAX_IMAGES) {
       toast.error(`You can upload a maximum of ${MAX_IMAGES} images.`);
       return;
     }
+
+    const normalizedColors = normalizeColors(form.colors);
+    const hasColorPhotos = normalizedColors.some(
+      (color) => Array.isArray(color.images) && color.images.length > 0
+    );
+    if (selectedFiles.length === 0 && !hasColorPhotos) {
+      toast.error("Upload a default product image, or add photos to at least one color.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const base64Images = await Promise.all(selectedFiles.map(fileToBase64));
+      const base64Images =
+        selectedFiles.length > 0
+          ? await Promise.all(selectedFiles.map(fileToBase64))
+          : [];
       const payload = {
         ...form,
         price: Number(form.price),
@@ -264,7 +273,7 @@ export default function AddProductPage() {
         images: base64Images.slice(0, MAX_IMAGES),
         category: form.category,
         sizes: Array.isArray(form.sizes) ? form.sizes : [],
-        colors: normalizeColors(form.colors),
+        colors: normalizedColors,
         oldPrice: Number(form.oldPrice),
         discount: Number(form.discount),
         isFlashSale: flashSaleEnabled ? Boolean(form.isFlashSale) : false,
@@ -446,7 +455,7 @@ export default function AddProductPage() {
                     : "Click to upload images"}
                 </span>
                 <span className="text-[10px] text-[var(--text-secondary)]">
-                  PNG, JPG — up to {MAX_IMAGES}. Used when a color has no photos.
+                  PNG, JPG — up to {MAX_IMAGES}. Optional if color photos are uploaded.
                 </span>
                 <input
                   type="file"

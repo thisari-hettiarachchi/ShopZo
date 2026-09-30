@@ -32,7 +32,17 @@ export const protect = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        code: "TOKEN_EXPIRED",
+        message: "Your session has expired. Please sign in again.",
+      });
+    }
+    if (error.name === "JsonWebTokenError" || error.name === "NotBeforeError") {
+      return res.status(401).json({ message: "Not authorized, token failed" });
+    }
+
     console.error("Auth middleware error:", error.message);
-    return res.status(401).json({ message: "Not authorized, token failed" });
+    return res.status(503).json({ message: "Unable to verify your session. Please try again shortly." });
   }
 };

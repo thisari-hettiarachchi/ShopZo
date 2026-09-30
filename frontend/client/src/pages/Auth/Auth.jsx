@@ -35,8 +35,6 @@ export default function AuthPages() {
           password: formData.password
         });
 
-        console.log(res.data);
-
         if (res.data?.user?.role === 'vendor') {
           toast.error('Vendor accounts can’t sign in here. Please use the vendor portal.');
           return;
@@ -59,7 +57,6 @@ export default function AuthPages() {
           password: formData.password,
         });
 
-        console.log(res.data);
         toast.success("Account created successfully");
         setIsLogin(true);
       }

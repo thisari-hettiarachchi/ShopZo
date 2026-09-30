@@ -21,6 +21,7 @@ import { fetchProductSuggestions } from '../../api/productApi'
 import { fetchCategories } from '../../api/categoryApi'
 import { API_BASE_URL, authHeaders } from '../../api/base'
 import { capitalizeText } from '../../utils/productHelpers'
+import { expireSession } from '../../utils/session'
 
 export default function Navbar() {
   const navigate = useNavigate()
@@ -114,10 +115,16 @@ export default function Navbar() {
     if (!token) return;
 
     const loadNotifications = async () => {
+      const requestToken = localStorage.getItem("token");
+      if (!requestToken) return;
       try {
         const res = await fetch(`${API_BASE_URL}/user/notifications`, {
           headers: authHeaders(),
         });
+        if (res.status === 401) {
+          expireSession(requestToken);
+          return;
+        }
         if (!res.ok) return;
         const data = await res.json();
         setNotifications(Array.isArray(data) ? data : []);

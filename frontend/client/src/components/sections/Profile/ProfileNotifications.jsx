@@ -4,6 +4,7 @@ import { Bell, CheckCircle2 } from "lucide-react";
 import { API_BASE_URL, authHeaders } from "../../../api/base";
 import { useNavigate } from "react-router-dom";
 import ProfileSectionHeader from "./ProfileSectionHeader";
+import { expireSession } from "../../../utils/session";
 
 export default function ProfileNotifications() {
   const navigate = useNavigate();
@@ -25,11 +26,17 @@ export default function ProfileNotifications() {
     }
 
     const loadNotifications = async () => {
+      const requestToken = localStorage.getItem("token");
+      if (!requestToken) return;
       try {
         const res = await fetch(`${API_BASE_URL}/user/notifications`, {
           headers: authHeaders(),
         });
 
+        if (res.status === 401) {
+          expireSession(requestToken);
+          return;
+        }
         if (!res.ok) {
           throw new Error(`Failed to load notifications (${res.status})`);
         }

@@ -7,7 +7,7 @@ import {
   clearWishlistApi,
 } from "../../api/wishlistApi";
 import { addToCartApi } from "../../api/cartApi";
-import { capitalizeText } from "../../utils/productHelpers";
+import { capitalizeText, getProductThumbnail } from "../../utils/productHelpers";
 
 export default function Wishlist() {
   const token = localStorage.getItem("token");
@@ -175,7 +175,7 @@ export default function Wishlist() {
               >
                 <div className="flex gap-4">
                   <img
-                    src={item.product.images?.[0]}
+                    src={getProductThumbnail(item.product)}
                     alt={capitalizeText(item.product.name)}
                     className="w-24 h-24 rounded-lg border border-[var(--border)] bg-[var(--bg-muted)] object-contain"
                   />

@@ -48,8 +48,19 @@ export const toCartColor = (color) => {
 };
 
 export const getDefaultProductImages = (product) => {
-  if (Array.isArray(product?.images)) return product.images.filter(Boolean);
-  if (product?.images) return [product.images];
+  const defaults = Array.isArray(product?.images)
+    ? product.images.filter(Boolean)
+    : product?.images
+      ? [product.images]
+      : [];
+  if (defaults.length > 0) return defaults;
+
+  // If vendor only uploaded color photos, use the first color that has images
+  const colors = Array.isArray(product?.colors) ? product.colors : [];
+  for (const color of colors) {
+    const imgs = Array.isArray(color?.images) ? color.images.filter(Boolean) : [];
+    if (imgs.length > 0) return imgs;
+  }
   return [];
 };
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Loader, ArrowLeft } from "lucide-react";
 import { getProductById } from "../services/productService";
+import { getProductThumbnail } from "../utils/productThumbnail";
 
 const getStockStatus = (stock) => {
   if (stock <= 0) return "Out of Stock";
@@ -64,7 +65,7 @@ export default function ProductDetailsPage() {
       <div className="bg-[var(--bg-card)] rounded-3xl shadow-lg border border-[var(--border)] overflow-hidden">
         <div className="aspect-video bg-[var(--bg-muted)] flex items-center justify-center overflow-hidden">
           <img
-            src={product.images?.[0] || "https://via.placeholder.com/300x200"}
+            src={getProductThumbnail(product) || "https://via.placeholder.com/300x200"}
             alt={product.name}
             className="w-full h-full object-cover"
           />

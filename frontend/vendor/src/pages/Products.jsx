@@ -5,6 +5,7 @@ import { Search, Star, Edit, Eye, Trash2, Plus, Loader, Zap } from "lucide-react
 import { getProducts, deleteProduct, updateProduct } from "../services/productService";
 import { getFlashSaleStatus } from "../services/settingsService";
 import { readVendorSession } from "../utils/authStorage";
+import { getProductThumbnail } from "../utils/productThumbnail";
 
 const getStockStatus = (stock) => {
   if (stock <= 0) return "Out of Stock";
@@ -173,7 +174,7 @@ export default function ProductsPage() {
             >
               <div className="aspect-video overflow-hidden bg-[linear-gradient(145deg,var(--bg-muted),var(--bg-card))]">
                 <img 
-                  src={product.images?.[0] || 'https://via.placeholder.com/300x200'} 
+                  src={getProductThumbnail(product) || "https://via.placeholder.com/300x200"} 
                   alt={product.name} 
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
